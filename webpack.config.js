@@ -6,7 +6,7 @@ module.exports = {
   // entry: path.join(__dirname, 'admin/app/main.js'),
   entry: {
     // "server/build": path.join(__dirname, 'server/app/main.js'),
-    'console/client/build': path.join(__dirname, 'console/client/app/main.js')
+    'server/client/build': path.join(__dirname, 'server/client/app/main.js')
   },
   output: {
     path: path.join(__dirname, '.'),
@@ -17,7 +17,7 @@ module.exports = {
       { test: /\.css$/, loader: 'style!css' },
       // { test: /\.json$/, loader: 'json-loader' },
       // { test: path.join(__dirname, 'server/client'), loader: 'babel-loader', query: { presets: ['react', 'es2015'] } },
-      { test: path.join(__dirname, 'console/client/app'), loader: 'babel-loader', query: { presets: ['react', 'es2015'] } },
+      { test: path.join(__dirname, 'server/client/app'), loader: 'babel-loader', query: { presets: ['react', 'es2015'] } },
     ]
   },
   plugins: [
