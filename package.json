@@ -1,34 +1,27 @@
 {
-  "name": "sso-poc",
+  "name": "pbc_console",
   "version": "1.0.0",
-  "description": "NEW SSO POC",
+  "description": "BPC Console",
   "main": "server/index.js",
   "dependencies": {
     "good": "^7.1.0",
     "good-console": "^6.2.0",
     "good-squeeze": "^5.0.1",
-    "googleapis": "^16.1.0",
     "hapi": "^15.2.0",
     "hawk": "^6.0.1",
     "inert": "^4.0.2",
     "iron": "^4.0.4",
     "joi": "^9.2.0",
     "jquery": "^3.1.1",
-    "jsonwebtoken": "^7.2.1",
-    "mongodb": "^2.2.12",
-    "oz": "^4.0.4",
     "react": "^15.4.1",
-    "react-dom": "^15.4.1",
-    "scarecrow": "^3.0.4"
+    "react-dom": "^15.4.1"
   },
   "devDependencies": {
     "babel-core": "^6.21.0",
     "babel-loader": "^6.2.10",
     "babel-preset-es2015": "^6.18.0",
     "babel-preset-react": "^6.16.0",
-    "code": "^4.0.0",
     "gulp": "^3.9.1",
-    "lab": "^12.1.0",
     "webpack": "^1.14.0"
   },
   "scripts": {
@@ -37,8 +30,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "github.com/BerlingskeMedia/sso-poc"
+    "url": "github.com/BerlingskeMedia/bpc_console"
   },
-  "author": "Daniel Kokott",
+  "contributors": [
+  {
+    "name": "Daniel Kokott",
+    "email": "dako@berlingskeMedia.dk"
+  }
+],
   "license": "ISC"
 }

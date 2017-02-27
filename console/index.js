@@ -6,10 +6,10 @@ const Inert = require('inert');
 const Tickets = require('./tickets');
 const Proxy = require('./proxy');
 
-const consoleApp = new Hapi.Server();
-consoleApp.connection({ port: process.env.PORT ? parseInt(process.env.PORT) + 2 : 8000 + 2 });
+var server = new Hapi.Server();
+server.connection({ port: process.env.PORT ? process.env.PORT : 8000 });
 
-consoleApp.state('ticket', {
+server.state('ticket', {
   ttl: 1000 * 60 * 60 * 24 * 30, // (one month)
   isHttpOnly: false,
   isSecure: false,
@@ -18,11 +18,11 @@ consoleApp.state('ticket', {
   encoding: 'base64json'
 });
 
-consoleApp.register(Inert, () => {});
-consoleApp.register(Tickets, { routes: { prefix: '/tickets' } }, cb);
-consoleApp.register(Proxy, { routes: { prefix: '/admin' } }, cb);
+server.register(Inert, () => {});
+server.register(Tickets, { routes: { prefix: '/tickets' } }, cb);
+server.register(Proxy, { routes: { prefix: '/admin' } }, cb);
 
-consoleApp.route({
+server.route({
   method: 'GET',
   path: '/favicon.ico',
   handler: function(request, reply){
@@ -30,7 +30,7 @@ consoleApp.route({
   }
 });
 
-consoleApp.route({
+server.route({
   method: 'get',
   path: '/build/{param*}',
   handler: {
@@ -40,7 +40,7 @@ consoleApp.route({
   }
 });
 
-consoleApp.route({
+server.route({
   method: 'get',
   path: '/assets/{param*}',
   handler: {
@@ -50,7 +50,7 @@ consoleApp.route({
   }
 });
 
-consoleApp.route({
+server.route({
   method: 'get',
   path: '/{param*}',
   handler: {
@@ -58,7 +58,7 @@ consoleApp.route({
   }
 });
 
-// consoleApp.route({
+// server.route({
 //   method: 'GET',
 //   path: '/{param*}',
 //   handler: {
@@ -70,16 +70,16 @@ consoleApp.route({
 //   }
 // });
 
-consoleApp.start((err) => {
+server.start((err) => {
   if (err) {
     throw err;
   }
-  console.log(`ConsoleApp running at: ${consoleApp.info.uri}`);
+  console.log(`Console server running at: ${server.info.uri}`);
 });
 
 function cb (err) {
   if (err) {
     console.log('Error when loading plugin', err);
-    consoleApp.stop();
+    server.stop();
   }
 }
