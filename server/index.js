@@ -35,7 +35,7 @@ server.route({
   path: '/build/{param*}',
   handler: {
     directory: {
-      path: './console/client/build'
+      path: './client/build'
     }
   }
 });
@@ -45,7 +45,7 @@ server.route({
   path: '/assets/{param*}',
   handler: {
     directory: {
-      path: './console/client/assets'
+      path: './client/assets'
     }
   }
 });
@@ -54,7 +54,7 @@ server.route({
   method: 'get',
   path: '/{param*}',
   handler: {
-    file: './console/client/index.html'
+    file: './client/index.html'
   }
 });
 
@@ -63,7 +63,7 @@ server.route({
 //   path: '/{param*}',
 //   handler: {
 //     directory: {
-//       path: './console/client',
+//       path: './client',
 //       redirectToSlash: true,
 //       index: true
 //     }

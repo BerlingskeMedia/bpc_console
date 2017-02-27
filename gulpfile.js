@@ -10,11 +10,11 @@ gulp.task('start_console', function (){
   if (server) {
     server.kill();
   }
-  server = spawn('node', ['./console/index.js'], {stdio: 'inherit'});
+  server = spawn('node', ['./server/index.js'], {stdio: 'inherit'});
 });
 
 gulp.task('watch', function(){
-  gulp.watch(['./console/*.js'], ['start_console']);
+  gulp.watch(['./server/*.js'], ['start_console']);
 });
 
 gulp.task('webpack_watch', function() {
