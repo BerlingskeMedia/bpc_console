@@ -11,9 +11,7 @@ function proxy (request, reply) {
     path = path.slice(prefix.length)
   }
 
-  // Well, we're actually just replacing route prefix '/admin' with the same '/admin'.
-  // But let's do it anyway in case the route prefix gets changed.
-  sso_client.request(request.method, '/admin'.concat(path), request.payload, request.state.ticket, reply);
+  sso_client.request(request.method, path, request.payload, request.state.ticket, reply);
 }
 
 module.exports.register = function (server, options, next) {
