@@ -47,11 +47,6 @@ function refreshAppTicket(){
 };
 
 
-module.exports.validateAppTicket = function(appTicket, callback){
-  callSsoServer('POST', '/validate/appticket', {}, appTicket, callback);
-};
-
-
 module.exports.getUserTicket = function(rsvp, callback) {
   callSsoServer('POST', '/ticket/user', {rsvp: rsvp}, appTicket, callback);
 };
@@ -59,11 +54,6 @@ module.exports.getUserTicket = function(rsvp, callback) {
 
 module.exports.refreshUserTicket = function(userTicket, callback){
   callSsoServer('POST', '/ticket/refresh', null, userTicket, callback);
-};
-
-
-module.exports.validateUserTicket = function(userTicket, scope, callback){
-  callSsoServer('POST', '/validate/userticket', {scope: scope}, userTicket, callback);
 };
 
 
