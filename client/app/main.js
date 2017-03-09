@@ -16,12 +16,27 @@ var ConsoleApp = React.createClass({
       authenticated: false,
       accountInfo: {},
       userprofile: {},
-      selectedAppId: null
+      selectedAppId: null,
+      bpc_env: {}
     };
   },
   componentWillMount: function() {
   },
   componentDidMount: function() {
+
+    $.ajax({
+      type: 'GET',
+      url: '/bpc_env',
+      success: [
+        function(bpc_env, status, jqXHR) {
+          console.log('GET bpc_env', bpc_env, status);
+          this.setState({ bpc_env: bpc_env });
+        }.bind(this)
+      ],
+      error: function(jqXHR, textStatus, err) {
+        console.error(textStatus, err.toString());
+      }.bind(this)
+    });
 
     gapi.signin2.render('g-signin2', {
       'scope': 'https://www.googleapis.com/auth/plus.login',
@@ -89,9 +104,12 @@ var ConsoleApp = React.createClass({
       return k.concat('=', params[k]);
     }).join('&');
 
+    // TODO: The scheme must not be hardcoded
+    var url = 'http://'.concat(this.state.bpc_env.host, ':', this.state.bpc_env.port, '/rsvp?app=', this.state.bpc_env.app_id, '&', rsvpParams)
+
     $.ajax({
       type: 'GET',
-      url: 'http://berlingske-poc-server.local:8085/rsvp?app=console&'.concat(rsvpParams),
+      url: url,
       success: [
         function(userTicket, status, jqXHR) {
           console.log('GET rsvp', userTicket, status);

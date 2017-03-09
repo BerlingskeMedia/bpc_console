@@ -31,6 +31,18 @@ server.route({
 });
 
 server.route({
+  method: 'GET',
+  path: '/bpc_env',
+  handler: function(request, reply){
+    reply({
+      host: process.env.CONSOLE_APPLICATION_SSO_URL,
+      port: process.env.CONSOLE_APPLICATION_SSO_PORT,
+      app_id: process.env.CONSOLE_APPLICATION_APP_ID,
+    });
+  }
+});
+
+server.route({
   method: 'get',
   path: '/build/{param*}',
   handler: {
