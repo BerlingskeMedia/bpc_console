@@ -6,7 +6,9 @@ module.exports = React.createClass({
   getInitialState: function() {
     return {
       newScope: '',
-      application: {}
+      application: {
+        settings: {}
+      }
     };
   },
   getApplication: function() {
@@ -15,6 +17,9 @@ module.exports = React.createClass({
       url: '/admin/applications/'.concat(this.props.app),
       success: function(data, status){
         console.log('application', data);
+        if(data.settings === undefined || data.settings === null){
+          data.settings = {};
+        }
         this.setState({application: data});
       }.bind(this),
       error: function(jqXHR, textStatus, err) {
@@ -30,6 +35,7 @@ module.exports = React.createClass({
       data: JSON.stringify(application),
       success: function(data, status){
         this.setState({application: application});
+        console.log('application updated');
       }.bind(this),
       error: function(jqXHR, textStatus, err) {
         console.error(textStatus, err.toString());
@@ -72,6 +78,12 @@ module.exports = React.createClass({
     temp[e.target.name] = e.target.value;
     this.setState(temp);
   },
+  onChangeSetting: function(e) {
+    var application = this.state.application;
+    const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+    application.settings[e.target.name] = value;
+    this.setState({ application: application });
+  },
   componentWillMount: function() {
     this.getApplication();
    },
@@ -113,6 +125,31 @@ module.exports = React.createClass({
             </dl>
           </div>
         </div>
+        <h2>Settings</h2>
+        <form className="form-horizontal">
+          <div className="form-group">
+            <label className="col-sm-2 control-label" htmlFor="inputProvider">Provider</label>
+            <div className="col-sm-10">
+              <select className="form-control" value={this.state.application.settings.provider} name="provider" id="inputProvider" onChange={this.onChangeSetting}>
+                <option value=""></option>
+                <option value="gigya">Gigya</option>
+                <option value="google">Google</option>
+              </select>
+            </div>
+          </div>
+          <div className="form-group">
+            <label className="col-sm-2 control-label">Grants</label>
+            <div className="col-sm-10">
+              <div className="checkbox">
+                <label>
+                  <input type="checkbox" value={this.state.application.settings.disallowAutoCreationGrants} name="disallowAutoCreationGrants" onChange={this.onChangeSetting}></input>
+                  Only allow access to specified users
+                </label>
+              </div>
+            </div>
+          </div>
+          <button type="button" className="btn btn-primary btn-xs" onClick={this.updateApplication.bind(this, this.state.application)}>Save settings</button>
+        </form>
         <div className="row">
           <div className="col-xs-12">
             <h2>Scope</h2>

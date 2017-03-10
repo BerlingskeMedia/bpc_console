@@ -87,12 +87,6 @@ module.exports = React.createClass({
     return (
       <div className="grants">
         <h3>Grants</h3>
-        <div className="checkbox">
-          <label>
-            <input type="checkbox"></input>
-            Disallow auto creation of grants (not implemented in GUI)
-          </label>
-        </div>
         <CreateGrant createGrant={this.createGrant} />
         <br />
         {grants}
