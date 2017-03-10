@@ -5,9 +5,12 @@ var Applications = require('./applications');
 var Application = require('./application');
 var Users = require('./users');
 var AdminUsers = require('./adminUsers');
+var GoogleLogin = require('react-google-login').default;
 
 // Add the event handler
 
+const gapiClientId = '844384284363-rattdu658pbu53csn5d9hmb65l8ml4gs.apps.googleusercontent.com';
+const gapiScope = 'https://www.googleapis.com/auth/plus.login';
 
 var ConsoleApp = React.createClass({
   getInitialState: function() {
@@ -21,9 +24,19 @@ var ConsoleApp = React.createClass({
     };
   },
   componentWillMount: function() {
+    window.gapi.load('auth2', function () {
+      window.gapi.auth2.init({
+        clientId: gapiClientId,
+        cookiePolicy: 'single_host_origin',
+        scope: gapiScope
+      }).then(function (GoogleAuth) {
+        if (GoogleAuth.isSignedIn.get()) {
+          this.onSignIn(GoogleAuth.currentUser.get());
+        }
+      }.bind(this));
+    }.bind(this));
   },
   componentDidMount: function() {
-
     $.ajax({
       type: 'GET',
       url: '/bpc_env',
@@ -37,56 +50,18 @@ var ConsoleApp = React.createClass({
         console.error(textStatus, err.toString());
       }.bind(this)
     });
-
-    gapi.signin2.render('g-signin2', {
-      'scope': 'https://www.googleapis.com/auth/plus.login',
-      'width': 200,
-      'height': 50,
-      'longtitle': true,
-      'theme': 'dark',
-      'onsuccess': this.onSignIn
-    });
-
-    // gigya.accounts.addEventHandlers({ onLogin: this.onLoginEventHandler});
-    // gigya.accounts.addEventHandlers({ onLogout: this.onLogoutEventHandler});
-    //
-    // gigya.accounts.getAccountInfo({
-    //   callback: function(response){
-    //     console.log('accounts.getAccountInfo', response);
-    //     if (response.status === 'OK') {
-    //
-    //       this.setState({ loggedIn: true, accountInfo: response });
-    //
-    //       this.getRsvp({ uid: response.UID, email: response.profile.email, provider: 'gigya' }, function(rsvp){
-    //         console.log('getRsvp', rsvp);
-    //         this.getUserTicket(rsvp, function(date){
-    //         }.bind(this));
-    //       }.bind(this));
-    //
-    //     } else if (response.status === 'FAIL') {
-    //     }
-    //   }.bind(this)
-    // });
   },
-  // onLoginEventHandler: function(response) {
-  //   console.log('onLoginEventHandler', response);
-  //   this.setState({ loggedIn: true });
-  // },
-  // onLogoutEventHandler: function(response) {
-  //   console.log('onLogoutEventHandler', response);
-  //   this.setState({ loggedIn: false });
-  // },
   onSignIn: function(googleUser) {
     console.log('Google login success');
     // Useful data for your client-side scripts:
     var basicProfile = googleUser.getBasicProfile();
-    var authReponse = googleUser.getAuthResponse();
+    var authResponse = googleUser.getAuthResponse();
 
     var profile = {
       ID: basicProfile.getId(),
       email: basicProfile.getEmail(),
-      id_token: authReponse.id_token,
-      access_token: authReponse.access_token,
+      id_token: authResponse.id_token,
+      access_token: authResponse.access_token,
       provider: 'google'
     };
 
@@ -97,6 +72,9 @@ var ConsoleApp = React.createClass({
       this.getUserTicket(rsvp, function(date){
       }.bind(this));
     }.bind(this));
+  },
+  onSignInFailure: function (err) {
+    console.log(err);
   },
   getRsvp: function(params, callback) {
 
@@ -231,7 +209,14 @@ var ConsoleApp = React.createClass({
 
         <h1>SSO POC - Oz Admin</h1>
 
-        <div id="g-signin2" className="g-signin2" data-onsuccess={this.onSignIn} data-theme="dark"></div>
+        {!this.state.authenticated
+          ? <GoogleLogin
+          clientId={gapiClientId}
+          scope={gapiScope}
+          buttonText="Login"
+          onSuccess={this.onSignIn}
+          onFailure={this.onSignInFailure}
+          /> : <div></div>}
 
         <div>
           {this.state.insufficientPermissions === true

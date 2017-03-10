@@ -14,7 +14,8 @@
     "joi": "^9.2.0",
     "jquery": "^3.1.1",
     "react": "^15.4.1",
-    "react-dom": "^15.4.1"
+    "react-dom": "^15.4.1",
+    "react-google-login": "^2.8.2"
   },
   "devDependencies": {
     "babel-core": "^6.21.0",
@@ -33,10 +34,10 @@
     "url": "github.com/BerlingskeMedia/bpc_console"
   },
   "contributors": [
-  {
-    "name": "Daniel Kokott",
-    "email": "dako@berlingskeMedia.dk"
-  }
-],
+    {
+      "name": "Daniel Kokott",
+      "email": "dako@berlingskeMedia.dk"
+    }
+  ],
   "license": "ISC"
 }
