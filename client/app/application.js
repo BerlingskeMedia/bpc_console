@@ -73,12 +73,19 @@ module.exports = React.createClass({
     application.scope.splice(index, 1);
     this.updateApplication(application);
   },
-  onChange: function(e) {
+  onChangeState: function(e) {
     var temp = {};
-    temp[e.target.name] = e.target.value;
+    const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+    temp[e.target.name] = value;
     this.setState(temp);
   },
-  onChangeSetting: function(e) {
+  onChangeApplication: function(e) {
+    var application = this.state.application;
+    const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+    application[e.target.name] = value;
+    this.setState({ application: application });
+  },
+  onChangeApplicationSetting: function(e) {
     var application = this.state.application;
     const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
     application.settings[e.target.name] = value;
@@ -130,7 +137,7 @@ module.exports = React.createClass({
           <div className="form-group">
             <label className="col-sm-2 control-label" htmlFor="inputProvider">Provider</label>
             <div className="col-sm-10">
-              <select className="form-control" value={this.state.application.settings.provider} name="provider" id="inputProvider" onChange={this.onChangeSetting}>
+              <select className="form-control" value={this.state.application.settings.provider} name="provider" id="inputProvider" onChange={this.onChangeApplicationSetting}>
                 <option value=""></option>
                 <option value="gigya">Gigya</option>
                 <option value="google">Google</option>
@@ -142,8 +149,19 @@ module.exports = React.createClass({
             <div className="col-sm-10">
               <div className="checkbox">
                 <label>
-                  <input type="checkbox" value={this.state.application.settings.disallowAutoCreationGrants} name="disallowAutoCreationGrants" onChange={this.onChangeSetting}></input>
-                  Only allow access to specified users
+                  <input type="checkbox" defaultChecked={this.state.application.settings.disallowAutoCreationGrants} name="disallowAutoCreationGrants" onChange={this.onChangeApplicationSetting}></input>
+                  Only allow access to specified users.
+                </label>
+              </div>
+            </div>
+          </div>
+          <div className="form-group">
+            <label className="col-sm-2 control-label">Delegate</label>
+            <div className="col-sm-10">
+              <div className="checkbox">
+                <label>
+                  <input type="checkbox" defaultChecked={this.state.application.delegate} name="delegate" onChange={this.onChangeApplication}></input>
+                  Allowed the application to delegate a ticket to another application.
                 </label>
               </div>
             </div>
@@ -159,7 +177,7 @@ module.exports = React.createClass({
                name="newScope"
                className="form-control"
                value={this.state.newScope}
-               onChange={this.onChange}
+               onChange={this.onChangeState}
                placeholder="Add scope"/>
              </form>
             <ul className="list-unstyled">
