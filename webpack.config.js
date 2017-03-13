@@ -27,5 +27,9 @@ module.exports = {
         return o;
       }, {})
     })
-  ]
+  ],
+  watch: false,
+  watchOptions: {
+    poll: (process.env.SITE_ENVIRONMENT == 'docker') ? true : false // for Dockerized local development environment files sync
+  }
 };
