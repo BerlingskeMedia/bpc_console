@@ -207,7 +207,7 @@ var ConsoleApp = React.createClass({
     return (
       <div className="container">
 
-        <h1>SSO POC - Oz Admin</h1>
+        <h1>BPC Console</h1>
 
         {!this.state.authenticated
           ? <GoogleLogin
