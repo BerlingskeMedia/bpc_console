@@ -26,8 +26,8 @@ module.exports = React.createClass({
   render: function() {
 
     var users = this.state.users.map(function(user, index) {
-      var permissions = Object.keys(user.Permissions).map(function (name, index) {
-        return <PermissionScope key={index} scopeName={name} permissions={user.Permissions[name]} />
+      var permissions = Object.keys(user.dataScopes).map(function (name, index) {
+        return <PermissionScope key={index} scopeName={name} permissions={user.dataScopes[name]} />
       });
 
       return (
