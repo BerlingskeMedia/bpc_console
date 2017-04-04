@@ -153,6 +153,12 @@ module.exports = React.createClass({
                   Only allow access to specified users.
                 </label>
               </div>
+              <div className="checkbox">
+                <label>
+                  <input type="checkbox" defaultChecked={this.state.application.settings.disallowGrants} name="disallowGrants" onChange={this.onChangeApplicationSetting}></input>
+                  Do not allow access to any users (not implemented).
+                </label>
+              </div>
             </div>
           </div>
           <div className="form-group">
