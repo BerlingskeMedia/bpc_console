@@ -25,7 +25,7 @@ function getAppTicket() {
       console.error(err);
       process.exit(1);
     } else {
-      console.log('Got the console appTicket');
+      console.log('Got the appTicket from ' + CONSOLE_APPLICATION_SSO_URL);
       appTicket = result;
       setTimeout(refreshAppTicket, result.exp - Date.now() - 10000);
     }
