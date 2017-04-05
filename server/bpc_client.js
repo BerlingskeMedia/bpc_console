@@ -32,6 +32,8 @@ function getAppTicket() {
   });
 };
 
+module.exports.getAppTicket = getAppTicket;
+
 getAppTicket();
 
 function refreshAppTicket(){

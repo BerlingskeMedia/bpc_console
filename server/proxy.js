@@ -1,7 +1,7 @@
 /*jshint node: true */
 'use strict';
 
-const sso_client = require('./sso_client');
+const bpc = require('./bpc_client');
 var prefix = '';
 
 function proxy (request, reply) {
@@ -11,7 +11,7 @@ function proxy (request, reply) {
     path = path.slice(prefix.length)
   }
 
-  sso_client.request(request.method, path, request.payload, request.state.ticket, reply);
+  bpc.request(request.method, path, request.payload, request.state.ticket, reply);
 }
 
 module.exports.register = function (server, options, next) {

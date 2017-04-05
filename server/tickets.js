@@ -2,7 +2,7 @@
 'use strict';
 
 const Boom = require('boom');
-const sso_client = require('./sso_client');
+const bpc = require('./bpc_client');
 
 module.exports.register = function (server, options, next) {
 
@@ -17,9 +17,13 @@ module.exports.register = function (server, options, next) {
       }
     },
     handler: function(request, reply) {
-      sso_client.getUserTicket(request.payload.rsvp, function (err, userTicket){
+      bpc.getUserTicket(request.payload.rsvp, function (err, userTicket){
         console.log('getUserTicket', err, userTicket);
         if (err){
+          if (err.data.statusCode === 401 && err.data.message === 'Expired ticket'){
+            bpc.getAppTicket();
+          }
+          
           return reply(err);
         }
 
@@ -57,7 +61,7 @@ module.exports.register = function (server, options, next) {
       }
     },
     handler: function(request, reply) {
-      sso_client.refreshUserTicket(request.state.ticket, function (err, userTicket){
+      bpc.refreshUserTicket(request.state.ticket, function (err, userTicket){
         console.log('refreshUserTicket', err, userTicket);
         if (err) {
           return reply(err);
