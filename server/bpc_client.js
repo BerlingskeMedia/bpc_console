@@ -7,16 +7,16 @@ const http = require('http');
 const https = require('https');
 var appTicket = {};
 
-const CONSOLE_APPLICATION_APP_ID = process.env.CONSOLE_APPLICATION_APP_ID;
-const CONSOLE_APPLICATION_APP_SECRET = process.env.CONSOLE_APPLICATION_APP_SECRET;
-const CONSOLE_APPLICATION_SSO_URL = process.env.CONSOLE_APPLICATION_SSO_URL;
-const CONSOLE_APPLICATION_SSO_PORT = process.env.CONSOLE_APPLICATION_SSO_PORT;
+const BPC_APP_ID = process.env.BPC_APP_ID;
+const BPC_APP_SECRET = process.env.BPC_APP_SECRET;
+const BPC_HOST = process.env.BPC_HOST;
+const BPC_PORT = process.env.BPC_PORT;
 
 
 function getAppTicket() {
   var app = {
-    id: CONSOLE_APPLICATION_APP_ID,
-    key: CONSOLE_APPLICATION_APP_SECRET,
+    id: BPC_APP_ID,
+    key: BPC_APP_SECRET,
     algorithm: 'sha256'
   };
 
@@ -25,7 +25,7 @@ function getAppTicket() {
       console.error(err);
       process.exit(1);
     } else {
-      console.log('Got the appTicket from ' + CONSOLE_APPLICATION_SSO_URL);
+      console.log('Got the appTicket from ' + BPC_HOST);
       appTicket = result;
       setTimeout(refreshAppTicket, result.exp - Date.now() - 10000);
     }
@@ -79,8 +79,8 @@ function callSsoServer(method, path, body, credentials, callback) {
 
   var options = {
     // hostname: 'berlingske-poc.local',
-    hostname: CONSOLE_APPLICATION_SSO_URL,
-    port: CONSOLE_APPLICATION_SSO_PORT,
+    hostname: BPC_HOST,
+    port: BPC_PORT,
     // path: path.concat('?apiKey=', GIGYA_APP_KEY, '&userKey=', GIGYA_USER_KEY, '&secret=', GIGYA_SECRET_KEY, parameters),
     path: path.concat(parameters.length > 0 ? '?' : '', parameters.join('&')),
     method: method,
@@ -90,7 +90,7 @@ function callSsoServer(method, path, body, credentials, callback) {
   };
   if (credentials !== undefined && credentials !== null && Object.keys(credentials).length > 1){
     options.headers = {
-      'Authorization': Hawk.client.header('http://'.concat(options.hostname, ':', options.port, options.path), method, {credentials: credentials, app: CONSOLE_APPLICATION_APP_ID}).field
+      'Authorization': Hawk.client.header('http://'.concat(options.hostname, ':', options.port, options.path), method, {credentials: credentials, app: BPC_APP_ID}).field
     };
   }
 
