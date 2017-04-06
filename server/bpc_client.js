@@ -25,7 +25,7 @@ function getAppTicket() {
       console.error(err);
       process.exit(1);
     } else {
-      console.log('Got the appTicket from ' + BPC_HOST);
+      console.log('Got the appTicket for ' + BPC_APP_ID + ' from ' + BPC_HOST);
       appTicket = result;
       setTimeout(refreshAppTicket, result.exp - Date.now() - 10000);
     }
