@@ -13,6 +13,14 @@ const BPC_HOST = process.env.BPC_HOST;
 const BPC_PORT = process.env.BPC_PORT;
 
 
+module.exports.env = function() {
+  return {
+    host: process.env.BPC_HOST,
+    port: process.env.BPC_PORT,
+    app_id: process.env.BPC_APP_ID,
+  };
+};
+
 function getAppTicket() {
   var app = {
     id: BPC_APP_ID,

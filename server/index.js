@@ -5,6 +5,7 @@ const Hapi = require('hapi');
 const Inert = require('inert');
 const Tickets = require('./tickets');
 const Proxy = require('./proxy');
+const Bpc = require('./bpc_client');
 
 var server = new Hapi.Server();
 server.connection({ port: process.env.PORT ? process.env.PORT : 8000 });
@@ -34,11 +35,7 @@ server.route({
   method: 'GET',
   path: '/bpc_env',
   handler: function(request, reply){
-    reply({
-      host: process.env.CONSOLE_APPLICATION_SSO_URL,
-      port: process.env.CONSOLE_APPLICATION_SSO_PORT,
-      app_id: process.env.CONSOLE_APPLICATION_APP_ID,
-    });
+    reply(Bpc.env());
   }
 });
 
