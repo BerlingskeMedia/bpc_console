@@ -82,8 +82,7 @@ var ConsoleApp = React.createClass({
       return k.concat('=', params[k]);
     }).join('&');
 
-    // TODO: The scheme must not be hardcoded
-    var url = 'http://'.concat(this.state.bpc_env.host, ':', this.state.bpc_env.port, '/rsvp?app=', this.state.bpc_env.app_id, '&', rsvpParams)
+    var url = this.state.bpc_env.href.concat('rsvp?app=', this.state.bpc_env.app_id, '&', rsvpParams)
 
     $.ajax({
       type: 'GET',

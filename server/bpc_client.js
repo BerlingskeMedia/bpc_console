@@ -5,19 +5,24 @@ const Boom = require('boom');
 const Hawk = require('hawk');
 const http = require('http');
 const https = require('https');
+const url = require('url');
 var appTicket = {};
+var BPC_URL;
+
+try {
+  BPC_URL = url.parse(process.env.BPC_URL);
+} catch (ex) {
+  console.error('Env var BPC_URL missing or invalid.');
+  process.exit(1);
+}
 
 const BPC_APP_ID = process.env.BPC_APP_ID;
 const BPC_APP_SECRET = process.env.BPC_APP_SECRET;
-const BPC_HOST = process.env.BPC_HOST;
-const BPC_PORT = process.env.BPC_PORT;
-
 
 module.exports.env = function() {
   return {
-    host: process.env.BPC_HOST,
-    port: process.env.BPC_PORT,
-    app_id: process.env.BPC_APP_ID,
+    href: BPC_URL.href,
+    app_id: BPC_APP_ID,
   };
 };
 
@@ -33,7 +38,7 @@ function getAppTicket() {
       console.error(err);
       process.exit(1);
     } else {
-      console.log('Got the appTicket for ' + BPC_APP_ID + ' from ' + BPC_HOST);
+      console.log('Got the appTicket for ' + BPC_APP_ID + ' from ' + BPC_URL.host);
       appTicket = result;
       setTimeout(refreshAppTicket, result.exp - Date.now() - 10000);
     }
@@ -89,8 +94,8 @@ function callSsoServer(method, path, body, credentials, callback) {
 
   var options = {
     // hostname: 'berlingske-poc.local',
-    hostname: BPC_HOST,
-    port: BPC_PORT,
+    hostname: BPC_URL.hostname,
+    port: BPC_URL.port,
     // path: path.concat('?apiKey=', GIGYA_APP_KEY, '&userKey=', GIGYA_USER_KEY, '&secret=', GIGYA_SECRET_KEY, parameters),
     path: path.concat(parameters.length > 0 ? '?' : '', parameters.join('&')),
     method: method,
