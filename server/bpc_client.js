@@ -33,7 +33,7 @@ function getAppTicket() {
     algorithm: 'sha256'
   };
 
-  callSsoServer('POST', '/ticket/app', {}, app, function(err, result){
+  callSsoServer({path: '/ticket/app', method: 'POST'}, {}, app, function(err, result){
     if (err){
       console.error(err);
       process.exit(1);
@@ -50,7 +50,7 @@ module.exports.getAppTicket = getAppTicket;
 getAppTicket();
 
 function refreshAppTicket(){
-  callSsoServer('POST', '/ticket/reissue', null, appTicket, function(err, result){
+  callSsoServer({path: '/ticket/reissue', method: 'POST'}, null, appTicket, function(err, result){
     if (err){
       console.error('refreshAppTicket:', err);
     } else {
@@ -63,55 +63,60 @@ function refreshAppTicket(){
 
 
 module.exports.getUserTicket = function(rsvp, callback) {
-  callSsoServer('POST', '/ticket/user', {rsvp: rsvp}, appTicket, callback);
+  callSsoServer({path: '/ticket/user', method: 'POST'}, {rsvp: rsvp}, appTicket, callback);
 };
 
 
 module.exports.refreshUserTicket = function(userTicket, callback){
-  callSsoServer('POST', '/ticket/refresh', null, userTicket, callback);
+  callSsoServer({path: '/ticket/refresh', method: 'POST'}, null, userTicket, callback);
 };
 
 
 module.exports.getApplications = function(userTicket, callback){
-  callSsoServer('GET', '/admin/applications', null, userTicket, callback);
+  callSsoServer({path: '/admin/applications'}, null, userTicket, callback);
 };
 
 
-function callSsoServer(method, path, body, credentials, callback) {
+function callSsoServer(options, body, credentials, callback) {
   if (callback === undefined && typeof body === 'function') {
     callback = body;
     body = null;
   }
 
+  options.protocol = BPC_URL.protocol;
+  options.hostname = BPC_URL.hostname;
+  if (BPC_URL.port){
+    options.port = BPC_URL.port;
+  }
+
   var parameters = [];
 
-  if (method === 'GET' && body !== null && typeof body === 'object'){
+  if ((options.method === null || options.method === 'GET') && body !== null && typeof body === 'object'){
     var temp = [];
     Object.keys(body).forEach(function (k){
       parameters.push(k.concat('=', body[k]));
     });
+
+    if (parameters.length > 0) {
+      options.path = options.path.concat('?', parameters.join('&'));
+    }
   }
 
-  var options = {
-    // hostname: 'berlingske-poc.local',
-    hostname: BPC_URL.hostname,
-    port: BPC_URL.port,
-    // path: path.concat('?apiKey=', GIGYA_APP_KEY, '&userKey=', GIGYA_USER_KEY, '&secret=', GIGYA_SECRET_KEY, parameters),
-    path: path.concat(parameters.length > 0 ? '?' : '', parameters.join('&')),
-    method: method,
-    headers: {
-      // 'Authorization': 'Basic ' + authorization
-    }
-  };
   if (credentials !== undefined && credentials !== null && Object.keys(credentials).length > 1){
+    var requestHref = url.resolve(BPC_URL.href, options.path)
     options.headers = {
-      'Authorization': Hawk.client.header('http://'.concat(options.hostname, ':', options.port, options.path), method, {credentials: credentials, app: BPC_APP_ID}).field
+      'Authorization': Hawk.client.header(requestHref, options.method, {credentials: credentials, app: BPC_APP_ID}).field
     };
   }
 
-  var req = http.request(options, parseReponse(callback));
+  var reqHandler = https;
+  if (options.protocol === 'http:') {
+    reqHandler = http;
+  }
 
-  if (method !== 'GET' && body !== null && typeof body === 'object'){
+  var req = reqHandler.request(options, parseReponse(callback));
+
+  if (options.method !== null && options.method !== 'GET' && body !== null && typeof body === 'object'){
     req.write(JSON.stringify(body));
   }
 
