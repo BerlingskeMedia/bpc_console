@@ -15,8 +15,8 @@ const gapiScope = 'https://www.googleapis.com/auth/plus.login';
 var ConsoleApp = React.createClass({
   getInitialState: function() {
     return {
-      loggedIn: false,
       authenticated: false,
+      authorized: false,
       accountInfo: {},
       userprofile: {},
       selectedAppId: null,
@@ -65,7 +65,7 @@ var ConsoleApp = React.createClass({
       provider: 'google'
     };
 
-    this.setState({ loggedIn: true, profile: profile });
+    this.setState({ authenticated: true, profile: profile });
 
     this.getRsvp(profile, function(rsvp){
       console.log('getRsvp', rsvp);
@@ -74,7 +74,7 @@ var ConsoleApp = React.createClass({
     }.bind(this));
   },
   onSignInFailure: function (err) {
-    console.log(err);
+    console.log('Google Sign in error', err);
   },
   getRsvp: function(params, callback) {
 
@@ -84,7 +84,7 @@ var ConsoleApp = React.createClass({
 
     var url = this.state.bpc_env.href.concat('rsvp?app=', this.state.bpc_env.app_id, '&', rsvpParams)
 
-    $.ajax({
+    return $.ajax({
       type: 'GET',
       url: url,
       success: [
@@ -95,11 +95,12 @@ var ConsoleApp = React.createClass({
       ],
       error: function(jqXHR, textStatus, err) {
         console.error(textStatus, err.toString());
+        this.setState({ authorized: false });
       }.bind(this)
     });
   },
   getUserTicket: function(rsvp, callback){
-    $.ajax({
+    return $.ajax({
       type: 'POST',
       url: '/tickets',
       contentType: 'application/json; charset=utf-8',
@@ -107,17 +108,13 @@ var ConsoleApp = React.createClass({
       success: [
         function(userTicket, status, jqXHR) {
           console.log('POST tickets success', userTicket, status);
-          this.setState({ authenticated: true, loggedIn: true });
+          this.setState({ authorized: true});
         }.bind(this),
         callback
       ],
       error: function(jqXHR, textStatus, err) {
         console.error(textStatus, err.toString());
-        // The user is logged in, but just not an admin
-        this.setState({ insufficientPermissions: true });
-        if(jqXHR.status === 403){
-          this.setState({ loggedIn: true });
-        }
+        this.setState({ authorized: false });
       }.bind(this)
     });
   },
@@ -129,26 +126,23 @@ var ConsoleApp = React.createClass({
       success: [
         function(userTicket, status, jqXHR) {
           console.log('GET tickets success', userTicket, status);
-          this.setState({ authenticated: true, loggedIn: true });
+          this.setState({ authorized: true});
         }.bind(this)
       ],
       error: function(jqXHR, textStatus, err) {
         console.error(textStatus, err.toString());
-        // The user is logged in, but just not an admin
-        if(jqXHR.status === 403){
-          this.setState({ loggedIn: true });
-        }
+        this.setState({ authorized: false });
       }.bind(this)
     });
   },
   deleteUserTicket: function(callback){
-    $.ajax({
+    return $.ajax({
       type: 'DELETE',
       url: '/tickets',
       success: [
         function(data, status, jqXHR) {
           console.log('DELETE signout success', data, status);
-          this.setState({ authenticated: false, loggedIn: false });
+          this.setState({ authenticated: false, authorized: false});
         }.bind(this),
         callback
       ],
@@ -203,10 +197,16 @@ var ConsoleApp = React.createClass({
   },
   render: function() {
 
+    var bpc_env = <div>
+                    <small>Using BPC on <em>{this.state.bpc_env.href}</em></small>
+                  </div>;
+
     return (
       <div className="container">
 
         <h1>BPC Console</h1>
+
+        {bpc_env}
 
         {!this.state.authenticated
           ? <GoogleLogin
@@ -217,16 +217,17 @@ var ConsoleApp = React.createClass({
           onFailure={this.onSignInFailure}
           /> : <div></div>}
 
-        <div>
-          {this.state.insufficientPermissions === true
-            ? <p>Du har ikke de fornødne rettigheder</p>
-            : null
-          }
-        </div>
-
         <br />
 
-        {this.state.authenticated === true
+        {this.state.authorized === false
+          ? <div>
+              <p>Du har ikke de fornødne rettigheder</p>
+            </div>
+          : null
+        }
+
+
+        {this.state.authorized === true
           ? <div>
               {this.state.selectedAppId === null
                 ? <div>

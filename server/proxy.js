@@ -2,21 +2,21 @@
 'use strict';
 
 const bpc = require('./bpc_client');
-var prefix = '';
+var route_prefix = '';
 
 function proxy (request, reply) {
   var path = request.path;
 
-  if(path.startsWith(prefix)){
-    path = path.slice(prefix.length)
+  if(path.startsWith(route_prefix)){
+    path = path.slice(route_prefix.length)
   }
 
-  bpc.request(request.method, path, request.payload, request.state.ticket, reply);
+  bpc.request({path: path, method: request.method}, request.payload, request.state.ticket, reply);
 }
 
 module.exports.register = function (server, options, next) {
 
-  prefix = server.realm.modifiers.route.prefix;
+  route_prefix = server.realm.modifiers.route.prefix;
 
   server.route({
     method: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
