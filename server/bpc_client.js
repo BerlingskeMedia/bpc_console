@@ -19,6 +19,8 @@ try {
 const BPC_APP_ID = process.env.BPC_APP_ID;
 const BPC_APP_SECRET = process.env.BPC_APP_SECRET;
 
+console.log('Connecting to BPC on', BPC_URL.host, 'AS', BPC_APP_ID);
+
 module.exports.env = function() {
   return {
     href: BPC_URL.href,
@@ -38,7 +40,7 @@ function getAppTicket() {
       console.error(err);
       process.exit(1);
     } else {
-      console.log('Got the appTicket for ' + BPC_APP_ID + ' from ' + BPC_URL.host);
+      console.log('Got the appTicket');
       appTicket = result;
       setTimeout(refreshAppTicket, result.exp - Date.now() - 10000);
     }
