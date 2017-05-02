@@ -105,9 +105,16 @@ function callSsoServer(options, body, credentials, callback) {
   }
 
   if (credentials !== undefined && credentials !== null && Object.keys(credentials).length > 1){
-    var requestHref = url.resolve(BPC_URL.href, options.path)
+    var requestHref = url.resolve(BPC_URL.href, options.path);
+
+    var hawkHeader = Hawk.client.header(requestHref, options.method || 'GET', {credentials: credentials, app: BPC_APP_ID});
+    if (hawkHeader.err) {
+      console.error(hawkHeader.err);
+      return callback(new Error('Hawk header: ' + hawkHeader.err));
+    }
+
     options.headers = {
-      'Authorization': Hawk.client.header(requestHref, options.method, {credentials: credentials, app: BPC_APP_ID}).field
+      'Authorization': hawkHeader.field
     };
   }
 
