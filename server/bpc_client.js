@@ -5,12 +5,12 @@ const Boom = require('boom');
 const Hawk = require('hawk');
 const http = require('http');
 const https = require('https');
-const url = require('url');
+const Url = require('url');
 var appTicket = {};
 var BPC_URL;
 
 try {
-  BPC_URL = url.parse(process.env.BPC_URL);
+  BPC_URL = Url.parse(process.env.BPC_URL);
 } catch (ex) {
   console.error('Env var BPC_URL missing or invalid.');
   process.exit(1);
@@ -110,7 +110,7 @@ function callSsoServer(options, body, credentials, callback) {
   }
 
   if (credentials !== undefined && credentials !== null && Object.keys(credentials).length > 1){
-    var requestHref = url.resolve(BPC_URL.href, options.path);
+    var requestHref = Url.resolve(BPC_URL.href, options.path);
     var hawkHeader = Hawk.client.header(requestHref, options.method || 'GET', {credentials: credentials, app: BPC_APP_ID});
     if (hawkHeader.err) {
       console.error(hawkHeader.err);
