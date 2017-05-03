@@ -20,10 +20,6 @@ module.exports.register = function (server, options, next) {
       bpc.getUserTicket(request.payload.rsvp, function (err, userTicket){
         console.log('getUserTicket', err, userTicket);
         if (err){
-          if (err.data.statusCode === 401 && err.data.message === 'Expired ticket'){
-            bpc.getAppTicket();
-          }
-          
           return reply(err);
         }
 

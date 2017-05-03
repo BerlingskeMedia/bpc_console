@@ -47,9 +47,8 @@ function getAppTicket() {
   });
 };
 
-module.exports.getAppTicket = getAppTicket;
-
 getAppTicket();
+
 
 function refreshAppTicket(){
   callSsoServer({path: '/ticket/reissue', method: 'POST'}, null, appTicket, function(err, result){
@@ -70,7 +69,7 @@ module.exports.getUserTicket = function(rsvp, callback) {
 
 
 module.exports.refreshUserTicket = function(userTicket, callback){
-  callSsoServer({path: '/ticket/refresh', method: 'POST'}, null, userTicket, callback);
+  callSsoServer({path: '/ticket/reissue', method: 'POST'}, null, userTicket, callback);
 };
 
 
@@ -93,7 +92,7 @@ function callSsoServer(options, body, credentials, callback) {
 
   var parameters = [];
 
-  if ((options.method === null || options.method === 'GET') && body !== null && typeof body === 'object'){
+  if ((options.method === undefined || options.method === null || options.method === 'GET') && body !== null && typeof body === 'object'){
     var temp = [];
     Object.keys(body).forEach(function (k){
       parameters.push(k.concat('=', body[k]));
@@ -104,9 +103,14 @@ function callSsoServer(options, body, credentials, callback) {
     }
   }
 
+
+  // In case we want a request completely without any credentials, use {} as the credentials parameter to this function
+  if (credentials === undefined || credentials === null){
+    credentials = appTicket;
+  }
+
   if (credentials !== undefined && credentials !== null && Object.keys(credentials).length > 1){
     var requestHref = url.resolve(BPC_URL.href, options.path);
-
     var hawkHeader = Hawk.client.header(requestHref, options.method || 'GET', {credentials: credentials, app: BPC_APP_ID});
     if (hawkHeader.err) {
       console.error(hawkHeader.err);
@@ -158,8 +162,13 @@ function parseReponse (callback) {
 
 
       if (res.statusCode > 300) {
-        var err = Boom.wrap(new Error(data.error), data.statusCode, data.message);
+        var err = Boom.wrap(new Error(data.error), res.statusCode, data.message);
         err.data = data;
+
+        if (res.statusCode === 401 && data.message === 'Expired ticket'){
+          getAppTicket();
+        }
+
         callback(err, null);
       }
       else
