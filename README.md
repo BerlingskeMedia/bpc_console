@@ -3,10 +3,11 @@
 The BPC console is a special application for managing BPC. It enabled it's users register other applications in BPC, set scopes and administer users.
 
 # Prerequisites
-node
-npm
-gulp (`npm install -g gulp`)
-webpack (`npm install -g webpack`)
+
+* node
+* npm
+* gulp (`npm install -g gulp`)
+* webpack (`npm install -g webpack`)
 
 To install Node modules, run:
 
