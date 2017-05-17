@@ -144,7 +144,7 @@ module.exports = React.createClass({
 
     return (
       <div className="users">
-        <h3>Admin users</h3>
+        <h3>Console users</h3>
         <AddAdminUser addAdminUser={this.createGrant} />
         <table className="table">
           <tbody>
