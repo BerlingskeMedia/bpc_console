@@ -1,13 +1,14 @@
 var $ = require('jquery');
 var React = require('react');
 
-module.exports = React.createClass({
-  getInitialState: function() {
-    return {
-      users: []
-    };
-  },
-  getUsers: function() {
+module.exports = class extends React.Component {
+
+  constructor(props){
+    super(props);
+    this.state = {users: []};
+  }
+
+  getUsers() {
     return $.ajax({
       type: 'GET',
       url: '/admin/users',
@@ -19,11 +20,13 @@ module.exports = React.createClass({
         console.error(textStatus, err.toString());
       }
     });
-  },
-  componentDidMount: function() {
+  }
+
+  componentDidMount() {
     this.getUsers();
-  },
-  render: function() {
+  }
+
+  render() {
 
     var users = this.state.users.map(function(user, index) {
       var permissions = Object.keys(user.dataScopes).map(function (name, index) {
@@ -59,11 +62,11 @@ module.exports = React.createClass({
       </div>
     );
   }
-});
+}
 
 
-var PermissionScope = React.createClass({
-  render: function() {
+class PermissionScope extends React.Component {
+  render() {
     var permissions = this.props.permissions instanceof Array
       ? this.props.permissions.map(function(permission, index) {
           return (
@@ -102,4 +105,4 @@ var PermissionScope = React.createClass({
       </div>
     );
   }
-});
+}

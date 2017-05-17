@@ -1,14 +1,17 @@
 var $ = require('jquery');
 var React = require('react');
 
-module.exports = React.createClass({
-  getInitialState: function() {
-    return {
+module.exports = class extends React.Component {
+
+  constructor(props){
+    super(props);
+    this.state = {
       adminUsers: [],
       applications: []
     };
-  },
-  getApplications: function() {
+  }
+
+  getApplications() {
     return $.ajax({
       type: 'GET',
       url: '/admin/applications',
@@ -20,8 +23,9 @@ module.exports = React.createClass({
         console.error(textStatus, err.toString());
       }
     });
-  },
-  createApplication: function(application) {
+  }
+
+  createApplication(application) {
     return $.ajax({
       type: 'POST',
       url: '/admin/applications',
@@ -36,11 +40,13 @@ module.exports = React.createClass({
         console.error(textStatus, err.toString());
       }
     });
-  },
-  componentDidMount: function() {
+  }
+
+  componentDidMount() {
     this.getApplications();
-  },
-  render: function() {
+  }
+
+  render() {
     var applications = this.state.applications.map(function(application, index) {
       return (
         <tr key={index}>
@@ -68,27 +74,30 @@ module.exports = React.createClass({
       </div>
     );
   }
-});
+}
 
 
-var CreateApplication = React.createClass({
-  getInitialState: function() {
-    return {
-      value: ''
-    };
-  },
-  onChange: function(e) {
+class CreateApplication extends React.Component {
+
+  constructor(props){
+    super(props);
+    this.state = {value: ''};
+  }
+
+  onChange(e) {
     this.setState({value: e.target.value});
-  },
-  handleSubmit: function(e) {
+  }
+
+  handleSubmit(e) {
     e.preventDefault();
     if (this.state.value !== '') {
       this.props.createApplication({id: this.state.value}).done(function() {
         this.setState({value: ''});
       }.bind(this));
     }
-  },
-  render: function() {
+  }
+
+  render() {
     return (
       <form style={{paddingTop: '30px', paddingBottom: '30px'}} onSubmit={this.handleSubmit} className="form-inline">
         <input
@@ -102,4 +111,4 @@ var CreateApplication = React.createClass({
       </form>
     );
   }
-});
+}

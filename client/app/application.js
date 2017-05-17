@@ -2,16 +2,19 @@ var $ = require('jquery');
 var React = require('react');
 var Grants = require('./grants');
 
-module.exports = React.createClass({
-  getInitialState: function() {
-    return {
+module.exports = class extends React.Component {
+
+  constructor(props){
+    super(props);
+    this.state = {
       newScope: '',
       application: {
         settings: {}
       }
     };
-  },
-  getApplication: function() {
+  }
+
+  getApplication() {
     return $.ajax({
       type: 'GET',
       url: '/admin/applications/'.concat(this.props.app),
@@ -26,8 +29,9 @@ module.exports = React.createClass({
         console.error(textStatus, err.toString());
       }
     });
-  },
-  updateApplication: function(application) {
+  }
+
+  updateApplication(application) {
     return $.ajax({
       type: 'PUT',
       url: '/admin/applications/'.concat(this.props.app),
@@ -41,8 +45,9 @@ module.exports = React.createClass({
         console.error(textStatus, err.toString());
       }
     });
-  },
-  deleteApplication: function() {
+  }
+
+  deleteApplication() {
     return $.ajax({
       type: 'DELETE',
       url: '/admin/applications/'.concat(this.props.app),
@@ -54,8 +59,9 @@ module.exports = React.createClass({
         console.error(textStatus, err.toString());
       }
     });
-  },
-  addScope: function(e) {
+  }
+
+  addScope(e) {
     e.preventDefault();
     var application = Object.assign({}, this.state.application);
     var newLength = application.scope.push(this.state.newScope);
@@ -67,34 +73,40 @@ module.exports = React.createClass({
       console.log('fail');
       application.scope.splice(newLength - 1, 1);
     });
-  },
-  removeScope: function(index) {
+  }
+
+  removeScope(index) {
     var application = Object.assign({}, this.state.application);
     application.scope.splice(index, 1);
     this.updateApplication(application);
-  },
-  onChangeState: function(e) {
+  }
+
+  onChangeState(e) {
     var temp = {};
     const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
     temp[e.target.name] = value;
     this.setState(temp);
-  },
-  onChangeApplication: function(e) {
+  }
+
+  onChangeApplication(e) {
     var application = this.state.application;
     const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
     application[e.target.name] = value;
     this.setState({ application: application });
-  },
-  onChangeApplicationSetting: function(e) {
+  }
+
+  onChangeApplicationSetting(e) {
     var application = this.state.application;
     const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
     application.settings[e.target.name] = value;
     this.setState({ application: application });
-  },
-  componentWillMount: function() {
+  }
+
+  componentWillMount() {
     this.getApplication();
-   },
-  render: function() {
+  }
+
+  render() {
 
     var scopeList = this.state.application !== undefined && this.state.application.scope !== undefined
       ? this.state.application.scope.map(function(s, i){
@@ -199,4 +211,4 @@ module.exports = React.createClass({
       </div>
     );
   }
-});
+}

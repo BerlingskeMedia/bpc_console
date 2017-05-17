@@ -12,9 +12,11 @@ var GoogleLogin = require('react-google-login').default;
 const gapiClientId = '844384284363-rattdu658pbu53csn5d9hmb65l8ml4gs.apps.googleusercontent.com';
 const gapiScope = 'https://www.googleapis.com/auth/plus.login';
 
-var ConsoleApp = React.createClass({
-  getInitialState: function() {
-    return {
+class ConsoleApp extends React.Component {
+
+  constructor(props) {
+    super(props);
+    this.state = {
       authenticated: false,
       authorized: false,
       accountInfo: {},
@@ -22,8 +24,9 @@ var ConsoleApp = React.createClass({
       selectedAppId: null,
       bpc_env: {}
     };
-  },
-  componentWillMount: function() {
+  }
+
+  componentWillMount() {
     window.gapi.load('auth2', function () {
       window.gapi.auth2.init({
         clientId: gapiClientId,
@@ -35,8 +38,9 @@ var ConsoleApp = React.createClass({
         }
       }.bind(this));
     }.bind(this));
-  },
-  componentDidMount: function() {
+  }
+
+  componentDidMount() {
     $.ajax({
       type: 'GET',
       url: '/bpc_env',
@@ -50,8 +54,9 @@ var ConsoleApp = React.createClass({
         console.error(textStatus, err.toString());
       }.bind(this)
     });
-  },
-  onSignIn: function(googleUser) {
+  }
+
+  onSignIn (googleUser) {
     console.log('Google login success');
     // Useful data for your client-side scripts:
     var basicProfile = googleUser.getBasicProfile();
@@ -72,11 +77,13 @@ var ConsoleApp = React.createClass({
       this.getUserTicket(rsvp, function(date){
       }.bind(this));
     }.bind(this));
-  },
-  onSignInFailure: function (err) {
+  }
+
+  onSignInFailure (err) {
     console.log('Google Sign in error', err);
-  },
-  getRsvp: function(params, callback) {
+  }
+
+  getRsvp (params, callback) {
 
     var rsvpParams = Object.keys(params).map(function(k){
       return k.concat('=', params[k]);
@@ -98,8 +105,9 @@ var ConsoleApp = React.createClass({
         this.setState({ authorized: false });
       }.bind(this)
     });
-  },
-  getUserTicket: function(rsvp, callback){
+  }
+
+  getUserTicket (rsvp, callback){
     return $.ajax({
       type: 'POST',
       url: '/tickets',
@@ -117,8 +125,9 @@ var ConsoleApp = React.createClass({
         this.setState({ authorized: false });
       }.bind(this)
     });
-  },
-  refreshUserTicket: function(){
+  }
+
+  refreshUserTicket() {
     return $.ajax({
       type: 'GET',
       url: '/tickets',
@@ -134,8 +143,9 @@ var ConsoleApp = React.createClass({
         this.setState({ authorized: false });
       }.bind(this)
     });
-  },
-  deleteUserTicket: function(callback){
+  }
+
+  deleteUserTicket(callback){
     return $.ajax({
       type: 'DELETE',
       url: '/tickets',
@@ -150,8 +160,9 @@ var ConsoleApp = React.createClass({
         console.error(textStatus, err.toString());
       }
     });
-  },
-  getSearchParameter: function(name, url) {
+  }
+
+  getSearchParameter(name, url) {
     if (!url) url = window.location.href;
     name = name.replace(/[\[\]]/g, "\\$&");
     var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
@@ -159,8 +170,9 @@ var ConsoleApp = React.createClass({
     if (!results) return null;
     if (!results[2]) return '';
     return decodeURIComponent(results[2].replace(/\+/g, " "));
-  },
-  setSearchParameter: function (key, value) {
+  }
+
+  setSearchParameter (key, value) {
     // remove the hash part before operating on the uri
     var uri = window.location.href;
     var i = uri.indexOf('#');
@@ -183,19 +195,23 @@ var ConsoleApp = React.createClass({
     if (window.history.pushState) {
       window.history.pushState({path:href},'',href)
     }
-  },
-  selectApplication: function(id){
+  }
+
+  selectApplication(id){
     console.log('selectApplication', id);
     this.setState({ selectedAppId: id });
-  },
-  closeApplication: function(){
+  }
+
+  closeApplication(){
     console.log('closeApplication');
     this.setState({ selectedAppId: null });
-  },
-  showLoginScreen: function() {
+  }
+
+  showLoginScreen() {
     gigya.accounts.showScreenSet({screenSet:'Default-RegistrationLogin'});
-  },
-  render: function() {
+  }
+
+  render() {
 
     var bpc_env = <div>
                     <small>Using BPC on <em>{this.state.bpc_env.href}</em></small>
@@ -245,7 +261,7 @@ var ConsoleApp = React.createClass({
       </div>
     );
   }
-});
+}
 
 ReactDOM.render(
   <ConsoleApp />,

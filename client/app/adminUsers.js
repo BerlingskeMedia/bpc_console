@@ -1,13 +1,14 @@
 var $ = require('jquery');
 var React = require('react');
 
-module.exports = React.createClass({
-  getInitialState: function() {
-    return {
-      grants: []
-    };
-  },
-  getConsoleGrants: function() {
+module.exports = class extends React.Component {
+
+  constructor(props) {
+    super(props);
+    this.state = {grants: []};
+  }
+
+  getConsoleGrants() {
     return $.ajax({
       type: 'GET',
       url: '/admin/applications/console/grants',
@@ -18,8 +19,9 @@ module.exports = React.createClass({
         console.error(textStatus, err.toString());
       }
     });
-  },
-  createGrant: function(user) {
+  }
+
+  createGrant(user) {
     var grant = {
       user: user,
       scope: []
@@ -39,8 +41,9 @@ module.exports = React.createClass({
         console.error(textStatus, err.toString());
       }
     });
-  },
-  updateGrant: function(grant, index) {
+  }
+
+  updateGrant(grant, index) {
     return $.ajax({
       type: 'POST',
       url: '/admin/applications/console/grants/'.concat(grant.id),
@@ -58,8 +61,9 @@ module.exports = React.createClass({
         console.error(textStatus, err.toString());
       }
     });
-  },
-  deleteGrant: function(grant, index) {
+  }
+
+  deleteGrant(grant, index) {
     return $.ajax({
       type: 'DELETE',
       url: '/admin/applications/console/grants/'.concat(grant.id),
@@ -77,8 +81,9 @@ module.exports = React.createClass({
         console.error(textStatus, err.toString());
       }
     });
-  },
-  makeSuperAdmin: function(grant, index) {
+  }
+
+  makeSuperAdmin(grant, index) {
     return $.ajax({
       type: 'POST',
       url: '/admin/users/'.concat(grant.user, '/superadmin'),
@@ -94,8 +99,9 @@ module.exports = React.createClass({
         console.error(textStatus, err.toString());
       }
     });
-  },
-  demoteSuperAdmin: function(grant, index) {
+  }
+
+  demoteSuperAdmin(grant, index) {
     return $.ajax({
       type: 'DELETE',
       url: '/admin/users/'.concat(grant.user, '/superadmin'),
@@ -112,11 +118,13 @@ module.exports = React.createClass({
         console.error(textStatus, err.toString());
       }
     });
-  },
-  componentDidMount: function() {
+  }
+
+  componentDidMount() {
     this.getConsoleGrants();
-  },
-  render: function() {
+  }
+
+  render() {
 
     var grants = this.state.grants.map(function(grant, index) {
       var isSuperAdmin = grant.scope.indexOf('admin:*') > -1;
@@ -159,20 +167,22 @@ module.exports = React.createClass({
       </div>
     );
   }
-});
+}
 
-var AddAdminUser = React.createClass({
-  getInitialState: function() {
-    return {
-      user: ''
-    };
-  },
-  onChange: function(e) {
+class AddAdminUser extends React.Component {
+
+  constructor(props){
+    super(props);
+    this.state = {user: ''};
+  }
+
+  onChange(e) {
     var temp = {};
     temp[e.target.name] = e.target.value;
     this.setState(temp);
-  },
-  handleSubmit: function(e) {
+  }
+
+  handleSubmit(e) {
     console.log('d');
     e.preventDefault();
     if (this.state.user !== '') {
@@ -181,8 +191,9 @@ var AddAdminUser = React.createClass({
         this.setState({user: ''});
       }.bind(this));
     }
-  },
-  render: function() {
+  }
+
+  render() {
     return (
       <form style={{paddingTop: '30px', paddingBottom: '30px'}} onSubmit={this.handleSubmit} className="form-inline">
         <input
@@ -196,4 +207,4 @@ var AddAdminUser = React.createClass({
       </form>
     );
   }
-});
+}

@@ -1,14 +1,17 @@
 var $ = require('jquery');
 var React = require('react');
 
-module.exports = React.createClass({
-  getInitialState: function() {
-    return {
+module.exports = class extends React.Component {
+
+  constructor(props){
+    super(props);
+    this.state = {
       validScopes: [],
       grants: []
     };
-  },
-  getGrants: function() {
+  }
+
+  getGrants() {
     return $.ajax({
       type: 'GET',
       // url: '/admin/grants',
@@ -21,8 +24,9 @@ module.exports = React.createClass({
         console.error(textStatus, err.toString());
       }
     });
-  },
-  createGrant: function(grant) {
+  }
+
+  createGrant(grant) {
     return $.ajax({
       type: 'POST',
       url: '/admin/applications/'.concat(this.props.app, '/grants'),
@@ -37,8 +41,9 @@ module.exports = React.createClass({
         console.error(textStatus, err.toString());
       }
     });
-  },
-  updateGrant: function(grant, index) {
+  }
+
+  updateGrant(grant, index) {
     return $.ajax({
       type: 'PUT',
       // url: '/admin/grants/'.concat(grant.id),
@@ -54,8 +59,9 @@ module.exports = React.createClass({
         console.error(textStatus, err.toString());
       }
     });
-  },
-  deleteGrant: function(grantId, index) {
+  }
+
+  deleteGrant(grantId, index) {
     return $.ajax({
       type: 'DELETE',
       url: '/admin/applications/'.concat(this.props.app, '/grants/', grantId),
@@ -68,11 +74,13 @@ module.exports = React.createClass({
         console.error(textStatus, err.toString());
       }
     });
-  },
-  componentDidMount: function() {
+  }
+
+  componentDidMount() {
     this.getGrants();
-  },
-  render: function() {
+  }
+
+  render() {
 
     var grants = this.state.grants.map(function(grant, index) {
       return (
@@ -93,13 +101,14 @@ module.exports = React.createClass({
       </div>
     );
   }
-});
+}
 
-var Grant = React.createClass({
-  deleteGrant: function() {
+class Grant extends React.Component {
+  deleteGrant() {
     this.props.deleteGrant(this.props.grant.id, this.props.index);
-  },
-  render: function() {
+  }
+
+  render() {
     return (
       <div className="row">
         <div className="col-xs-10"><div>{this.props.grant.user}</div></div>
@@ -109,31 +118,36 @@ var Grant = React.createClass({
       </div>
     );
   }
-});
+}
 
 
-var CreateGrant = React.createClass({
-  getInitialState: function() {
-    return {
+class CreateGrant extends React.Component {
+
+  constructor(props){
+    super(props);
+    this.state = {
       app: '',
       user: '',
       scope: []
     };
-  },
-  onChange: function(e) {
+  }
+
+  onChange(e) {
     var temp = {};
     temp[e.target.name] = e.target.value;
     this.setState(temp);
-  },
-  handleSubmit: function(e) {
+  }
+
+  handleSubmit(e) {
     e.preventDefault();
     if (this.state.user !== '') {
       this.props.createGrant({user: this.state.user}).done(function() {
         this.setState({user: ''});
       }.bind(this));
     }
-  },
-  render: function() {
+  }
+
+  render() {
     return (
       <form style={{paddingTop: '30px', paddingBottom: '30px'}} onSubmit={this.handleSubmit} className="form-inline">
         <input
@@ -147,4 +161,4 @@ var CreateGrant = React.createClass({
       </form>
     );
   }
-});
+}
