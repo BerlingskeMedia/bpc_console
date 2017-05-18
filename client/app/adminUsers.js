@@ -1,5 +1,5 @@
-var $ = require('jquery');
-var React = require('react');
+const $ = require('jquery');
+const React = require('react');
 
 module.exports = class extends React.Component {
 
@@ -153,7 +153,7 @@ module.exports = class extends React.Component {
     return (
       <div className="users">
         <h3>Console users</h3>
-        <AddAdminUser addAdminUser={this.createGrant} />
+        <AddAdminUser addAdminUser={this.createGrant.bind(this)} />
         <table className="table">
           <tbody>
             <tr>
@@ -173,6 +173,8 @@ class AddAdminUser extends React.Component {
 
   constructor(props){
     super(props);
+    this.onChange = this.onChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
     this.state = {user: ''};
   }
 
@@ -183,10 +185,8 @@ class AddAdminUser extends React.Component {
   }
 
   handleSubmit(e) {
-    console.log('d');
     e.preventDefault();
     if (this.state.user !== '') {
-      console.log('v');
       this.props.addAdminUser(this.state.user).done(function() {
         this.setState({user: ''});
       }.bind(this));

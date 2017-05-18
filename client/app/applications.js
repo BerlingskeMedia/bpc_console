@@ -1,8 +1,9 @@
-var $ = require('jquery');
-var React = require('react');
+const $ = require('jquery');
+const React = require('react');
+const Link = require('react-router-dom').Link;
 
 module.exports = class extends React.Component {
-
+  
   constructor(props){
     super(props);
     this.state = {
@@ -47,12 +48,14 @@ module.exports = class extends React.Component {
   }
 
   render() {
+
     var applications = this.state.applications.map(function(application, index) {
       return (
         <tr key={index}>
-          <td className="col-xs-10">{application.id}</td>
+          <td className="col-xs-10">
+            <Link to={`/application/${application.id}`}>{application.id}</Link>
+          </td>
           <td className="col-xs-2">
-            <input className="btn btn-default" type="button" value="Edit" onClick={this.props.selectApplication.bind(null, application.id)} />
           </td>
         </tr>
       );
@@ -60,8 +63,10 @@ module.exports = class extends React.Component {
 
     return (
       <div className="applications">
+
         <h3>Applications</h3>
         <CreateApplication createApplication={this.createApplication} />
+
         <table className="table">
           <tbody>
             <tr>

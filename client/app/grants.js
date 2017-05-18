@@ -1,10 +1,13 @@
-var $ = require('jquery');
-var React = require('react');
+const $ = require('jquery');
+const React = require('react');
 
 module.exports = class extends React.Component {
 
   constructor(props){
     super(props);
+    this.createGrant = this.createGrant.bind(this);
+    this.deleteGrant = this.deleteGrant.bind(this);
+    this.updateGrant = this.updateGrant.bind(this);
     this.state = {
       validScopes: [],
       grants: []
@@ -98,12 +101,22 @@ module.exports = class extends React.Component {
         <CreateGrant createGrant={this.createGrant} />
         <br />
         {grants}
+        {grants === null || grants.length === 0
+          ? <div>This app has no grants.</div>
+          : null
+        }
       </div>
     );
   }
 }
 
 class Grant extends React.Component {
+
+  constructor(props){
+    super(props);
+    this.deleteGrant = this.deleteGrant.bind(this);
+  }
+
   deleteGrant() {
     this.props.deleteGrant(this.props.grant.id, this.props.index);
   }
@@ -125,6 +138,8 @@ class CreateGrant extends React.Component {
 
   constructor(props){
     super(props);
+    this.onChange = this.onChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
     this.state = {
       app: '',
       user: '',

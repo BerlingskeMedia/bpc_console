@@ -1,5 +1,5 @@
-var $ = require('jquery');
-var React = require('react');
+const $ = require('jquery');
+const React = require('react');
 
 module.exports = class extends React.Component {
 

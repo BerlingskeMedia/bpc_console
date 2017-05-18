@@ -1,11 +1,15 @@
-var $ = require('jquery');
-var React = require('react');
-var ReactDOM = require('react-dom');
-var Applications = require('./applications');
-var Application = require('./application');
-var Users = require('./users');
-var AdminUsers = require('./adminUsers');
-var GoogleLogin = require('react-google-login').default;
+const $ = require('jquery');
+const React = require('react');
+const ReactDOM = require('react-dom');
+const ReactRouterDom = require('react-router-dom');
+const Router = ReactRouterDom.BrowserRouter;
+const Route = ReactRouterDom.Route;
+const Link = ReactRouterDom.Link;
+const Applications = require('./applications');
+const Users = require('./users');
+const AdminUsers = require('./adminUsers');
+const Application = require('./application');
+const GoogleLogin = require('react-google-login').default;
 
 // Add the event handler
 
@@ -21,7 +25,6 @@ class ConsoleApp extends React.Component {
       authorized: false,
       accountInfo: {},
       userprofile: {},
-      selectedAppId: null,
       bpc_env: {}
     };
   }
@@ -56,7 +59,7 @@ class ConsoleApp extends React.Component {
     });
   }
 
-  onSignIn (googleUser) {
+  onSignIn(googleUser) {
     console.log('Google login success');
     // Useful data for your client-side scripts:
     var basicProfile = googleUser.getBasicProfile();
@@ -79,11 +82,11 @@ class ConsoleApp extends React.Component {
     }.bind(this));
   }
 
-  onSignInFailure (err) {
+  onSignInFailure(err) {
     console.log('Google Sign in error', err);
   }
 
-  getRsvp (params, callback) {
+  getRsvp(params, callback) {
 
     var rsvpParams = Object.keys(params).map(function(k){
       return k.concat('=', params[k]);
@@ -107,7 +110,7 @@ class ConsoleApp extends React.Component {
     });
   }
 
-  getUserTicket (rsvp, callback){
+  getUserTicket(rsvp, callback){
     return $.ajax({
       type: 'POST',
       url: '/tickets',
@@ -172,7 +175,7 @@ class ConsoleApp extends React.Component {
     return decodeURIComponent(results[2].replace(/\+/g, " "));
   }
 
-  setSearchParameter (key, value) {
+  setSearchParameter(key, value) {
     // remove the hash part before operating on the uri
     var uri = window.location.href;
     var i = uri.indexOf('#');
@@ -197,69 +200,68 @@ class ConsoleApp extends React.Component {
     }
   }
 
-  selectApplication(id){
-    console.log('selectApplication', id);
-    this.setState({ selectedAppId: id });
-  }
-
-  closeApplication(){
-    console.log('closeApplication');
-    this.setState({ selectedAppId: null });
-  }
-
   showLoginScreen() {
     gigya.accounts.showScreenSet({screenSet:'Default-RegistrationLogin'});
   }
 
   render() {
 
-    var bpc_env = <div>
-                    <small>Using BPC on <em>{this.state.bpc_env.href}</em></small>
-                  </div>;
-
     return (
       <div className="container">
 
-        <h1>BPC Console</h1>
+          {!this.state.authenticated
+            ? <GoogleLogin
+            clientId={gapiClientId}
+            scope={gapiScope}
+            buttonText="Login"
+            onSuccess={this.onSignIn}
+            onFailure={this.onSignInFailure}
+            /> : <div></div>}
 
-        {bpc_env}
+          <br />
 
-        {!this.state.authenticated
-          ? <GoogleLogin
-          clientId={gapiClientId}
-          scope={gapiScope}
-          buttonText="Login"
-          onSuccess={this.onSignIn}
-          onFailure={this.onSignInFailure}
-          /> : <div></div>}
-
-        <br />
-
-        {this.state.authorized === false
-          ? <div>
-              <p>Du har ikke de fornødne rettigheder</p>
-            </div>
-          : null
-        }
-
-
-        {this.state.authorized === true
-          ? <div>
-              {this.state.selectedAppId === null
-                ? <div>
-                    <Applications selectApplication={this.selectApplication} />
-                    <AdminUsers />
-                    <Users />
-                  </div>
-                : <Application app={this.state.selectedAppId} closeApplication={this.closeApplication} />
-              }
-
-            </div>
-          : null
-        }
+          {this.state.authorized === true
+            ? <Main />
+            : <div>
+                <p>Du har ikke de fornødne rettigheder</p>
+              </div>
+          }
 
       </div>
     );
+  }
+}
+
+class Main extends React.Component {
+
+  changemenu(oo, ii, pp) {
+    console.log('changemenu', oo, ii, pp);
+  }
+
+  render() {
+    return (
+      <Router>
+        <div>
+          <h1>BPC Console</h1>
+          <ul className="nav nav-tabs">
+            <li role="presentation" className="_active" onClick={this.changemenu}>
+              <Link to={`/applications`}>Applications</Link>
+            </li>
+            <li role="presentation" onClick={this.changemenu}>
+              <Link to={`/users`}>Users</Link>
+            </li>
+            <li role="presentation" onClick={this.changemenu}>
+              <Link to={`/admins`}>Console users</Link>
+            </li>
+          </ul>
+          <Route exact path="/" component={Applications}/>
+          <Route path="/applications" component={Applications}/>
+          <Route path="/users" component={Users}/>
+          <Route path="/admins" component={AdminUsers}/>
+          <Route path={`/application/:app`} component={Application}/>
+        </div>
+      </Router>
+    )
   }
 }
 
