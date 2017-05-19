@@ -5,13 +5,20 @@ const bpc = require('./bpc_client');
 var route_prefix = '';
 
 function proxy (request, reply) {
-  var path = request.path;
 
+  var path = request.raw.req.url;
   if(path.startsWith(route_prefix)){
     path = path.slice(route_prefix.length)
   }
 
-  bpc.request({path: path, method: request.method}, request.payload, request.state.ticket, reply);
+  bpc.request({
+    path: path,
+    method: request.method,
+    query: request.query
+  },
+  request.payload,
+  request.state.ticket,
+  reply);
 }
 
 module.exports.register = function (server, options, next) {

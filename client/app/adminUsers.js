@@ -153,7 +153,7 @@ module.exports = class extends React.Component {
     return (
       <div className="users">
         <h3>Console users</h3>
-        <AddAdminUser addAdminUser={this.createGrant.bind(this)} />
+        <AddAdminUser createGrant={this.createGrant.bind(this)} />
         <table className="table">
           <tbody>
             <tr>
@@ -174,35 +174,84 @@ class AddAdminUser extends React.Component {
   constructor(props){
     super(props);
     this.onChange = this.onChange.bind(this);
+    this.searchUsersByEmail = this.searchUsersByEmail.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
-    this.state = {user: ''};
+    this.state = {
+      user: '',
+      searchText: '',
+      searching: false,
+      searchTimer: null,
+      searchSuccess: false,
+      lastSearch: ''
+    };
   }
 
   onChange(e) {
-    var temp = {};
-    temp[e.target.name] = e.target.value;
-    this.setState(temp);
+    var value = e.target.value;
+    this.setState({user: value, searchText: value});
+    // We're clearing the old timer
+    clearTimeout(this.state.searchTimer);
+    var searchTimer = setTimeout(this.searchUsersByEmail, 1000);
+    this.setState({searchTimer: searchTimer});
+  }
+
+  searchUsersByEmail() {
+    if(this.state.searching){
+      return false;
+    }
+
+    var searchText = this.state.searchText;
+
+    this.setState({searching: true});
+
+    return $.ajax({
+      type: 'GET',
+      url: '/admin/users?provider=google&email='.concat(searchText)
+    }).done((data, textStatus, jqXHR) => {
+      if (data.length === 1){
+        this.setState({searchSuccess: true, user: data[0].id});
+      }
+    }).fail((jqXHR, textStatus, errorThrown) => {
+      console.error(jqHXR.responseText);
+      this.setState({searchSuccess: false})
+    }).always(() => {
+      this.setState({searching: false})
+    });
   }
 
   handleSubmit(e) {
     e.preventDefault();
     if (this.state.user !== '') {
-      this.props.addAdminUser(this.state.user).done(function() {
-        this.setState({user: ''});
-      }.bind(this));
+      this.props.createGrant(this.state.user)
+      .done(() => {
+        this.setState({user: '', searchText: ''});
+      })
+      .fail((jqXHR, textStatus, errorThrown) => {
+        console.log('jqXHR', jqXHR);
+        if (jqXHR.status === 409) {
+          alert('User already admin');
+          this.setState({user: '', searchText: ''});
+        } else {
+          console.error(jqHXR.responseText);
+        }
+      }).always(() => {
+        this.setState({searchSuccess: false});
+      });
     }
   }
 
   render() {
+    var inputClasses = 'form-group '.concat(this.state.searchSuccess ? 'has-success' : '');
     return (
       <form style={{paddingTop: '30px', paddingBottom: '30px'}} onSubmit={this.handleSubmit} className="form-inline">
-        <input
-          type="text"
-          name="user"
-          className='form-control'
-          placeholder="User ID"
-          value={this.state.user}
-          onChange={this.onChange} />
+        <div className={inputClasses}>
+          <input
+            type="text"
+            className='form-control'
+            placeholder="Email / User ID"
+            value={this.state.searchText}
+            onChange={this.onChange} />
+        </div>
         <button type="submit" className="btn btn-default">Add user</button>
       </form>
     );

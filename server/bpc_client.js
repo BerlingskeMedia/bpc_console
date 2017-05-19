@@ -73,11 +73,6 @@ module.exports.refreshUserTicket = function(userTicket, callback){
 };
 
 
-module.exports.getApplications = function(userTicket, callback){
-  callSsoServer({path: '/admin/applications'}, null, userTicket, callback);
-};
-
-
 function callSsoServer(options, body, credentials, callback) {
   if (callback === undefined && typeof body === 'function') {
     callback = body;
@@ -92,7 +87,7 @@ function callSsoServer(options, body, credentials, callback) {
 
   var parameters = [];
 
-  if ((options.method === undefined || options.method === null || options.method === 'GET') && body !== null && typeof body === 'object'){
+  if ((options.method === undefined || options.method === null || options.method === 'GET') && options.path.indexOf('?') === -1 && body !== null && typeof body === 'object'){
     var temp = [];
     Object.keys(body).forEach(function (k){
       parameters.push(k.concat('=', body[k]));
@@ -129,7 +124,7 @@ function callSsoServer(options, body, credentials, callback) {
 
   var req = reqHandler.request(options, parseReponse(callback));
 
-  if (options.method !== null && options.method !== 'GET' && body !== null && typeof body === 'object'){
+  if (options.method !== null && options.method.toUpperCase() !== 'GET' && body !== null && typeof body === 'object'){
     req.write(JSON.stringify(body));
   }
 
@@ -161,14 +156,13 @@ function parseReponse (callback) {
       }
 
 
-      if (res.statusCode > 300) {
-        var err = Boom.wrap(new Error(data.error), res.statusCode, data.message);
-        err.data = data;
+      if (data.statusCode > 300) {
 
-        if (res.statusCode === 401 && data.message === 'Expired ticket'){
+        if (data.statusCode === 401 && data.message === 'Expired ticket'){
           getAppTicket();
         }
 
+        var err = Boom.create(data.statusCode, data.error.concat(' ', data.message), data.validation);
         callback(err, null);
       }
       else
