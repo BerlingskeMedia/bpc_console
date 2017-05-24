@@ -11,7 +11,7 @@ module.exports = class extends React.Component {
   getUsers() {
     return $.ajax({
       type: 'GET',
-      url: '/admin/users',
+      url: '/admin/users?provider=gigya',
       contentType: "application/json; charset=utf-8",
       success: function(data, status){
         this.setState({users: data});
@@ -23,7 +23,8 @@ module.exports = class extends React.Component {
   }
 
   componentDidMount() {
-    this.getUsers();
+    // TODO: Make a search user feature instead of loading all of them
+    // this.getUsers();
   }
 
   render() {
@@ -46,8 +47,19 @@ module.exports = class extends React.Component {
     });
 
     return (
+      <div>
+        <h4>Not implemented</h4>
+        <p>Must build a search function here</p>
+      </div>
+    );
+
+    return (
       <div className="users">
         <h3>Users</h3>
+        <select className="form-control">
+          <option value="gigya">Gigya</option>
+          <option value="google">Google</option>
+        </select>
         <table className="table">
           <tbody>
             <tr>

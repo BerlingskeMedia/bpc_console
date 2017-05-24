@@ -55,7 +55,6 @@ function refreshAppTicket(){
     if (err){
       console.error('refreshAppTicket:', err);
     } else {
-      console.log('refreshAppTicket (console)', result);
       appTicket = result;
       setTimeout(refreshAppTicket, result.exp - Date.now() - 10000);
     }
