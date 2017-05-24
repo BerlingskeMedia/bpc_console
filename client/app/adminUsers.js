@@ -5,20 +5,35 @@ module.exports = class extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = {grants: []};
+    this.getUsersInformation = this.getUsersInformation.bind(this);
+    this.getUserInformation = this.getUserInformation.bind(this);
+    this.state = {
+      users: [],
+      grants: []
+    };
   }
 
   getConsoleGrants() {
     return $.ajax({
       type: 'GET',
-      url: '/admin/applications/console/grants',
-      success: function(data, status){
-        this.setState({grants: data});
-      }.bind(this),
-      error: function(jqXHR, textStatus, err) {
-        console.error(textStatus, err.toString());
-      }
+      url: '/admin/applications/console/grants'
+    }).done(data => {
+      this.setState({grants: data});
+    }).fail((jqHXR) => {
+      console.error(jqHXR.responseText);
     });
+  }
+
+  getUsersInformation(grants) {
+    grants.forEach(grant => this.getUserInformation(grant.user).then(data => {
+      this.setState((prevState) => {
+        users: prevState.users[data.id] = data
+      });
+    }));
+  }
+
+  getUserInformation(id) {
+    return $.ajax({ type: 'GET', url: '/admin/users/'.concat(id) });
   }
 
   createGrant(user) {
@@ -121,34 +136,40 @@ module.exports = class extends React.Component {
   }
 
   componentDidMount() {
-    this.getConsoleGrants();
+    this.getConsoleGrants().then((data) => {
+      this.getUsersInformation(data);
+    });
   }
 
   render() {
 
-    var grants = this.state.grants.map(function(grant, index) {
+    var grants = this.state.grants.map((grant, index) => {
       var isSuperAdmin = grant.scope.indexOf('admin:*') > -1;
+      var user = this.state.users[grant.user];
+
+      if (!user) {
+        return;
+      }
+
       return (
         <tr key={index}>
           <td className="col-xs-2">{grant.user}</td>
-          <td className="col-xs-2"></td>
-          <td className="col-xs-8">
-            <ul className="list-unstyled">
-              { isSuperAdmin
-                ? <li>
-                    <button type="button" className="btn btn-default btn-sm" onClick={this.demoteSuperAdmin.bind(this, grant, index)}>Demote Superadmin</button>
-                  </li>
-                : <li>
-                    <button type="button" className="btn btn-warning btn-sm" onClick={this.makeSuperAdmin.bind(this, grant, index)}>Promote to Superadmin</button>
-                    &nbsp;
-                    <button type="button" className="btn btn-danger btn-sm" onClick={this.deleteGrant.bind(this, grant, index)}>Remove admin</button>
-                  </li>
-              }
-            </ul>
+          <td className="col-xs-6">{user.email}</td>
+          <td className="col-xs-2">
+            { isSuperAdmin
+              ? null
+              : <button type="button" className="btn btn-danger btn-sm btn-block" onClick={this.deleteGrant.bind(this, grant, index)}>Remove admin</button>
+            }
+          </td>
+          <td className="col-xs-2">
+            { isSuperAdmin
+              ? <button type="button" className="btn btn-default btn-sm btn-block" onClick={this.demoteSuperAdmin.bind(this, grant, index)}>Demote Superadmin</button>
+              : <button type="button" className="btn btn-warning btn-sm btn-block" onClick={this.makeSuperAdmin.bind(this, grant, index)}>Promote to Superadmin</button>
+            }
           </td>
         </tr>
       );
-    }.bind(this));
+    });
 
     return (
       <div className="users">
@@ -157,9 +178,10 @@ module.exports = class extends React.Component {
         <table className="table">
           <tbody>
             <tr>
-              <th className="col-xs-2">User ID</th>
+              <th className="col-xs-2">ID</th>
+              <th className="col-xs-6">Email</th>
               <th className="col-xs-2"></th>
-              <th className="col-xs-8"></th>
+              <th className="col-xs-2"></th>
             </tr>
             {grants}
           </tbody>
