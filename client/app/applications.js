@@ -3,13 +3,15 @@ const React = require('react');
 const Link = require('react-router-dom').Link;
 
 module.exports = class extends React.Component {
-  
+
   constructor(props){
     super(props);
     this.state = {
       adminUsers: [],
       applications: []
     };
+    this.getApplications = this.getApplications.bind(this);
+    this.createApplication = this.createApplication.bind(this);
   }
 
   getApplications() {
@@ -33,9 +35,9 @@ module.exports = class extends React.Component {
       contentType: "application/json; charset=utf-8",
       data: JSON.stringify(application),
       success: function(data, status){
-        var apps = this.state.applications;
-        apps.push(data);
-        this.setState({applications: apps});
+        this.setState((prevState) => {
+          applications: prevState.applications.push(data);
+        });
       }.bind(this),
       error: function(jqXHR, textStatus, err) {
         console.error(textStatus, err.toString());
@@ -87,6 +89,8 @@ class CreateApplication extends React.Component {
   constructor(props){
     super(props);
     this.state = {value: ''};
+    this.onChange = this.onChange.bind(this)
+    this.handleSubmit = this.handleSubmit.bind(this)
   }
 
   onChange(e) {

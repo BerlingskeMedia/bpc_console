@@ -136,9 +136,9 @@ module.exports = class extends React.Component {
       <div style={{marginTop: '4px'}}>
         <div className="row">
           <div className="col-xs-2">
-            <button type="button" className="btn btn-default btn-sm btn-block">
-              <Link to={`/applications`}>Close</Link>
-            </button>
+            <Link to={`/applications`}>
+              <button type="button" className="btn btn-default btn-sm btn-block">Close</button>
+            </Link>
           </div>
           <div className="col-xs-2 col-xs-offset-4">
             <div className="warnDeleteApplication text-right" style={{display: 'none'}}>
