@@ -19,8 +19,8 @@ module.exports = class extends React.Component {
       url: '/admin/applications/console/grants'
     }).done(data => {
       this.setState({grants: data});
-    }).fail((jqHXR) => {
-      console.error(jqHXR.responseText);
+    }).fail((jqXHR) => {
+      console.error(jqXHR.responseText);
     });
   }
 
@@ -213,8 +213,7 @@ class AddAdminUser extends React.Component {
     this.setState({user: value, searchText: value});
     // We're clearing the old timer
     clearTimeout(this.state.searchTimer);
-    var searchTimer = setTimeout(this.searchUsersByEmail, 1000);
-    this.setState({searchTimer: searchTimer});
+    this.setState({searchTimer: setTimeout(this.searchUsersByEmail, 1000)});
   }
 
   searchUsersByEmail() {
@@ -234,7 +233,7 @@ class AddAdminUser extends React.Component {
         this.setState({searchSuccess: true, user: data[0].id});
       }
     }).fail((jqXHR, textStatus, errorThrown) => {
-      console.error(jqHXR.responseText);
+      console.error(jqXHR.responseText);
       this.setState({searchSuccess: false})
     }).always(() => {
       this.setState({searching: false})
@@ -254,7 +253,7 @@ class AddAdminUser extends React.Component {
           alert('User already admin');
           this.setState({user: '', searchText: ''});
         } else {
-          console.error(jqHXR.responseText);
+          console.error(jqXHR.responseText);
         }
       }).always(() => {
         this.setState({searchSuccess: false});

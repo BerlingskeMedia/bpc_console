@@ -233,11 +233,6 @@ class ConsoleApp extends React.Component {
 }
 
 class Main extends React.Component {
-
-  changemenu(oo, ii, pp) {
-    console.log('changemenu', oo, ii, pp);
-  }
-
   render() {
     return (
       <Router>
