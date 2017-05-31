@@ -5,26 +5,15 @@ module.exports = class extends React.Component {
 
   constructor(props){
     super(props);
+    this.setUsers = this.setUsers.bind(this);
     this.state = {users: []};
   }
 
-  getUsers() {
-    return $.ajax({
-      type: 'GET',
-      url: '/admin/users?provider=gigya',
-      contentType: "application/json; charset=utf-8",
-      success: function(data, status){
-        this.setState({users: data});
-      }.bind(this),
-      error: function(jqXHR, textStatus, err) {
-        console.error(textStatus, err.toString());
-      }
-    });
+  setUsers(users) {
+    this.setState({users: users});
   }
 
   componentDidMount() {
-    // TODO: Make a search user feature instead of loading all of them
-    // this.getUsers();
   }
 
   render() {
@@ -47,20 +36,10 @@ module.exports = class extends React.Component {
     });
 
     return (
-      <div>
-        <h4>Not implemented</h4>
-        <p>Must build a search function here</p>
-      </div>
-    );
-
-    return (
       <div className="users">
         <h3>Users</h3>
-        <select className="form-control">
-          <option value="gigya">Gigya</option>
-          <option value="google">Google</option>
-        </select>
-        <table className="table">
+        <SearchUser setUsers={this.setUsers} />
+        <table className="table" style={{marginTop: '30px', marginBottom: '30px'}}>
           <tbody>
             <tr>
               <th className="col-xs-2">ID</th>
@@ -68,9 +47,73 @@ module.exports = class extends React.Component {
               <th className="col-xs-2">Provider</th>
               <th className="col-xs-6">Permissions</th>
             </tr>
-            {users}
+            {users.length > 1
+              ? {users}
+              : <tr><td></td><td></td><td></td><td></td></tr>
+            }
           </tbody>
         </table>
+      </div>
+    );
+  }
+}
+
+class SearchUser extends React.Component {
+
+  constructor(props){
+    super(props);
+    this.onChange = this.onChange.bind(this);
+    this.searchUsersByEmail = this.searchUsersByEmail.bind(this);
+    this.state = {
+      searching: false,
+      searchTimer: null
+    };
+  }
+
+  onChange(e) {
+    // // We're clearing the old timer
+    clearTimeout(this.state.searchTimer);
+    if (this.email.value.length > 0) {
+      this.setState({searchTimer: setTimeout(this.searchUsersByEmail, 1000)});
+    }
+  }
+
+  searchUsersByEmail(provider, email) {
+    if(this.state.searching){
+      return false;
+    }
+
+    return $.ajax({
+      type: 'GET',
+      url: '/admin/users?provider='.concat(this.provider.value, '&email=', this.email.value),
+      contentType: "application/json; charset=utf-8"
+    }).done((data, textStatus, jqXHR) => {
+      this.props.setUsers(data);
+    }).fail((jqXHR, textStatus, errorThrown) => {
+      console.error(jqXHR.responseText);
+    }).always(() => {
+      this.setState({searching: false})
+    });
+  }
+
+  render() {
+    return (
+      <div className="row">
+        <div className="col-xs-2">
+          <select className="form-control" ref={(provider) => this.provider = provider}>
+            <option value="gigya">Gigya</option>
+            <option value="google">Google</option>
+          </select>
+        </div>
+        <div className="col-xs-10">
+          <input
+            type="text"
+            name="searchValue"
+            onChange={this.onChange}
+            className="form-control"
+            placeholder="Søg via email"
+            ref={(email) => this.email = email} />
+        </div>
       </div>
     );
   }
