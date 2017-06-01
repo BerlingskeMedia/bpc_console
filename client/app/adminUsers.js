@@ -38,7 +38,7 @@ module.exports = class extends React.Component {
 
   createGrant(user) {
     var grant = {
-      user: user,
+      user: user.id,
       scope: []
     };
 
@@ -46,15 +46,14 @@ module.exports = class extends React.Component {
       type: 'POST',
       url: '/admin/applications/console/grants',
       contentType: "application/json; charset=utf-8",
-      data: JSON.stringify(grant),
-      success: function(data, status){
-        var grants = this.state.grants;
-        grants.push(grant);
-        this.setState({grants: grants});
-      }.bind(this),
-      error: function(jqXHR, textStatus, err) {
-        console.error(textStatus, err.toString());
-      }
+      data: JSON.stringify(grant)
+    }).done((data, textStatus, jqXHR) => {
+      this.setState((prevState) => {
+        grants: prevState.grants.push(grant);
+        users: prevState.users[user.id] = user;
+      });
+    }).fail((jqXHR, textStatus, errorThrown) => {
+      console.error(textStatus, err.toString());
     });
   }
 
@@ -63,18 +62,15 @@ module.exports = class extends React.Component {
       type: 'POST',
       url: '/admin/applications/console/grants/'.concat(grant.id),
       contentType: "application/json; charset=utf-8",
-      data: JSON.stringify(grant),
-      success: function(data, status){
-        // Updating the UI
-        if (index) {
-          var grants = this.state.grants;
-          grants[index] = grant;
-          this.setState({grants: grants});
-        }
-      }.bind(this),
-      error: function(jqXHR, textStatus, err) {
-        console.error(textStatus, err.toString());
+      data: JSON.stringify(grant)
+    }).done((data, textStatus, jqXHR) => {
+      if (index) {
+        var grants = this.state.grants;
+        grants[index] = grant;
+        this.setState({grants: grants});
       }
+    }).fail((jqXHR, textStatus, errorThrown) => {
+      console.error(textStatus, err.toString());
     });
   }
 
@@ -83,63 +79,55 @@ module.exports = class extends React.Component {
       type: 'DELETE',
       url: '/admin/applications/console/grants/'.concat(grant.id),
       contentType: "application/json; charset=utf-8",
-      data: JSON.stringify(grant),
-      success: function(data, status){
-        // Updating the UI
-        if (index) {
-          var grants = this.state.grants;
-          grants.splice(index,1);
-          this.setState({grants: grants});
-        }
-      }.bind(this),
-      error: function(jqXHR, textStatus, err) {
-        console.error(textStatus, err.toString());
+      data: JSON.stringify(grant)
+    }).done((data, textStatus, jqXHR) => {
+      if (index) {
+        var grants = this.state.grants;
+        grants.splice(index,1);
+        this.setState({grants: grants});
       }
+    }).fail((jqXHR, textStatus, errorThrown) => {
+      console.error(textStatus, err.toString());
     });
   }
 
   makeSuperAdmin(grant, index) {
     return $.ajax({
       type: 'POST',
-      url: '/admin/users/'.concat(grant.user, '/superadmin'),
-      success: function(data, status){
-        // Updating the UI
-        if (index) {
-          var grants = this.state.grants;
-          grants[index].scope.push('admin:*');
-          this.setState({grants: grants});
-        }
-      }.bind(this),
-      error: function(jqXHR, textStatus, err) {
-        console.error(textStatus, err.toString());
+      url: '/admin/users/'.concat(grant.user, '/superadmin')
+    }).done((data, textStatus, jqXHR) => {
+      if (index) {
+        var grants = this.state.grants;
+        grants[index].scope.push('admin:*');
+        this.setState({grants: grants});
       }
+    }).fail((jqXHR, textStatus, errorThrown) => {
+      console.error(textStatus, err.toString());
     });
   }
 
   demoteSuperAdmin(grant, index) {
     return $.ajax({
       type: 'DELETE',
-      url: '/admin/users/'.concat(grant.user, '/superadmin'),
-      success: function(data, status){
-        console.log('makeSuperAdmin', data);
-        // Updating the UI
-        if (index) {
-          var grants = this.state.grants;
-          grants[index].scope.splice(grant.scope.indexOf('admin:*'), 1);
-          this.setState({grants: grants});
-        }
-      }.bind(this),
-      error: function(jqXHR, textStatus, err) {
-        console.error(textStatus, err.toString());
+      url: '/admin/users/'.concat(grant.user, '/superadmin')
+    }).done((data, textStatus, jqXHR) => {
+      if (index) {
+        var grants = this.state.grants;
+        grants[index].scope.splice(grant.scope.indexOf('admin:*'), 1);
+        this.setState({grants: grants});
       }
+    }).fail((jqXHR, textStatus, errorThrown) => {
+      console.error(textStatus, err.toString());
     });
   }
+
 
   componentDidMount() {
     this.getConsoleGrants().then((data) => {
       this.getUsersInformation(data);
     });
   }
+
 
   render() {
 
@@ -199,7 +187,7 @@ class AddAdminUser extends React.Component {
     this.searchUsersByEmail = this.searchUsersByEmail.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.state = {
-      user: '',
+      user: {},
       searchText: '',
       searching: false,
       searchTimer: null,
@@ -210,7 +198,7 @@ class AddAdminUser extends React.Component {
 
   onChange(e) {
     var value = e.target.value;
-    this.setState({user: value, searchText: value});
+    this.setState({searchText: value, searchSuccess: false});
     // We're clearing the old timer
     clearTimeout(this.state.searchTimer);
     this.setState({searchTimer: setTimeout(this.searchUsersByEmail, 1000)});
@@ -230,7 +218,7 @@ class AddAdminUser extends React.Component {
       url: '/admin/users?provider=google&email='.concat(searchText)
     }).done((data, textStatus, jqXHR) => {
       if (data.length === 1){
-        this.setState({searchSuccess: true, user: data[0].id});
+        this.setState({searchSuccess: true, user: data[0]});
       }
     }).fail((jqXHR, textStatus, errorThrown) => {
       console.error(jqXHR.responseText);
@@ -242,16 +230,16 @@ class AddAdminUser extends React.Component {
 
   handleSubmit(e) {
     e.preventDefault();
-    if (this.state.user !== '') {
+    if (this.state.user !== {}) {
       this.props.createGrant(this.state.user)
       .done(() => {
-        this.setState({user: '', searchText: ''});
+        this.setState({user: {}, searchText: ''});
       })
       .fail((jqXHR, textStatus, errorThrown) => {
         console.log('jqXHR', jqXHR);
         if (jqXHR.status === 409) {
           alert('User already admin');
-          this.setState({user: '', searchText: ''});
+          this.setState({user: {}, searchText: ''});
         } else {
           console.error(jqXHR.responseText);
         }
@@ -273,7 +261,7 @@ class AddAdminUser extends React.Component {
             value={this.state.searchText}
             onChange={this.onChange} />
         </div>
-        <button type="submit" className="btn btn-default">Add user</button>
+        <button type="submit" className="btn btn-default" disabled={!this.state.searchSuccess}>Add user</button>
       </form>
     );
   }

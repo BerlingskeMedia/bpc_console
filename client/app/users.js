@@ -17,46 +17,16 @@ module.exports = class extends React.Component {
   }
 
   render() {
-
-    var users = this.state.users.map(function(user, index) {
-      var permissions = Object.keys(user.dataScopes).map(function (name, index) {
-        return <PermissionScope key={index} scopeName={name} permissions={user.dataScopes[name]} />
-      });
-
-      return (
-        <tr key={index}>
-          <td className="col-xs-2">{user.id}</td>
-          <td className="col-xs-2">{user.email}</td>
-          <td className="col-xs-2"><span className="label label-info">{user.provider}</span></td>
-          <td className="col-xs-8">
-            {permissions}
-          </td>
-        </tr>
-      );
-    });
-
     return (
       <div className="users">
         <h3>Users</h3>
         <SearchUser setUsers={this.setUsers} />
-        <table className="table" style={{marginTop: '30px', marginBottom: '30px'}}>
-          <tbody>
-            <tr>
-              <th className="col-xs-2">ID</th>
-              <th className="col-xs-2">Email</th>
-              <th className="col-xs-2">Provider</th>
-              <th className="col-xs-6">Permissions</th>
-            </tr>
-            {users.length > 1
-              ? {users}
-              : <tr><td></td><td></td><td></td><td></td></tr>
-            }
-          </tbody>
-        </table>
+        <SearchResult users={this.state.users} />
       </div>
     );
   }
 }
+
 
 class SearchUser extends React.Component {
 
@@ -85,7 +55,7 @@ class SearchUser extends React.Component {
 
     return $.ajax({
       type: 'GET',
-      url: '/admin/users?provider='.concat(this.provider.value, '&email=', this.email.value),
+      url: '/admin/users?provider='.concat(this.provider.value, '&email=', encodeURIComponent(this.email.value)),
       contentType: "application/json; charset=utf-8"
     }).done((data, textStatus, jqXHR) => {
       this.props.setUsers(data);
@@ -100,9 +70,12 @@ class SearchUser extends React.Component {
     return (
       <div className="row">
         <div className="col-xs-2">
-          <select className="form-control" ref={(provider) => this.provider = provider}>
-            <option value="gigya">Gigya</option>
-            <option value="google">Google</option>
+          <select
+            className="form-control"
+            ref={(provider) => this.provider = provider}
+            onChange={this.onChange}>
+              <option value="gigya">Gigya</option>
+              <option value="google">Google</option>
           </select>
         </div>
         <div className="col-xs-10">
@@ -115,6 +88,46 @@ class SearchUser extends React.Component {
             ref={(email) => this.email = email} />
         </div>
       </div>
+    );
+  }
+}
+
+
+class SearchResult extends React.Component {
+  constructor(props){
+    super(props);
+  }
+
+  render(){
+    var userRows = this.props.users.map(function(user, index) {
+      var permissions = Object.keys(user.dataScopes).map(function (name, index) {
+        return <PermissionScope key={index} scopeName={name} permissions={user.dataScopes[name]} />
+      });
+
+      return (
+        <tr key={index}>
+          <td className="col-xs-2">{user.id}</td>
+          <td className="col-xs-2">{user.email}</td>
+          <td className="col-xs-2"><span className="label label-info">{user.provider}</span></td>
+          <td className="col-xs-8">
+            {permissions}
+          </td>
+        </tr>
+      );
+    });
+
+    return (
+      <table className="table" style={{marginTop: '30px', marginBottom: '30px'}}>
+        <tbody>
+          <tr>
+            <th className="col-xs-2">ID</th>
+            <th className="col-xs-2">Email</th>
+            <th className="col-xs-2">Provider</th>
+            <th className="col-xs-6">Permissions</th>
+          </tr>
+          {userRows}
+        </tbody>
+      </table>
     );
   }
 }

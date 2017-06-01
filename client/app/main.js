@@ -23,6 +23,7 @@ class ConsoleApp extends React.Component {
     this.state = {
       authenticated: false,
       authorized: false,
+      missingGrant: false,
       accountInfo: {},
       userprofile: {},
       bpc_env: {}
@@ -105,7 +106,7 @@ class ConsoleApp extends React.Component {
       ],
       error: function(jqXHR, textStatus, err) {
         console.error(textStatus, err.toString());
-        this.setState({ authorized: false });
+        this.setState({ authorized: false, missingGrant: true });
       }.bind(this)
     });
   }
@@ -209,24 +210,20 @@ class ConsoleApp extends React.Component {
     return (
       <div className="container">
 
-          {!this.state.authenticated
-            ? <GoogleLogin
-            clientId={gapiClientId}
-            scope={gapiScope}
-            buttonText="Login"
-            onSuccess={this.onSignIn}
-            onFailure={this.onSignInFailure}
-            /> : <div></div>}
-
-          <br />
-
-          {this.state.authorized === true
-            ? <Main />
+          {this.state.authenticated
+            ? <div>
+                {this.state.authorized === true ? <Main /> : null }
+                {this.state.missingGrant === true ? <p>Du har ikke de fornødne rettigheder</p> : null }
+              </div>
             : <div>
-                <p>Du har ikke de fornødne rettigheder</p>
+                <GoogleLogin
+                  clientId={gapiClientId}
+                  scope={gapiScope}
+                  buttonText="Login"
+                  onSuccess={this.onSignIn}
+                  onFailure={this.onSignInFailure} />
               </div>
           }
-
       </div>
     );
   }
