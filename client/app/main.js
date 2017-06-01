@@ -48,15 +48,11 @@ class ConsoleApp extends React.Component {
     $.ajax({
       type: 'GET',
       url: '/bpc_env',
-      success: [
-        function(bpc_env, status, jqXHR) {
-          console.log('GET bpc_env', bpc_env, status);
-          this.setState({ bpc_env: bpc_env });
-        }.bind(this)
-      ],
-      error: function(jqXHR, textStatus, err) {
-        console.error(textStatus, err.toString());
-      }.bind(this)
+    }).done((data, textStatus, jqXHR) => {
+      console.log('GET bpc_env', data, textStatus);
+      this.setState({ bpc_env: data });
+    }).fail((jqXHR, textStatus, errorThrown) => {
+      console.error(jqXHR.responseText);
     });
   }
 
@@ -76,10 +72,9 @@ class ConsoleApp extends React.Component {
 
     this.setState({ authenticated: true, profile: profile });
 
-    this.getRsvp(profile, function(rsvp){
+    this.getRsvp(profile).then(function(rsvp){
       console.log('getRsvp', rsvp);
-      this.getUserTicket(rsvp, function(date){
-      }.bind(this));
+      this.getUserTicket(rsvp);
     }.bind(this));
   }
 
@@ -87,7 +82,7 @@ class ConsoleApp extends React.Component {
     console.log('Google Sign in error', err);
   }
 
-  getRsvp(params, callback) {
+  getRsvp(params) {
 
     var rsvpParams = Object.keys(params).map(function(k){
       return k.concat('=', params[k]);
@@ -97,37 +92,27 @@ class ConsoleApp extends React.Component {
 
     return $.ajax({
       type: 'GET',
-      url: url,
-      success: [
-        function(userTicket, status, jqXHR) {
-          console.log('GET rsvp', userTicket, status);
-        }.bind(this),
-        callback
-      ],
-      error: function(jqXHR, textStatus, err) {
-        console.error(textStatus, err.toString());
-        this.setState({ authorized: false, missingGrant: true });
-      }.bind(this)
+      url: url
+    }).done((data, textStatus, jqXHR) => {
+      console.log('GET rsvp', data, textStatus);
+    }).fail((jqXHR, textStatus, errorThrown) => {
+      this.setState({ authorized: false, missingGrant: true });
+      console.error(jqXHR.responseText);
     });
   }
 
-  getUserTicket(rsvp, callback){
+  getUserTicket(rsvp){
     return $.ajax({
       type: 'POST',
       url: '/tickets',
       contentType: 'application/json; charset=utf-8',
-      data: JSON.stringify({rsvp: rsvp}),
-      success: [
-        function(userTicket, status, jqXHR) {
-          console.log('POST tickets success', userTicket, status);
-          this.setState({ authorized: true});
-        }.bind(this),
-        callback
-      ],
-      error: function(jqXHR, textStatus, err) {
-        console.error(textStatus, err.toString());
-        this.setState({ authorized: false });
-      }.bind(this)
+      data: JSON.stringify({rsvp: rsvp})
+    }).done((data, textStatus, jqXHR) => {
+      console.log('POST tickets success', data, textStatus);
+      this.setState({ authorized: true});
+    }).fail((jqXHR, textStatus, errorThrown) => {
+      console.error(jqXHR.responseText);
+      this.setState({ authorized: false });
     });
   }
 
@@ -135,34 +120,25 @@ class ConsoleApp extends React.Component {
     return $.ajax({
       type: 'GET',
       url: '/tickets',
-      contentType: 'application/json; charset=utf-8',
-      success: [
-        function(userTicket, status, jqXHR) {
-          console.log('GET tickets success', userTicket, status);
-          this.setState({ authorized: true});
-        }.bind(this)
-      ],
-      error: function(jqXHR, textStatus, err) {
-        console.error(textStatus, err.toString());
-        this.setState({ authorized: false });
-      }.bind(this)
+      contentType: 'application/json; charset=utf-8'
+    }).done((data, textStatus, jqXHR) => {
+      console.log('GET tickets success', data, textStatus);
+      this.setState({ authorized: true});
+    }).fail((jqXHR, textStatus, errorThrown) => {
+      console.error(jqXHR.responseText);
+      this.setState({ authorized: false });
     });
   }
 
-  deleteUserTicket(callback){
+  deleteUserTicket(){
     return $.ajax({
       type: 'DELETE',
-      url: '/tickets',
-      success: [
-        function(data, status, jqXHR) {
-          console.log('DELETE signout success', data, status);
-          this.setState({ authenticated: false, authorized: false});
-        }.bind(this),
-        callback
-      ],
-      error: function(jqXHR, textStatus, err) {
-        console.error(textStatus, err.toString());
-      }
+      url: '/tickets'
+    }).done((data, textStatus, jqXHR) => {
+      console.log('DELETE signout success', data, status);
+      this.setState({ authenticated: false, authorized: false});
+    }).fail((jqXHR, textStatus, errorThrown) => {
+      console.error(jqXHR.responseText);
     });
   }
 

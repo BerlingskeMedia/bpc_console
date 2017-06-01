@@ -5,8 +5,6 @@ module.exports = class extends React.Component {
 
   constructor(props) {
     super(props);
-    this.getUsersInformation = this.getUsersInformation.bind(this);
-    this.getUserInformation = this.getUserInformation.bind(this);
     this.state = {
       users: [],
       grants: []
@@ -53,24 +51,7 @@ module.exports = class extends React.Component {
         users: prevState.users[user.id] = user;
       });
     }).fail((jqXHR, textStatus, errorThrown) => {
-      console.error(textStatus, err.toString());
-    });
-  }
-
-  updateGrant(grant, index) {
-    return $.ajax({
-      type: 'POST',
-      url: '/admin/applications/console/grants/'.concat(grant.id),
-      contentType: "application/json; charset=utf-8",
-      data: JSON.stringify(grant)
-    }).done((data, textStatus, jqXHR) => {
-      if (index) {
-        var grants = this.state.grants;
-        grants[index] = grant;
-        this.setState({grants: grants});
-      }
-    }).fail((jqXHR, textStatus, errorThrown) => {
-      console.error(textStatus, err.toString());
+      console.error(jqXHR.responseText);
     });
   }
 
@@ -81,13 +62,13 @@ module.exports = class extends React.Component {
       contentType: "application/json; charset=utf-8",
       data: JSON.stringify(grant)
     }).done((data, textStatus, jqXHR) => {
-      if (index) {
-        var grants = this.state.grants;
-        grants.splice(index,1);
-        this.setState({grants: grants});
+      if(data.n > 0 && index){
+        this.setState((prevState) => {
+          grants: prevState.grants.splice(index, 1);
+        });
       }
     }).fail((jqXHR, textStatus, errorThrown) => {
-      console.error(textStatus, err.toString());
+      console.error(jqXHR.responseText);
     });
   }
 
@@ -102,7 +83,7 @@ module.exports = class extends React.Component {
         this.setState({grants: grants});
       }
     }).fail((jqXHR, textStatus, errorThrown) => {
-      console.error(textStatus, err.toString());
+      console.error(jqXHR.responseText);
     });
   }
 
@@ -117,7 +98,7 @@ module.exports = class extends React.Component {
         this.setState({grants: grants});
       }
     }).fail((jqXHR, textStatus, errorThrown) => {
-      console.error(textStatus, err.toString());
+      console.error(jqXHR.responseText);
     });
   }
 
@@ -136,7 +117,7 @@ module.exports = class extends React.Component {
       var user = this.state.users[grant.user];
 
       if (!user) {
-        return;
+        user = {email: ''};
       }
 
       return (
@@ -179,6 +160,7 @@ module.exports = class extends React.Component {
   }
 }
 
+
 class AddAdminUser extends React.Component {
 
   constructor(props){
@@ -189,7 +171,7 @@ class AddAdminUser extends React.Component {
     this.state = {
       user: {},
       searchText: '',
-      searching: false,
+      searchInProgress: false,
       searchTimer: null,
       searchSuccess: false,
       lastSearch: ''
@@ -205,13 +187,13 @@ class AddAdminUser extends React.Component {
   }
 
   searchUsersByEmail() {
-    if(this.state.searching){
+    if(this.state.searchInProgress){
       return false;
     }
 
     var searchText = this.state.searchText;
 
-    this.setState({searching: true});
+    this.setState({searchInProgress: true});
 
     return $.ajax({
       type: 'GET',
@@ -224,7 +206,7 @@ class AddAdminUser extends React.Component {
       console.error(jqXHR.responseText);
       this.setState({searchSuccess: false})
     }).always(() => {
-      this.setState({searching: false})
+      this.setState({searchInProgress: false})
     });
   }
 
@@ -257,7 +239,7 @@ class AddAdminUser extends React.Component {
           <input
             type="text"
             className='form-control'
-            placeholder="Email / User ID"
+            placeholder="Email"
             value={this.state.searchText}
             onChange={this.onChange} />
         </div>
