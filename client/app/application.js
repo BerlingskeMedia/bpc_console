@@ -26,17 +26,14 @@ module.exports = class extends React.Component {
   getApplication() {
     return $.ajax({
       type: 'GET',
-      url: '/admin/applications/'.concat(this.state.app),
-      success: function(data, status){
-        console.log('application', data);
-        if(data.settings === undefined || data.settings === null){
-          data.settings = {};
-        }
-        this.setState({application: data});
-      }.bind(this),
-      error: function(jqXHR, textStatus, err) {
-        console.error(textStatus, err.toString());
+      url: '/admin/applications/'.concat(this.state.app)
+    }).done((data, textStatus, jqXHR) => {
+      if(data.settings === undefined || data.settings === null){
+        data.settings = {};
       }
+      this.setState({application: data});
+    }).fail((jqXHR, textStatus, errorThrown) => {
+      console.error(jqXHR.responseText);
     });
   }
 
@@ -45,14 +42,11 @@ module.exports = class extends React.Component {
       type: 'PUT',
       url: '/admin/applications/'.concat(this.state.app),
       contentType: "application/json; charset=utf-8",
-      data: JSON.stringify(application),
-      success: function(data, status){
-        this.setState({application: application});
-        console.log('application updated');
-      }.bind(this),
-      error: function(jqXHR, textStatus, err) {
-        console.error(textStatus, err.toString());
-      }
+      data: JSON.stringify(application)
+    }).done((data, textStatus, jqXHR) => {
+      this.setState({application: application});
+    }).fail((jqXHR, textStatus, errorThrown) => {
+      console.error(jqXHR.responseText);
     });
   }
 
@@ -64,13 +58,11 @@ module.exports = class extends React.Component {
     return $.ajax({
       type: 'DELETE',
       url: '/admin/applications/'.concat(this.state.app),
-      contentType: "application/json; charset=utf-8",
-      success: function(data, status){
-        location.pathname = '/applications';
-      }.bind(this),
-      error: function(jqXHR, textStatus, err) {
-        console.error(textStatus, err.toString());
-      }
+      contentType: "application/json; charset=utf-8"
+    }).done((data, textStatus, jqXHR) => {
+      location.pathname = '/applications';
+    }).fail((jqXHR, textStatus, errorThrown) => {
+      console.error(jqXHR.responseText);
     });
   }
 
@@ -79,11 +71,9 @@ module.exports = class extends React.Component {
     var application = Object.assign({}, this.state.application);
     var newLength = application.scope.push(this.state.newScope);
     this.updateApplication(application)
-    .done(function(){
+    .done((data, textStatus, jqXHR) => {
       this.setState({newScope: ''});
-    }.bind(this))
-    .fail(function(){
-      console.log('fail');
+    }).fail((jqXHR, textStatus, errorThrown) => {
       application.scope.splice(newLength - 1, 1);
     });
   }
@@ -239,7 +229,7 @@ module.exports = class extends React.Component {
         </div>
         <div className="row">
           <div className="col-xs-12">
-            <Grants app={this.state.app} />
+            <Grants app={this.state.app} provider={this.state.application.settings.provider} />
           </div>
         </div>
       </div>

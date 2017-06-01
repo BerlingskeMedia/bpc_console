@@ -23,7 +23,7 @@ module.exports = class extends React.Component {
         this.setState({applications: data.filter((a) => {return a.id !== 'console';})});
       }.bind(this),
       error: function(jqXHR, textStatus, err) {
-        console.error(textStatus, err.toString());
+        console.error(jqXHR.responseText);
       }
     });
   }
@@ -40,7 +40,7 @@ module.exports = class extends React.Component {
         });
       }.bind(this),
       error: function(jqXHR, textStatus, err) {
-        console.error(textStatus, err.toString());
+        console.error(jqXHR.responseText);
       }
     });
   }
