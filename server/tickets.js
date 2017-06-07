@@ -57,13 +57,12 @@ module.exports.register = function (server, options, next) {
       }
     },
     handler: function(request, reply) {
-      bpc.refreshUserTicket(request.state.ticket, function (err, userTicket){
-        console.log('refreshUserTicket', err, userTicket);
+      bpc.reissueTicket(request.state.ticket, function (err, reissuedTicket){
         if (err) {
           return reply(err);
         }
-        reply(userTicket)
-          .state('ticket', userTicket);
+        reply(reissuedTicket)
+          .state('ticket', reissuedTicket);
       });
     }
   });
