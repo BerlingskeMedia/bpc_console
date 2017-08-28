@@ -9,6 +9,7 @@ const Applications = require('./applications');
 const Users = require('./users');
 const AdminUsers = require('./adminUsers');
 const Application = require('./application');
+const Gigya = require('./gigya');
 const GoogleLogin = require('react-google-login').default;
 
 // Add the event handler
@@ -221,12 +222,16 @@ class Main extends React.Component {
             <li role="presentation" onClick={this.changemenu}>
               <Link to={`/admins`}>Console users</Link>
             </li>
+            <li role="presentation" onClick={this.changemenu}>
+              <Link to={`/gigya`}>Gigya</Link>
+            </li>
           </ul>
           <Route exact path="/" component={Applications}/>
           <Route path="/applications" component={Applications}/>
           <Route path="/users" component={Users}/>
           <Route path="/admins" component={AdminUsers}/>
           <Route path={`/application/:app`} component={Application}/>
+          <Route path={`/gigya`} component={Gigya}/>
         </div>
       </Router>
     )
