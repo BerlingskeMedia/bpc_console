@@ -89,8 +89,8 @@ class CreateApplication extends React.Component {
   constructor(props){
     super(props);
     this.state = {value: ''};
-    this.onChange = this.onChange.bind(this)
-    this.handleSubmit = this.handleSubmit.bind(this)
+    this.onChange = this.onChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
   }
 
   onChange(e) {
