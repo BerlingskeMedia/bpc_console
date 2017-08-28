@@ -24,7 +24,7 @@ module.exports.register = function (server, options, next) {
         }
 
         reply(userTicket)
-          .state('ticket', userTicket);
+          .state('console_ticket', userTicket);
       });
     }
   });
@@ -42,7 +42,7 @@ module.exports.register = function (server, options, next) {
     handler: function(request, reply) {
       // This is not a global signout.
       reply()
-        .unstate('ticket');
+        .unstate('console_ticket');
     }
   });
 
@@ -57,13 +57,12 @@ module.exports.register = function (server, options, next) {
       }
     },
     handler: function(request, reply) {
-      bpc.refreshUserTicket(request.state.ticket, function (err, userTicket){
-        console.log('refreshUserTicket', err, userTicket);
+      bpc.reissueTicket(request.state.console_ticket, function (err, reissuedTicket){
         if (err) {
           return reply(err);
         }
-        reply(userTicket)
-          .state('ticket', userTicket);
+        reply(reissuedTicket)
+          .state('console_ticket', reissuedTicket);
       });
     }
   });

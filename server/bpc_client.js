@@ -67,8 +67,8 @@ module.exports.getUserTicket = function(rsvp, callback) {
 };
 
 
-module.exports.refreshUserTicket = function(userTicket, callback){
-  callSsoServer({path: '/ticket/reissue', method: 'POST'}, null, userTicket, callback);
+module.exports.reissueTicket = function(ticket, callback){
+  callSsoServer({path: '/ticket/reissue', method: 'POST'}, null, ticket, callback);
 };
 
 
