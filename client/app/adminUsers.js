@@ -75,7 +75,7 @@ module.exports = class extends React.Component {
   makeSuperAdmin(grant, index) {
     return $.ajax({
       type: 'POST',
-      url: '/admin/users/'.concat(grant.user, '/superadmin')
+      url: '/admin/superadmin/'.concat(grant.user)
     }).done((data, textStatus, jqXHR) => {
       if (index) {
         var grants = this.state.grants;
@@ -90,7 +90,7 @@ module.exports = class extends React.Component {
   demoteSuperAdmin(grant, index) {
     return $.ajax({
       type: 'DELETE',
-      url: '/admin/users/'.concat(grant.user, '/superadmin')
+      url: '/admin/superadmin/'.concat(grant.user)
     }).done((data, textStatus, jqXHR) => {
       if (index) {
         var grants = this.state.grants;
