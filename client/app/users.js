@@ -53,9 +53,11 @@ class SearchUser extends React.Component {
       return false;
     }
 
+    let searchText = encodeURIComponent(this.searchBox.value);
+
     return $.ajax({
       type: 'GET',
-      url: '/admin/users?provider='.concat(this.provider.value, '&email=', encodeURIComponent(this.email.value)),
+      url: `/admin/users?provider=${this.provider.value}&email=${searchText}&id=${searchText}`,
       contentType: "application/json; charset=utf-8"
     }).done((data, textStatus, jqXHR) => {
       this.props.setUsers(data);
@@ -81,11 +83,11 @@ class SearchUser extends React.Component {
         <div className="col-xs-10">
           <input
             type="text"
-            name="searchValue"
+            name="searchBox"
             onChange={this.onChange}
             className="form-control"
-            placeholder="Søg via email"
-            ref={(email) => this.email = email} />
+            placeholder="Søg via email eller ID"
+            ref={(searchBox) => this.searchBox = searchBox} />
         </div>
       </div>
     );

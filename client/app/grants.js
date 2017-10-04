@@ -7,7 +7,6 @@ module.exports = class extends React.Component {
     super(props);
     this.state = {
       validScopes: [],
-      users: [],
       grants: []
     };
   }
@@ -25,21 +24,9 @@ module.exports = class extends React.Component {
     });
   }
 
-  getUsersInformation(grants) {
-    grants.forEach(grant => this.getUserInformation(grant.user).then(data => {
-      this.setState((prevState) => {
-        users: prevState.users[data.id] = data
-      });
-    }));
-  }
-
-  getUserInformation(id) {
-    return $.ajax({ type: 'GET', url: '/admin/users/'.concat(id) });
-  }
-
   createGrant(user) {
     var grant = {
-      user: user.id,
+      user: user.email,
       scope: []
     };
 
@@ -51,7 +38,6 @@ module.exports = class extends React.Component {
     }).done((data, textStatus, jqXHR) => {
       this.setState((prevState) => {
         grants: prevState.grants.push(grant);
-        users: prevState.users[user.id] = user;
       });
     }).fail((jqXHR, textStatus, errorThrown) => {
       console.error(jqXHR.responseText);
@@ -73,28 +59,61 @@ module.exports = class extends React.Component {
     });
   }
 
-  componentDidMount() {
-    this.getGrants().then((data) => {
-      this.getUsersInformation(data);
+  expireGrant(grant, index) {
+
+    grant.exp = Date.now();
+
+    return $.ajax({
+      type: 'POST',
+      url: '/admin/applications/'.concat(this.props.app, '/grants/', grant.id),
+      contentType: "application/json; charset=utf-8",
+      data: JSON.stringify(grant)
+    }).done((data, textStatus, jqXHR) => {
+      console.error(data);
+      this.setState((prevState) => {
+        grants: prevState.grants[index] = grant;
+      });
+    }).fail((jqXHR, textStatus, errorThrown) => {
+      console.error(jqXHR.responseText);
     });
+  }
+
+  reactivateGrant(grant, index) {
+
+    grant.exp = null;
+
+    return $.ajax({
+      type: 'POST',
+      url: '/admin/applications/'.concat(this.props.app, '/grants/', grant.id),
+      contentType: "application/json; charset=utf-8",
+      data: JSON.stringify(grant)
+    }).done((data, textStatus, jqXHR) => {
+      this.setState((prevState) => {
+        grants: prevState.grants[index] = grant;
+      });
+    }).fail((jqXHR, textStatus, errorThrown) => {
+      console.error(jqXHR.responseText);
+    });
+  }
+
+  componentDidMount() {
+    this.getGrants();
   }
 
   render() {
 
     var grants = this.state.grants.map(function(grant, index) {
-      var user = this.state.users[grant.user];
-
-      if (!user) {
-        user = {email: ''};
-      }
-
       return (
         <tr key={index}>
-          <td className="col-xs-2">{grant.user}</td>
-          <td className="col-xs-6">{user.email}</td>
-          <td className="col-xs-2"></td>
+          <td className="col-xs-8">{grant.user}</td>
           <td className="col-xs-2">
-            <button type="button" className="btn btn-default btn-sm btn-block" onClick={this.deleteGrant.bind(this, grant, index)}>Delete grant</button>
+            {grant.exp === null || grant.exp > Date.now()
+             ? <button type="button" className="btn btn-warning btn-sm btn-block" onClick={this.expireGrant.bind(this, grant, index)}>Expire grant</button>
+             : <button type="button" className="btn btn-primary btn-sm btn-block" onClick={this.reactivateGrant.bind(this, grant, index)}>Reactivate grant</button>
+            }
+          </td>
+          <td className="col-xs-2">
+            <button type="button" className="btn btn-danger btn-sm btn-block" onClick={this.deleteGrant.bind(this, grant, index)}>Delete grant</button>
           </td>
         </tr>
       );
@@ -107,8 +126,7 @@ module.exports = class extends React.Component {
         <table className="table">
           <tbody>
             <tr>
-              <th className="col-xs-2">ID</th>
-              <th className="col-xs-6">Email</th>
+              <th className="col-xs-8">User</th>
               <th className="col-xs-2"></th>
               <th className="col-xs-2"></th>
             </tr>

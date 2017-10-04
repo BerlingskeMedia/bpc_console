@@ -6,7 +6,6 @@ module.exports = class extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      users: [],
       grants: []
     };
   }
@@ -22,21 +21,9 @@ module.exports = class extends React.Component {
     });
   }
 
-  getUsersInformation(grants) {
-    grants.forEach(grant => this.getUserInformation(grant.user).then(data => {
-      this.setState((prevState) => {
-        users: prevState.users[data.id] = data
-      });
-    }));
-  }
-
-  getUserInformation(id) {
-    return $.ajax({ type: 'GET', url: '/admin/users/'.concat(id) });
-  }
-
   createGrant(user) {
     var grant = {
-      user: user.id,
+      user: user.email,
       scope: []
     };
 
@@ -48,7 +35,6 @@ module.exports = class extends React.Component {
     }).done((data, textStatus, jqXHR) => {
       this.setState((prevState) => {
         grants: prevState.grants.push(grant);
-        users: prevState.users[user.id] = user;
       });
     }).fail((jqXHR, textStatus, errorThrown) => {
       console.error(jqXHR.responseText);
@@ -75,7 +61,7 @@ module.exports = class extends React.Component {
   makeSuperAdmin(grant, index) {
     return $.ajax({
       type: 'POST',
-      url: '/admin/superadmin/'.concat(grant.user)
+      url: '/admin/superadmin/'.concat(grant.id)
     }).done((data, textStatus, jqXHR) => {
       if (index) {
         var grants = this.state.grants;
@@ -90,7 +76,7 @@ module.exports = class extends React.Component {
   demoteSuperAdmin(grant, index) {
     return $.ajax({
       type: 'DELETE',
-      url: '/admin/superadmin/'.concat(grant.user)
+      url: '/admin/superadmin/'.concat(grant.id)
     }).done((data, textStatus, jqXHR) => {
       if (index) {
         var grants = this.state.grants;
@@ -104,9 +90,7 @@ module.exports = class extends React.Component {
 
 
   componentDidMount() {
-    this.getConsoleGrants().then((data) => {
-      this.getUsersInformation(data);
-    });
+    this.getConsoleGrants();
   }
 
 
@@ -114,16 +98,10 @@ module.exports = class extends React.Component {
 
     var grants = this.state.grants.map((grant, index) => {
       var isSuperAdmin = grant.scope.indexOf('admin:*') > -1;
-      var user = this.state.users[grant.user];
-
-      if (!user) {
-        user = {email: ''};
-      }
 
       return (
         <tr key={index}>
-          <td className="col-xs-2">{grant.user}</td>
-          <td className="col-xs-6">{user.email}</td>
+          <td className="col-xs-8">{grant.user}</td>
           <td className="col-xs-2">
             { isSuperAdmin
               ? null
@@ -147,8 +125,7 @@ module.exports = class extends React.Component {
         <table className="table">
           <tbody>
             <tr>
-              <th className="col-xs-2">ID</th>
-              <th className="col-xs-6">Email</th>
+              <th className="col-xs-8">User</th>
               <th className="col-xs-2"></th>
               <th className="col-xs-2"></th>
             </tr>
@@ -197,7 +174,7 @@ class AddAdminUser extends React.Component {
 
     return $.ajax({
       type: 'GET',
-      url: '/admin/users?provider=google&email='.concat(searchText)
+      url: `/admin/users?provider=google&email=${searchText}&id=${searchText}`
     }).done((data, textStatus, jqXHR) => {
       if (data.length === 1){
         this.setState({searchSuccess: true, user: data[0]});
