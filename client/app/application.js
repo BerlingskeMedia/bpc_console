@@ -157,6 +157,8 @@ module.exports = class extends React.Component {
               <dd>{this.state.application.id}</dd>
               <dt>Application Key</dt>
               <dd>{this.state.application.key}</dd>
+              <dt>Algorithm</dt>
+              <dd>{this.state.application.algorithm}</dd>
             </dl>
           </div>
         </div>
