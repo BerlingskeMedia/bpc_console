@@ -35,9 +35,10 @@ module.exports = class extends React.Component {
       contentType: "application/json; charset=utf-8",
       data: JSON.stringify(application),
       success: function(data, status){
-        this.setState((prevState) => {
-          applications: prevState.applications.push(data);
-        });
+        location.pathname = `/application/${data.id}`;
+        // this.setState((prevState) => {
+        //   applications: prevState.applications.push(data);
+        // });
       }.bind(this),
       error: function(jqXHR, textStatus, err) {
         console.error(jqXHR.responseText);
