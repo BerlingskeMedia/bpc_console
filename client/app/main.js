@@ -73,9 +73,13 @@ class ConsoleApp extends React.Component {
 
     this.setState({ authenticated: true, profile: profile });
 
-    this.getRsvp(profile).then(function(rsvp){
-      console.log('getRsvp', rsvp);
-      this.getUserTicket(rsvp);
+    this.getRsvp(profile).then(function(response){
+      console.log('getRsvp', response);
+      if (typeof response === 'string') {
+        getUserTicket(response, callback);
+      } else if (response.rsvp) {
+        this.getUserTicket(response);
+      }
     }.bind(this));
   }
 
@@ -107,7 +111,7 @@ class ConsoleApp extends React.Component {
       type: 'POST',
       url: '/tickets',
       contentType: 'application/json; charset=utf-8',
-      data: JSON.stringify({rsvp: rsvp})
+      data: JSON.stringify(rsvp)
     }).done((data, textStatus, jqXHR) => {
       console.log('POST tickets success', data, textStatus);
       this.setState({ authorized: true});
