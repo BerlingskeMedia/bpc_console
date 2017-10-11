@@ -43,7 +43,7 @@ class SearchUser extends React.Component {
   onChange(e) {
     // // We're clearing the old timer
     clearTimeout(this.state.searchTimer);
-    if (this.email.value.length > 0) {
+    if (this.searchBox.value.length > 0) {
       this.setState({searchTimer: setTimeout(this.searchUsersByEmail, 1000)});
     }
   }
