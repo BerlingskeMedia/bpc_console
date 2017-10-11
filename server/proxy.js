@@ -14,9 +14,9 @@ function proxy (request, reply) {
   bpc.request({
     path: path,
     method: request.method,
-    query: request.query
+    query: request.query,
+    payload: request.payload
   },
-  request.payload,
   request.state.console_ticket,
   reply);
 }
