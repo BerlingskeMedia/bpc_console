@@ -208,9 +208,9 @@ module.exports = class extends React.Component {
             </div>
           </div>
         </form>
-        <h3>Scope</h3>
         <div className="row">
-          <div className="col-xs-12">
+          <div className="col-xs-6">
+            <h3>Scopes</h3>
             <form style={{paddingTop: '30px', paddingBottom: '30px'}} onSubmit={this.addScope} className="form-inline">
               <input
                type="text"
@@ -227,6 +227,10 @@ module.exports = class extends React.Component {
               ? <div>This app has no scopes.</div>
               : null
             }
+          </div>
+          <div className="col-xs-6">
+            <h3>Admin users</h3>
+            <div>Will be shown here soon</div>
           </div>
         </div>
         <div className="row">

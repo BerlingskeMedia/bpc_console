@@ -48,45 +48,39 @@ class SearchUser extends React.Component {
     }
   }
 
-  searchUsersByEmail(provider, email) {
+  searchUsersByEmail() {
     if(this.state.searching){
       return false;
     }
 
     let searchText = encodeURIComponent(this.searchBox.value);
 
+    this.setState({searching: true});
+
     return $.ajax({
       type: 'GET',
-      url: `/admin/users?provider=${this.provider.value}&email=${searchText}&id=${searchText}`,
+      url: `/admin/users?email=${searchText}&id=${searchText}`,
       contentType: "application/json; charset=utf-8"
     }).done((data, textStatus, jqXHR) => {
       this.props.setUsers(data);
     }).fail((jqXHR, textStatus, errorThrown) => {
       console.error(jqXHR.responseText);
     }).always(() => {
-      this.setState({searching: false})
+      this.setState({searching: false});
     });
   }
 
   render() {
     return (
       <div className="row">
-        <div className="col-xs-2">
-          <select
-            className="form-control"
-            ref={(provider) => this.provider = provider}
-            onChange={this.onChange}>
-              <option value="gigya">Gigya</option>
-              <option value="google">Google</option>
-          </select>
-        </div>
-        <div className="col-xs-10">
+        <div className="col-xs-12">
           <input
             type="text"
             name="searchBox"
             onChange={this.onChange}
             className="form-control"
             placeholder="Søg via email eller ID"
+            readOnly={this.state.searching}
             ref={(searchBox) => this.searchBox = searchBox} />
         </div>
       </div>
@@ -96,38 +90,113 @@ class SearchUser extends React.Component {
 
 
 class SearchResult extends React.Component {
+
   constructor(props){
     super(props);
   }
 
   render(){
-    var userRows = this.props.users.map(function(user, index) {
-      var permissions = Object.keys(user.dataScopes).map(function (name, index) {
-        return <PermissionScope key={index} scopeName={name} permissions={user.dataScopes[name]} />
-      });
-
-      return (
-        <tr key={index}>
-          <td className="col-xs-2">{user.id}</td>
-          <td className="col-xs-2">{user.email}</td>
-          <td className="col-xs-2"><span className="label label-info">{user.provider}</span></td>
-          <td className="col-xs-8">
-            {permissions}
-          </td>
-        </tr>
-      );
-    });
 
     return (
-      <table className="table" style={{marginTop: '30px', marginBottom: '30px'}}>
+      <div style={{marginTop: '30px', marginBottom: '30px'}}>
+        { this.props.users.length === 1 ?
+          <div>
+          <div className="row">
+            <div className="col-xs-12">
+            <span>
+              <dt>ID</dt>
+              <dd>{this.props.users[0].id}</dd>
+            </span>
+              <span>
+                <dt>Email</dt>
+                <dd>{this.props.users[0].email}</dd>
+              </span>
+            </div>
+          </div>
+          <hr />
+          <div className="row">
+            <div className="col-xs-12">
+              <DataScopes dataScopes={this.props.users[0].dataScopes} />
+            </div>
+          </div>
+          </div>
+        : null }
+      </div>
+    );
+  }
+}
+
+
+class DataScopes extends React.Component {
+
+  constructor(props){
+    super(props);
+  }
+
+  render() {
+
+    var scopes = Object.keys(this.props.dataScopes).map(function (name, index) {
+      return <ScopePermissions key={index} name={name} permissions={this.props.dataScopes[name]} />
+    }.bind(this));
+
+    return (
+      <div>
+        {scopes}
+      </div>
+    );
+  }
+}
+
+
+class ScopePermissions extends React.Component {
+
+  constructor(props){
+    super(props);
+  }
+
+  render() {
+    return (
+      <div style={{marginBottom: '10px'}}>
+        <div className="row">
+          <div className="col-xs-12">
+            <h4>Scope: {this.props.name}</h4>
+          </div>
+        </div>
+        <PermissionsTable permissions={this.props.permissions}/>
+      </div>
+    );
+  }
+}
+
+
+class PermissionsTable extends React.Component {
+
+  constructor(props){
+    super(props);
+  }
+
+  split(name, permissionArray){
+    return permissionArray.map(function (value, index) {
+      let key = name + '[' + index.toString() + ']';
+      return typeof permissionArray[index] === 'object'
+        ? <PermissionObject key={key} name={key} data={permissionArray[index]} />
+        : <PermissionField key={key} name={key} data={permissionArray[index]} />
+    });
+  }
+
+  render() {
+    let permissions = Object.keys(this.props.permissions).map(function (name, index) {
+      return this.props.permissions[name] instanceof Array
+        ? this.split(name, this.props.permissions[name])
+        : typeof this.props.permissions[name] === 'object'
+          ? <PermissionObject key={index} name={name} data={this.props.permissions[name]} />
+          : <PermissionField key={index} name={name} data={this.props.permissions[name]} />
+    }.bind(this));
+
+    return (
+      <table className="table table-condensed">
         <tbody>
-          <tr>
-            <th className="col-xs-2">ID</th>
-            <th className="col-xs-2">Email</th>
-            <th className="col-xs-2">Provider</th>
-            <th className="col-xs-6">Permissions</th>
-          </tr>
-          {userRows}
+          {permissions}
         </tbody>
       </table>
     );
@@ -135,44 +204,39 @@ class SearchResult extends React.Component {
 }
 
 
-class PermissionScope extends React.Component {
-  render() {
-    var permissions = this.props.permissions instanceof Array
-      ? this.props.permissions.map(function(permission, index) {
-          return (
-            <span>
-              <dt>{index}</dt>
-              <dd>{permission}</dd>
-            </span>
-          );
-        })
-      : Object.keys(this.props.permissions).map(function (name, index) {
-          if (typeof this.props.permissions[name] === 'object') {
-            return Object.keys(this.props.permissions[name]).map(function (key, index2){
-              return (
-                <span key={index + index2}>
-                  <dt>{name}.{key}</dt>
-                  <dd>{this.props.permissions[name][key].toString()}</dd>
-                </span>
-              );
-            }.bind(this));
-          } else {
-            return (
-              <span key={index}>
-                <dt>{name}</dt>
-                <dd>{this.props.permissions[name].toString()}</dd>
-              </span>
-            );
-          }
-      }.bind(this));
+class PermissionObject extends React.Component {
 
+  constructor(props){
+    super(props);
+  }
+
+  render() {
     return (
-      <div>
-        <div>Scope: <strong>{this.props.scopeName}</strong></div>
-        <dl className="dl-horizontal">
-          {permissions}
-        </dl>
-      </div>
+      <tr>
+        <td className="col-xs-2">{this.props.name}</td>
+        <td className="col-xs-10">
+          {JSON.stringify(this.props.data)}
+        </td>
+      </tr>
+    );
+  }
+}
+
+
+class PermissionField extends React.Component {
+
+  constructor(props){
+    super(props);
+  }
+
+  render() {
+    return (
+      <tr>
+        <td className="col-xs-2">{this.props.name}</td>
+        <td className="col-xs-10">
+          {this.props.data.toString()}
+        </td>
+      </tr>
     );
   }
 }
