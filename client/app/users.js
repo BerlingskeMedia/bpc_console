@@ -175,7 +175,7 @@ class PermissionsTable extends React.Component {
     super(props);
   }
 
-  split(name, permissionArray){
+  mapIntoMoreRows(name, permissionArray){
     return permissionArray.map(function (value, index) {
       let key = name + '[' + index.toString() + ']';
       return typeof permissionArray[index] === 'object'
@@ -184,10 +184,16 @@ class PermissionsTable extends React.Component {
     });
   }
 
+  elementTypeIsAnObject(element, index, array){
+    return typeof element === 'object';
+  }
+
   render() {
     let permissions = Object.keys(this.props.permissions).map(function (name, index) {
+      // If the permission is an array and some elements is an object, then we split the permission over multiple rows
       return this.props.permissions[name] instanceof Array
-        ? this.split(name, this.props.permissions[name])
+          && this.props.permissions[name].some(this.elementTypeIsAnObject)
+        ? this.mapIntoMoreRows(name, this.props.permissions[name])
         : typeof this.props.permissions[name] === 'object'
           ? <PermissionObject key={index} name={name} data={this.props.permissions[name]} />
           : <PermissionField key={index} name={name} data={this.props.permissions[name]} />
