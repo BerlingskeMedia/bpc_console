@@ -172,6 +172,7 @@ module.exports = class extends React.Component {
                 <option value="gigya">Gigya</option>
                 <option value="google">Google</option>
               </select>
+              <p>Allow user login session from this provider.</p>
             </div>
           </div>
           <div className="form-group">
@@ -186,13 +187,13 @@ module.exports = class extends React.Component {
               <div className="checkbox">
                 <label>
                   <input type="checkbox" defaultChecked={this.state.application.settings.disallowGrants} name="disallowGrants" onChange={this.onChangeApplicationSettings}></input>
-                  Do not allow access to any users (not implemented).
+                  Do not allow access to any users.
                 </label>
               </div>
             </div>
           </div>
           <div className="form-group">
-            <label className="col-sm-2 control-label">Delegate</label>
+            <label className="col-sm-2 control-label">Ticket options</label>
             <div className="col-sm-10">
               <div className="checkbox">
                 <label>
@@ -200,6 +201,19 @@ module.exports = class extends React.Component {
                   Allow the application to delegate tickets to another applications.
                 </label>
               </div>
+              <div className="checkbox">
+                <label>
+                  <input type="checkbox" defaultChecked={this.state.application.settings.includeScopeInPrivatExt} name="includeScopeInPrivatExt" onChange={this.onChangeApplicationSettings}></input>
+                  Store scope data in encryptet part of the ticket.
+                </label>
+              </div>
+            </div>
+          </div>
+          <div className="form-group">
+            <label className="col-sm-2 control-label">Ticket duration</label>
+            <div className="col-sm-10">
+              <input type="number" className="form-control" name="ticketDuration" min="1" placeholder="Default: 60 minuttes" onChange={this.onChangeApplicationSettings}></input>
+              <p>Minuttes until the user ticket needs to be reissued.</p>
             </div>
           </div>
           <div className="form-group">
