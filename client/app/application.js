@@ -181,13 +181,13 @@ module.exports = class extends React.Component {
               <div className="checkbox">
                 <label>
                   <input type="checkbox" defaultChecked={this.state.application.settings.disallowAutoCreationGrants} name="disallowAutoCreationGrants" onChange={this.onChangeApplicationSettings}></input>
-                  Only allow access to specified users.
+                  Only issue ticket to users with existing grant.
                 </label>
               </div>
               <div className="checkbox">
                 <label>
                   <input type="checkbox" defaultChecked={this.state.application.settings.disallowGrants} name="disallowGrants" onChange={this.onChangeApplicationSettings}></input>
-                  Do not allow access to any users.
+                  Do not issue tickets to any users.
                 </label>
               </div>
             </div>
@@ -204,7 +204,7 @@ module.exports = class extends React.Component {
               <div className="checkbox">
                 <label>
                   <input type="checkbox" defaultChecked={this.state.application.settings.includeScopeInPrivatExt} name="includeScopeInPrivatExt" onChange={this.onChangeApplicationSettings}></input>
-                  Store scope data in encryptet part of the ticket.
+                  Store scope data in the encryptet private part of the ticket.
                 </label>
               </div>
             </div>
