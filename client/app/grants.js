@@ -107,9 +107,15 @@ module.exports = class extends React.Component {
         <tr key={index}>
           <td className="col-xs-8">{grant.user}</td>
           <td className="col-xs-2">
-            {grant.exp === null || grant.exp > Date.now()
-             ? <button type="button" className="btn btn-warning btn-sm btn-block" onClick={this.expireGrant.bind(this, grant, index)}>Expire grant</button>
-             : <button type="button" className="btn btn-primary btn-sm btn-block" onClick={this.reactivateGrant.bind(this, grant, index)}>Reactivate grant</button>
+            {grant.exp
+              ? <span>{grant.exp}</span>
+              : <span>Never</span>
+            }
+          </td>
+          <td className="col-xs-2">
+            {grant.exp && grant.exp < Date.now()
+             ? <button type="button" className="btn btn-primary btn-sm btn-block" onClick={this.reactivateGrant.bind(this, grant, index)}>Reactivate grant</button>
+             : <button type="button" className="btn btn-warning btn-sm btn-block" onClick={this.expireGrant.bind(this, grant, index)}>Expire grant</button>
             }
           </td>
           <td className="col-xs-2">
@@ -126,7 +132,8 @@ module.exports = class extends React.Component {
         <table className="table">
           <tbody>
             <tr>
-              <th className="col-xs-8">User</th>
+              <th className="col-xs-6">User</th>
+              <th className="col-xs-2">Expires</th>
               <th className="col-xs-2"></th>
               <th className="col-xs-2"></th>
             </tr>
