@@ -176,12 +176,19 @@ class PermissionsTable extends React.Component {
   }
 
   mapIntoMoreRows(name, permissionArray){
-    return permissionArray.map(function (value, index) {
-      let key = name + '[' + index.toString() + ']';
+
+    let rows = [
+      <PermissionField key={name} name={name} data="(See array items below)" />
+    ];
+
+    var permissionArrayRows = permissionArray.map(function (value, index) {
+      let key = name + '.' + index.toString();
       return typeof permissionArray[index] === 'object'
         ? <PermissionObject key={key} name={key} data={permissionArray[index]} />
         : <PermissionField key={key} name={key} data={permissionArray[index]} />
     });
+
+    return rows.concat(permissionArrayRows);
   }
 
   elementTypeIsAnObject(element, index, array){
