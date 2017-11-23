@@ -233,6 +233,7 @@ module.exports = class extends React.Component {
         <div className="row">
           <div className="col-xs-6">
             <h3>Scopes</h3>
+            <div>Scopes the application is allow to read/write. And users can read.</div>
             <form style={{paddingTop: '30px', paddingBottom: '30px'}} onSubmit={this.addScope} className="form-inline">
               <input
                type="text"
@@ -252,7 +253,7 @@ module.exports = class extends React.Component {
           </div>
           <div className="col-xs-6">
             <h3>Admin users</h3>
-            <div>Will be shown here soon</div>
+            <div><strong>Will be shown here below soon...</strong></div>
           </div>
         </div>
         <div className="row">
