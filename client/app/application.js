@@ -165,14 +165,14 @@ module.exports = class extends React.Component {
         <h3>Settings</h3>
         <form className="form-horizontal">
           <div className="form-group">
-            <label className="col-sm-2 control-label" htmlFor="inputProvider">Provider</label>
+            <label className="col-sm-2 control-label" htmlFor="inputProvider">Provider/RSVP</label>
             <div className="col-sm-10">
               <select className="form-control" value={this.state.application.settings.provider} name="provider" id="inputProvider" onChange={this.onChangeApplicationSettings}>
                 <option value=""></option>
                 <option value="gigya">Gigya</option>
                 <option value="google">Google</option>
               </select>
-              <p>Allow user login session from this provider.</p>
+              <p>Only allow RSVP from this provider.</p>
             </div>
           </div>
           <div className="form-group">
@@ -188,6 +188,12 @@ module.exports = class extends React.Component {
                 <label>
                   <input type="checkbox" defaultChecked={this.state.application.settings.disallowGrants} name="disallowGrants" onChange={this.onChangeApplicationSettings}></input>
                   Do not issue tickets to any users.
+                </label>
+              </div>
+              <div className="checkbox">
+                <label>
+                  <input type="checkbox" defaultChecked={this.state.application.settings.allowAnonymousUsers} name="allowAnonymousUsers" onChange={this.onChangeApplicationSettings}></input>
+                  Allow issue of anonymous tickets.
                 </label>
               </div>
             </div>
@@ -218,7 +224,9 @@ module.exports = class extends React.Component {
           </div>
           <div className="form-group">
             <div className="col-sm-10 col-sm-offset-2">
-              <button type="button" className="btn btn-primary btn-xs" onClick={this.updateApplication.bind(this, this.state.application)}>Save settings</button>
+              <button type="button" className="btn btn-primary btn-xs" onClick={this.updateApplication.bind(this, this.state.application)}>
+                Save settings
+              </button>
             </div>
           </div>
         </form>
@@ -249,7 +257,7 @@ module.exports = class extends React.Component {
         </div>
         <div className="row">
           <div className="col-xs-12">
-            <Grants app={this.state.app} provider={this.state.application.settings.provider} />
+            <Grants app={this.state.app} />
           </div>
         </div>
       </div>

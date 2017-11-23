@@ -128,7 +128,7 @@ module.exports = class extends React.Component {
     return (
       <div className="grants">
         <h3>Grants</h3>
-        <CreateGrant createGrant={this.createGrant.bind(this)} provider={this.props.provider} />
+        <CreateGrant createGrant={this.createGrant.bind(this)} />
         <table className="table">
           <tbody>
             <tr>
@@ -187,7 +187,7 @@ class CreateGrant extends React.Component {
 
     return $.ajax({
       type: 'GET',
-      url: '/admin/users?'.concat('provider=', this.props.provider, '&email=', searchText)
+      url: '/admin/users?'.concat('email=', searchText)
     }).done((data, textStatus, jqXHR) => {
       if (data.length === 1){
         this.setState({searchSuccess: true, user: data[0]});
