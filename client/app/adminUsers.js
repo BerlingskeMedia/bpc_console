@@ -23,7 +23,7 @@ module.exports = class extends React.Component {
 
   createGrant(user) {
     var grant = {
-      user: user.email,
+      user: user,
       scope: []
     };
 
@@ -143,69 +143,31 @@ class AddAdminUser extends React.Component {
   constructor(props){
     super(props);
     this.onChange = this.onChange.bind(this);
-    this.searchUsersByEmail = this.searchUsersByEmail.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.state = {
-      user: {},
-      searchText: '',
-      searchInProgress: false,
-      searchTimer: null,
-      searchSuccess: false,
-      lastSearch: ''
+      inputValue: ''
     };
   }
 
   onChange(e) {
-    var value = e.target.value;
-    this.setState({searchText: value, searchSuccess: false});
-    // We're clearing the old timer
-    clearTimeout(this.state.searchTimer);
-    this.setState({searchTimer: setTimeout(this.searchUsersByEmail, 1000)});
-  }
-
-  searchUsersByEmail() {
-    if(this.state.searchInProgress){
-      return false;
-    }
-
-    var searchText = this.state.searchText;
-
-    this.setState({searchInProgress: true});
-
-    return $.ajax({
-      type: 'GET',
-      url: `/admin/users?provider=google&email=${searchText}&id=${searchText}`
-    }).done((data, textStatus, jqXHR) => {
-      if (data.length === 1){
-        this.setState({searchSuccess: true, user: data[0]});
-      }
-    }).fail((jqXHR, textStatus, errorThrown) => {
-      console.error(jqXHR.responseText);
-      this.setState({searchSuccess: false})
-    }).always(() => {
-      this.setState({searchInProgress: false})
-    });
+    this.setState({inputValue: e.target.value});
   }
 
   handleSubmit(e) {
     e.preventDefault();
-    if (this.state.user !== {}) {
-      this.props.createGrant(this.state.user)
-      .done(() => {
-        this.setState({user: {}, searchText: ''});
-      })
-      .fail((jqXHR, textStatus, errorThrown) => {
-        console.log('jqXHR', jqXHR);
-        if (jqXHR.status === 409) {
-          alert('User already admin');
-          this.setState({user: {}, searchText: ''});
-        } else {
-          console.error(jqXHR.responseText);
-        }
-      }).always(() => {
-        this.setState({searchSuccess: false});
-      });
-    }
+    this.props.createGrant(this.state.inputValue)
+    .done(() => {
+      this.setState({inputValue: ''});
+    })
+    .fail((jqXHR, textStatus, errorThrown) => {
+      console.log('jqXHR', jqXHR);
+      if (jqXHR.status === 409) {
+        alert('User already admin');
+        this.setState({inputValue: ''});
+      } else {
+        console.error(jqXHR.responseText);
+      }
+    });
   }
 
   render() {
@@ -217,10 +179,10 @@ class AddAdminUser extends React.Component {
             type="text"
             className='form-control'
             placeholder="Email"
-            value={this.state.searchText}
+            value={this.state.inputValue}
             onChange={this.onChange} />
         </div>
-        <button type="submit" className="btn btn-default" disabled={!this.state.searchSuccess}>Add user</button>
+        <button type="submit" className="btn btn-default">Add user</button>
       </form>
     );
   }
