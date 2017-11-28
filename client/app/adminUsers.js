@@ -24,7 +24,8 @@ module.exports = class extends React.Component {
   createGrant(user) {
     var grant = {
       user: user,
-      scope: []
+      scope: [],
+      exp: null
     };
 
     return $.ajax({
