@@ -180,19 +180,19 @@ module.exports = class extends React.Component {
             <div className="col-sm-10">
               <div className="checkbox">
                 <label>
-                  <input type="checkbox" defaultChecked={this.state.application.settings.disallowAutoCreationGrants} name="disallowAutoCreationGrants" onChange={this.onChangeApplicationSettings}></input>
+                  <input type="checkbox" defaultChecked={this.state.application.settings.disallowAutoCreationGrants} name="disallowAutoCreationGrants" onClick={this.onChangeApplicationSettings}></input>
                   Only issue ticket to users with existing grant.
                 </label>
               </div>
               <div className="checkbox">
                 <label>
-                  <input type="checkbox" defaultChecked={this.state.application.settings.disallowGrants} name="disallowGrants" onChange={this.onChangeApplicationSettings}></input>
+                  <input type="checkbox" defaultChecked={this.state.application.settings.disallowGrants} name="disallowGrants" onClick={this.onChangeApplicationSettings}></input>
                   Do not issue tickets to any users.
                 </label>
               </div>
               <div className="checkbox">
                 <label>
-                  <input type="checkbox" defaultChecked={this.state.application.settings.allowAnonymousUsers} name="allowAnonymousUsers" onChange={this.onChangeApplicationSettings}></input>
+                  <input type="checkbox" defaultChecked={this.state.application.settings.allowAnonymousUsers} name="allowAnonymousUsers" onClick={this.onChangeApplicationSettings}></input>
                   Allow issue of anonymous tickets.
                 </label>
               </div>
@@ -203,13 +203,13 @@ module.exports = class extends React.Component {
             <div className="col-sm-10">
               <div className="checkbox">
                 <label>
-                  <input type="checkbox" defaultChecked={this.state.application.delegate} name="delegate" onChange={this.onChangeApplication}></input>
+                  <input type="checkbox" defaultChecked={this.state.application.delegate} name="delegate" onClick={this.onChangeApplication}></input>
                   Allow the application to delegate tickets to another applications.
                 </label>
               </div>
               <div className="checkbox">
                 <label>
-                  <input type="checkbox" defaultChecked={this.state.application.settings.includeScopeInPrivatExt} name="includeScopeInPrivatExt" onChange={this.onChangeApplicationSettings}></input>
+                  <input type="checkbox" defaultChecked={this.state.application.settings.includeScopeInPrivatExt} name="includeScopeInPrivatExt" onClick={this.onChangeApplicationSettings}></input>
                   Store scope data in the encryptet private part of the ticket.
                 </label>
               </div>
