@@ -35,7 +35,7 @@ module.exports = class extends React.Component {
       data: JSON.stringify(grant)
     }).done((data, textStatus, jqXHR) => {
       this.setState((prevState) => {
-        grants: prevState.grants.push(grant);
+        grants: prevState.grants.push(data);
       });
     }).fail((jqXHR, textStatus, errorThrown) => {
       console.error(jqXHR.responseText);
@@ -179,7 +179,7 @@ class AddAdminUser extends React.Component {
           <input
             type="text"
             className='form-control'
-            placeholder="Email"
+            placeholder="Username"
             value={this.state.inputValue}
             onChange={this.onChange} />
         </div>
