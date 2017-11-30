@@ -226,9 +226,6 @@ class Main extends React.Component {
             <li role="presentation" onClick={this.changemenu}>
               <Link to={`/admins`}>Console users</Link>
             </li>
-            <li role="presentation" onClick={this.changemenu}>
-              <Link to={`/gigya`}>Gigya</Link>
-            </li>
           </ul>
           <Route exact path="/" component={Applications}/>
           <Route path="/applications" component={Applications}/>
