@@ -64,7 +64,7 @@ module.exports = class extends React.Component {
       type: 'POST',
       url: '/admin/superadmin/'.concat(grant.id)
     }).done((data, textStatus, jqXHR) => {
-      if (index) {
+      if (index > -1) {
         var grants = this.state.grants;
         grants[index].scope.push('admin:*');
         this.setState({grants: grants});
@@ -79,7 +79,7 @@ module.exports = class extends React.Component {
       type: 'DELETE',
       url: '/admin/superadmin/'.concat(grant.id)
     }).done((data, textStatus, jqXHR) => {
-      if (index) {
+      if (index > -1) {
         var grants = this.state.grants;
         grants[index].scope.splice(grant.scope.indexOf('admin:*'), 1);
         this.setState({grants: grants});
