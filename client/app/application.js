@@ -252,8 +252,7 @@ module.exports = class extends React.Component {
             }
           </div>
           <div className="col-xs-6">
-            <h3>Admin users</h3>
-            <div><strong>Will be shown here below soon...</strong></div>
+            <AdminUsers />
           </div>
         </div>
         <div className="row">
@@ -261,6 +260,23 @@ module.exports = class extends React.Component {
             <Grants app={this.state.app} />
           </div>
         </div>
+      </div>
+    );
+  }
+}
+
+
+class AdminUsers extends React.Component {
+
+  constructor(props){
+    super(props);
+  }
+
+  render() {
+    return (
+      <div>
+        <h3>Admin users</h3>
+        <div><strong>Will be shown here below soon...</strong></div>
       </div>
     );
   }
