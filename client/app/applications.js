@@ -53,12 +53,21 @@ module.exports = class extends React.Component {
   render() {
 
     var applications = this.state.applications.map(function(application, index) {
+      var scope = application.scope.map(function(scope) {
+        return (
+          <span>
+            <span>&nbsp;</span>
+            <span key={index + '.' + scope} className="scope label label-default">{scope}</span>
+          </span>
+        );
+      });
       return (
-        <tr key={index}>
-          <td className="col-xs-10">
+        <tr key={index} className="application">
+          <td className="col-xs-4">
             <Link to={`/application/${application.id}`}>{application.id}</Link>
           </td>
-          <td className="col-xs-2">
+          <td className="col-xs-8">
+            {scope}
           </td>
         </tr>
       );
@@ -73,8 +82,8 @@ module.exports = class extends React.Component {
         <table className="table">
           <tbody>
             <tr>
-              <th className="col-xs-10">ID</th>
-              <th className="col-xs-2"></th>
+              <th className="col-xs-4">ID</th>
+              <th className="col-xs-8">Scope</th>
             </tr>
             {applications}
           </tbody>
