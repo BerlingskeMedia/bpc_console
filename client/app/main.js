@@ -7,7 +7,7 @@ const Route = ReactRouterDom.Route;
 const Link = ReactRouterDom.Link;
 const Applications = require('./applications');
 const Users = require('./users');
-const AdminUsers = require('./adminUsers');
+const ConsoleUsers = require('./consoleUsers');
 const Application = require('./application');
 const Gigya = require('./gigya');
 const GoogleLogin = require('react-google-login').default;
@@ -230,7 +230,7 @@ class Main extends React.Component {
           <Route exact path="/" component={Applications}/>
           <Route path="/applications" component={Applications}/>
           <Route path="/users" component={Users}/>
-          <Route path="/admins" component={AdminUsers}/>
+          <Route path="/admins" component={ConsoleUsers}/>
           <Route path={`/application/:app`} component={Application}/>
           <Route path={`/gigya`} component={Gigya}/>
         </div>

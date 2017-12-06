@@ -122,7 +122,7 @@ module.exports = class extends React.Component {
     return (
       <div className="users">
         <h3>Console users</h3>
-        <AddAdminUser createGrant={this.createGrant.bind(this)} />
+        <AddConsoleUser createGrant={this.createGrant.bind(this)} />
         <table className="table">
           <tbody>
             <tr>
@@ -139,7 +139,7 @@ module.exports = class extends React.Component {
 }
 
 
-class AddAdminUser extends React.Component {
+class AddConsoleUser extends React.Component {
 
   constructor(props){
     super(props);
