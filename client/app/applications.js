@@ -7,7 +7,6 @@ module.exports = class extends React.Component {
   constructor(props){
     super(props);
     this.state = {
-      adminUsers: [],
       applications: []
     };
     this.getApplications = this.getApplications.bind(this);
@@ -55,9 +54,9 @@ module.exports = class extends React.Component {
     var applications = this.state.applications.map(function(application, index) {
       var scope = application.scope.map(function(scope) {
         return (
-          <span>
+          <span key={index + '.' + scope}>
             <span>&nbsp;</span>
-            <span key={index + '.' + scope} className="scope label label-default">{scope}</span>
+            <span className="scope label label-default">{scope}</span>
           </span>
         );
       });
