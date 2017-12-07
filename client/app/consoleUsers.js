@@ -102,7 +102,6 @@ module.exports = class extends React.Component {
       var isSuperAdmin = grant.scope.indexOf('admin:*') > -1;
 
       var isAdminOfApp = grant.scope.filter(function(scope){
-        console.log('sco', scope);
         return scope !== 'admin:*' && scope.indexOf('admin:') === 0;
       }).map(function(scope, index) {
         var app = scope.substring('admin:'.length);
