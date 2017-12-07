@@ -1,5 +1,6 @@
 const $ = require('jquery');
 const React = require('react');
+const Link = require('react-router-dom').Link;
 
 module.exports = class extends React.Component {
 
@@ -100,19 +101,39 @@ module.exports = class extends React.Component {
     var grants = this.state.grants.map((grant, index) => {
       var isSuperAdmin = grant.scope.indexOf('admin:*') > -1;
 
+      var isAdminOfApp = grant.scope.filter(function(scope){
+        console.log('sco', scope);
+        return scope !== 'admin:*' && scope.indexOf('admin:') === 0;
+      }).map(function(scope, index) {
+        var app = scope.substring('admin:'.length);
+        return (
+          <span key={index + '.' + app}>
+            <span>&nbsp;</span>
+            <span>
+            </span>
+            <span className="app label label-info">
+              <Link style={{color:'white'}} to={`/application/${app}`}>{app}</Link>
+            </span>
+          </span>
+        );
+      });
+
       return (
         <tr key={index}>
-          <td className="col-xs-8">{grant.user}</td>
+          <td className="col-xs-3">{grant.user}</td>
+          <th className="col-xs-5">
+            {isAdminOfApp}
+          </th>
           <td className="col-xs-2">
             { isSuperAdmin
-              ? null
+              ? <button type="button" className="btn btn-danger btn-sm btn-block" disabled="disabled">Is superadmin</button>
               : <button type="button" className="btn btn-danger btn-sm btn-block" onClick={this.deleteGrant.bind(this, grant, index)}>Remove admin</button>
             }
           </td>
           <td className="col-xs-2">
             { isSuperAdmin
-              ? <button type="button" className="btn btn-default btn-sm btn-block" onClick={this.demoteSuperAdmin.bind(this, grant, index)}>Demote Superadmin</button>
-              : <button type="button" className="btn btn-warning btn-sm btn-block" onClick={this.makeSuperAdmin.bind(this, grant, index)}>Promote to Superadmin</button>
+              ? <button type="button" className="btn btn-warning btn-sm btn-block" onClick={this.demoteSuperAdmin.bind(this, grant, index)}>Demote Superadmin</button>
+              : <button type="button" className="btn btn-info btn-sm btn-block" onClick={this.makeSuperAdmin.bind(this, grant, index)}>Promote to Superadmin</button>
             }
           </td>
         </tr>
@@ -126,7 +147,8 @@ module.exports = class extends React.Component {
         <table className="table">
           <tbody>
             <tr>
-              <th className="col-xs-8">User</th>
+              <th className="col-xs-3">User</th>
+              <th className="col-xs-5">Admin of app</th>
               <th className="col-xs-2"></th>
               <th className="col-xs-2"></th>
             </tr>

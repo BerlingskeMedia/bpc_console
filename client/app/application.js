@@ -181,7 +181,7 @@ module.exports = class extends React.Component {
               <div className="checkbox">
                 <label>
                   <input type="checkbox" defaultChecked={this.state.application.settings.disallowAutoCreationGrants} name="disallowAutoCreationGrants" onClick={this.onChangeApplicationSettings}></input>
-                  Only issue ticket to users with existing grant.
+                  Only issue ticket to users with existing grant. If not, grants will be created automatically.
                 </label>
               </div>
               <div className="checkbox">

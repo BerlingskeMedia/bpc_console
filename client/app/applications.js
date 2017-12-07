@@ -82,7 +82,7 @@ module.exports = class extends React.Component {
           <tbody>
             <tr>
               <th className="col-xs-4">ID</th>
-              <th className="col-xs-8">Scope</th>
+              <th className="col-xs-8">Scopes</th>
             </tr>
             {applications}
           </tbody>
