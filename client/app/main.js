@@ -5,6 +5,7 @@ const ReactRouterDom = require('react-router-dom');
 const Router = ReactRouterDom.BrowserRouter;
 const Route = ReactRouterDom.Route;
 const Link = ReactRouterDom.Link;
+const Redirect = ReactRouterDom.Redirect;
 const Applications = require('./applications');
 const Users = require('./users');
 const ConsoleUsers = require('./consoleUsers');
@@ -23,6 +24,7 @@ class ConsoleApp extends React.Component {
     super(props);
     this.state = {
       authenticated: false,
+      authenticationNeeded: false,
       authorized: false,
       missingGrant: false,
       accountInfo: {},
@@ -39,7 +41,9 @@ class ConsoleApp extends React.Component {
         scope: gapiScope
       }).then(function (GoogleAuth) {
         if (GoogleAuth.isSignedIn.get()) {
-          this.onSignIn(GoogleAuth.currentUser.get());
+          this.onGoogleSignIn(GoogleAuth.currentUser.get());
+        } else {
+          this.setState({ authenticationNeeded: true });
         }
       }.bind(this));
     }.bind(this));
@@ -57,7 +61,7 @@ class ConsoleApp extends React.Component {
     });
   }
 
-  onSignIn(googleUser) {
+  onGoogleSignIn(googleUser) {
     console.log('Google login success');
     // Useful data for your client-side scripts:
     var basicProfile = googleUser.getBasicProfile();
@@ -73,18 +77,29 @@ class ConsoleApp extends React.Component {
 
     this.setState({ authenticated: true, profile: profile });
 
-    this.getRsvp(profile).then(function(response){
-      console.log('getRsvp', response);
-      if (typeof response === 'string') {
-        getUserTicket(response, callback);
-      } else if (response.rsvp) {
+    var ticket = readTicket();
+
+    // We'll get a new ticket if there's then minuttes left
+    if(!ticket || (ticket.exp - (1000 * 60 * 10)) < Date.now()){
+      this.getRsvp(profile).then(function(response){
+        console.log('getRsvp', response);
         this.getUserTicket(response);
-      }
-    }.bind(this));
+      }.bind(this));
+    } else {
+      console.log('Already ticket', ticket);
+      this.setState({ authorized: true});
+      this.setRefreshUserTicketTimeout(ticket);
+    }
   }
 
-  onSignInFailure(err) {
+  onGoogleSignInFailure(err) {
     console.log('Google Sign in error', err);
+  }
+
+  setRefreshUserTicketTimeout(ticket) {
+    setTimeout(function () {
+      this.refreshUserTicket();
+    }.bind(this), ticket.exp - Date.now() - 10000);
   }
 
   getRsvp(params) {
@@ -112,27 +127,30 @@ class ConsoleApp extends React.Component {
       url: '/tickets',
       contentType: 'application/json; charset=utf-8',
       data: JSON.stringify(rsvp)
-    }).done((data, textStatus, jqXHR) => {
-      console.log('POST tickets success', data, textStatus);
-      this.setState({ authorized: true});
-    }).fail((jqXHR, textStatus, errorThrown) => {
-      console.error(jqXHR.responseText);
-      this.setState({ authorized: false });
-    });
+    })
+    .done((ticket, textStatus, jqXHR) => this.getTicketDone(ticket, textStatus, jqXHR))
+    .fail((jqXHR, textStatus, errorThrown) => this.getTicketFail(jqXHR, textStatus, errorThrown));
   }
 
   refreshUserTicket() {
     return $.ajax({
-      type: 'GET',
+      type: 'POST',
       url: '/tickets',
       contentType: 'application/json; charset=utf-8'
-    }).done((data, textStatus, jqXHR) => {
-      console.log('GET tickets success', data, textStatus);
-      this.setState({ authorized: true});
-    }).fail((jqXHR, textStatus, errorThrown) => {
-      console.error(jqXHR.responseText);
-      this.setState({ authorized: false });
-    });
+    })
+    .done((ticket, textStatus, jqXHR) => this.getTicketDone(ticket, textStatus, jqXHR))
+    .fail((jqXHR, textStatus, errorThrown) => this.getTicketFail(jqXHR, textStatus, errorThrown));
+  }
+
+  getTicketDone(ticket, textStatus, jqXHR) {
+    console.log('Get tickets success', ticket, textStatus);
+    this.setState({ authorized: true});
+    this.setRefreshUserTicketTimeout(ticket);
+  }
+
+  getTicketFail(jqXHR, textStatus, errorThrown) {
+    console.error(jqXHR.responseText);
+    this.setState({ authorized: false });
   }
 
   deleteUserTicket(){
@@ -190,20 +208,24 @@ class ConsoleApp extends React.Component {
 
     return (
       <div className="container">
-
           {this.state.authenticated
             ? <div>
-                {this.state.authorized === true ? <Main /> : null }
+                {this.state.authorized === true ? <Main /> : <p>Loading</p> }
                 {this.state.missingGrant === true ? <p>Du har ikke de fornødne rettigheder</p> : null }
               </div>
-            : <div>
+            : null
+          }
+
+          {this.state.authenticationNeeded
+            ? <div style={{marginTop: '15px'}}>
                 <GoogleLogin
                   clientId={gapiClientId}
                   scope={gapiScope}
                   buttonText="Login"
-                  onSuccess={this.onSignIn}
-                  onFailure={this.onSignInFailure} />
+                  onSuccess={this.onGoogleSignIn}
+                  onFailure={this.onGoogleSignInFailure} />
               </div>
+            : null
           }
       </div>
     );
@@ -243,3 +265,20 @@ ReactDOM.render(
   <ConsoleApp />,
   document.getElementById('content')
 );
+
+
+function readCookie(name) {
+  var nameEQ = name + "=";
+  var ca = document.cookie.split(';');
+  for(var i=0;i < ca.length;i++) {
+    var c = ca[i];
+    while (c.charAt(0)==' ') c = c.substring(1,c.length);
+    if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+  }
+  return null;
+}
+
+function readTicket(){
+  var ticket = readCookie('console_ticket');
+  return ticket !== null ? JSON.parse(window.atob(ticket)): null;
+}

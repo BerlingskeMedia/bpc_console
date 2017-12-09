@@ -120,19 +120,19 @@ module.exports = class extends React.Component {
       return (
         <tr key={index}>
           <td className="col-xs-3">{grant.user}</td>
+          <td className="col-xs-2">
+          { isSuperAdmin
+            ? <button type="button" className="btn btn-warning btn-sm btn-block" onClick={this.demoteSuperAdmin.bind(this, grant, index)}>Demote Superadmin</button>
+            : <button type="button" className="btn btn-info btn-sm btn-block" onClick={this.makeSuperAdmin.bind(this, grant, index)}>Promote to Superadmin</button>
+          }
+          </td>
           <th className="col-xs-5">
             {isAdminOfApp}
           </th>
           <td className="col-xs-2">
             { isSuperAdmin
               ? <button type="button" className="btn btn-danger btn-sm btn-block" disabled="disabled">Is superadmin</button>
-              : <button type="button" className="btn btn-danger btn-sm btn-block" onClick={this.deleteGrant.bind(this, grant, index)}>Remove admin</button>
-            }
-          </td>
-          <td className="col-xs-2">
-            { isSuperAdmin
-              ? <button type="button" className="btn btn-warning btn-sm btn-block" onClick={this.demoteSuperAdmin.bind(this, grant, index)}>Demote Superadmin</button>
-              : <button type="button" className="btn btn-info btn-sm btn-block" onClick={this.makeSuperAdmin.bind(this, grant, index)}>Promote to Superadmin</button>
+              : <button type="button" className="btn btn-danger btn-sm btn-block" onClick={this.deleteGrant.bind(this, grant, index)}>Remove access</button>
             }
           </td>
         </tr>
@@ -147,8 +147,8 @@ module.exports = class extends React.Component {
           <tbody>
             <tr>
               <th className="col-xs-3">User</th>
-              <th className="col-xs-5">Admin of app</th>
               <th className="col-xs-2"></th>
+              <th className="col-xs-5">Admin of app</th>
               <th className="col-xs-2"></th>
             </tr>
             {grants}
@@ -204,7 +204,7 @@ class AddConsoleUser extends React.Component {
             value={this.state.inputValue}
             onChange={this.onChange} />
         </div>
-        <button type="submit" className="btn btn-default">Add user</button>
+        <button type="submit" className="btn btn-default">Grant access</button>
       </form>
     );
   }

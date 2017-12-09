@@ -17,15 +17,35 @@ module.exports.register = function (server, options, next) {
       }
     },
     handler: function(request, reply) {
-      bpc.getUserTicket(request.payload.rsvp, function (err, userTicket){
-        console.log('getUserTicket', err, userTicket);
-        if (err){
-          return reply(err);
-        }
 
-        reply(userTicket)
+      if (request.payload && request.payload.rsvp) {
+
+        bpc.getUserTicket(request.payload.rsvp, function (err, userTicket){
+          console.log('getUserTicket', err, userTicket);
+          if (err){
+            return reply(err);
+          }
+
+          reply(userTicket)
           .state('console_ticket', userTicket);
-      });
+        });
+
+      } else if (request.state && request.state.console_ticket) {
+
+        bpc.reissueTicket(request.state.console_ticket, function (err, reissuedTicket){
+          if (err) {
+            return reply(err);
+          }
+          reply(reissuedTicket)
+            .state('console_ticket', reissuedTicket);
+        });
+
+      } else {
+
+        reply(Boom.badRequest());
+
+      }
+
     }
   });
 
@@ -43,27 +63,6 @@ module.exports.register = function (server, options, next) {
       // This is not a global signout.
       reply()
         .unstate('console_ticket');
-    }
-  });
-
-  server.route({
-    method: 'GET',
-    path: '/',
-    config: {
-      cors: false,
-      state: {
-        parse: true,
-        failAction: 'log'
-      }
-    },
-    handler: function(request, reply) {
-      bpc.reissueTicket(request.state.console_ticket, function (err, reissuedTicket){
-        if (err) {
-          return reply(err);
-        }
-        reply(reissuedTicket)
-          .state('console_ticket', reissuedTicket);
-      });
     }
   });
 
