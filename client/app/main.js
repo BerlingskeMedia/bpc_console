@@ -79,7 +79,7 @@ class ConsoleApp extends React.Component {
 
     var ticket = readTicket();
 
-    // We'll get a new ticket if there's then minuttes left
+    // We'll get a new ticket if there's then minutes left
     if(!ticket || (ticket.exp - (1000 * 60 * 10)) < Date.now()){
       this.getRsvp(profile).then(function(response){
         console.log('getRsvp', response);
