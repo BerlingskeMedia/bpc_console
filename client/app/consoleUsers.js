@@ -47,14 +47,11 @@ module.exports = class extends React.Component {
     return $.ajax({
       type: 'DELETE',
       url: '/admin/applications/console/grants/'.concat(grant.id),
-      contentType: "application/json; charset=utf-8",
-      data: JSON.stringify(grant)
+      contentType: "application/json; charset=utf-8"
     }).done((data, textStatus, jqXHR) => {
-      if(data.n > 0 && index){
-        this.setState((prevState) => {
-          grants: prevState.grants.splice(index, 1);
-        });
-      }
+      this.setState((prevState) => {
+        grants: prevState.grants.splice(index, 1);
+      });
     }).fail((jqXHR, textStatus, errorThrown) => {
       console.error(jqXHR.responseText);
     });

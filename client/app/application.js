@@ -353,8 +353,8 @@ class AdminUsers extends React.Component {
     var grant = this.state.grants[index];
 
     return $.ajax({
-      type: 'DELETE',
-      url: `/admin/applications/${this.props.app}/admin`,
+      type: 'POST',
+      url: `/admin/applications/${this.props.app}/removeadmin`,
       contentType: "application/json; charset=utf-8",
       data: JSON.stringify(grant)
     })
@@ -406,7 +406,7 @@ class AdminUsers extends React.Component {
   makeAdmin(app, grant) {
     return $.ajax({
       type: 'POST',
-      url: `/admin/applications/${app}/admin`,
+      url: `/admin/applications/${app}/makeadmin`,
       contentType: "application/json; charset=utf-8",
       data: JSON.stringify(grant)
     })
