@@ -273,11 +273,13 @@ class AdminUsers extends React.Component {
     super(props);
     this.onChangeState = this.onChangeState.bind(this)
     this.addNewUser = this.addNewUser.bind(this)
+    this.makeAdmin = this.makeAdmin.bind(this)
     this.state = {
       grants: [],
       newUserInput: '',
       newUserExistingConsoleGrant: null,
       newUserAlreadyHasScope: false,
+      readyUp: false,
       searching: false,
       searchTimer: null
     };
@@ -299,7 +301,12 @@ class AdminUsers extends React.Component {
       return false;
     }
 
-    this.setState({searching: true, newUserExistingConsoleGrant: null, newUserAlreadyHasScope: false});
+    this.setState({
+      readyUp: false,
+      searching: true,
+      newUserExistingConsoleGrant: null,
+      newUserAlreadyHasScope: false
+    });
 
     var user = encodeURIComponent(this.state.newUserInput);
 
@@ -307,6 +314,8 @@ class AdminUsers extends React.Component {
       type: 'GET',
       url: '/admin/applications/console/grants?user='.concat(user)
     }).done((data, textStatus, jqXHR) => {
+
+      this.setState({readyUp: true});
 
       if (data.length === 1){
 
@@ -328,6 +337,7 @@ class AdminUsers extends React.Component {
   }
 
   onChangeState(e) {
+    this.setState({readyUp: false});
     var temp = {};
     const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
     temp[e.target.name] = value;
@@ -341,11 +351,10 @@ class AdminUsers extends React.Component {
 
   removeScope(index) {
     var grant = this.state.grants[index];
-    grant.scope = grant.scope.filter(scope => { return scope !== 'admin:'.concat(this.props.app);})
 
     return $.ajax({
-      type: 'POST',
-      url: '/admin/applications/console/grants/'.concat(grant.id),
+      type: 'DELETE',
+      url: `/admin/applications/${this.props.app}/admin`,
       contentType: "application/json; charset=utf-8",
       data: JSON.stringify(grant)
     })
@@ -364,31 +373,18 @@ class AdminUsers extends React.Component {
 
     if (this.state.newUserExistingConsoleGrant){
 
-      var grant = Object.assign({}, this.state.newUserExistingConsoleGrant);
-      grant.scope.push('admin:'.concat(this.props.app))
+      var newAdmin = this.state.newUserExistingConsoleGrant;
 
-      return $.ajax({
-        type: 'POST',
-        url: '/admin/applications/console/grants/'.concat(grant.id),
-        contentType: "application/json; charset=utf-8",
-        data: JSON.stringify(grant)
-      })
-      .done((data, textStatus, jqXHR) => {
-        this.setState((prevState) => {
-          grants: prevState.grants.push(grant);
-        });
-        this.setState({newUserInput: ''});
-      })
-      .fail((jqXHR, textStatus, errorThrown) => {
-        console.error(jqXHR);
-      });
+      this.makeAdmin(this.props.app, this.state.newUserExistingConsoleGrant);
+
 
     } else {
 
       var newGrant = {
-        user: this.state.newUserInput,
-        scope: ['admin:'.concat(this.props.app)]
+        user: this.state.newUserInput
       };
+
+      var app = this.props.app;
 
       return $.ajax({
         type: 'POST',
@@ -397,15 +393,32 @@ class AdminUsers extends React.Component {
         data: JSON.stringify(newGrant)
       })
       .done((data, textStatus, jqXHR) => {
-        this.setState((prevState) => {
-          grants: prevState.grants.push(data);
-        });
-        this.setState({newUserInput: ''});
+
+        this.makeAdmin(app, data);
+
       })
       .fail((jqXHR, textStatus, errorThrown) => {
         console.error(jqXHR);
       });
     }
+  }
+
+  makeAdmin(app, grant) {
+    return $.ajax({
+      type: 'POST',
+      url: `/admin/applications/${app}/admin`,
+      contentType: "application/json; charset=utf-8",
+      data: JSON.stringify(grant)
+    })
+    .done((data, textStatus, jqXHR) => {
+      this.setState((prevState) => {
+        grants: prevState.grants.push(grant);
+      });
+      this.setState({newUserInput: ''});
+    })
+    .fail((jqXHR, textStatus, errorThrown) => {
+      console.error(jqXHR);
+    });
   }
 
   componentDidMount() {
@@ -437,7 +450,7 @@ class AdminUsers extends React.Component {
             onChange={this.onChangeState}
             readOnly={this.state.searching}
             placeholder="Add admin user"/>
-          <button type="submit" onClick={this.addNewUser} disabled={this.state.newUserAlreadyHasScope || this.state.searching} className="btn btn-default">Opret</button>
+          <button type="submit" onClick={this.addNewUser} disabled={!this.state.readyUp} className="btn btn-default">Opret</button>
         </form>
         <ul className="list-unstyled">
           {adminUsers}
