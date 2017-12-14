@@ -38,7 +38,7 @@ function getAppTicket() {
   callSsoServer({path: '/ticket/app', method: 'POST', payload: {}}, app, function(err, result){
     if (err){
       console.error(err);
-      process.exit(1);
+      setTimeout(getAppTicket, 1000 * 60 * 5); // Five minutes
     } else {
       console.log('Got the appTicket');
       appTicket = result;
@@ -54,6 +54,7 @@ function refreshAppTicket(){
   callSsoServer({path: '/ticket/reissue', method: 'POST'},  appTicket, function(err, result){
     if (err){
       console.error('refreshAppTicket:', err);
+      setTimeout(getAppTicket, 1000 * 60 * 5);
     } else {
       appTicket = result;
       setTimeout(refreshAppTicket, result.exp - Date.now() - 10000);
