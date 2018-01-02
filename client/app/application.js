@@ -34,6 +34,9 @@ module.exports = class extends React.Component {
       this.setState({application: data});
     }).fail((jqXHR, textStatus, errorThrown) => {
       console.error(jqXHR.responseText);
+      if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
+        alert(jqXHR.responseJSON.message);
+      }
     });
   }
 
@@ -271,24 +274,19 @@ class AdminUsers extends React.Component {
 
   constructor(props){
     super(props);
-    this.onChangeState = this.onChangeState.bind(this)
-    this.addNewUser = this.addNewUser.bind(this)
-    this.makeAdmin = this.makeAdmin.bind(this)
+    this.onChangeState = this.onChangeState.bind(this);
+    this.makeAdmin = this.makeAdmin.bind(this);
     this.state = {
       grants: [],
       newUserInput: '',
-      newUserExistingConsoleGrant: null,
-      newUserAlreadyHasScope: false,
-      readyUp: false,
-      searching: false,
-      searchTimer: null
+      readyUp: true
     };
   }
 
   getApplicationAdminUsers() {
     return $.ajax({
       type: 'GET',
-      url: '/admin/applications/console/grants?scope=admin:'.concat(this.props.app)
+      url: `/admin/applications/${this.props.app}/admins`
     }).done((data, textStatus, jqXHR) => {
       this.setState({grants: data});
     }).fail((jqXHR, textStatus, errorThrown) => {
@@ -296,60 +294,14 @@ class AdminUsers extends React.Component {
     });
   }
 
-  findConsoleUser() {
-    if(this.state.searching){
-      return false;
-    }
-
-    this.setState({
-      readyUp: false,
-      searching: true,
-      newUserExistingConsoleGrant: null,
-      newUserAlreadyHasScope: false
-    });
-
-    var user = encodeURIComponent(this.state.newUserInput);
-
-    return $.ajax({
-      type: 'GET',
-      url: '/admin/applications/console/grants?user='.concat(user)
-    }).done((data, textStatus, jqXHR) => {
-
-      this.setState({readyUp: true});
-
-      if (data.length === 1){
-
-        this.setState({newUserExistingConsoleGrant: data[0]});
-
-        var isAlreadyAdmin = this.state.grants.some((grant) => {
-          return grant.id === data[0].id;
-        });
-        this.setState({newUserAlreadyHasScope: isAlreadyAdmin});
-
-      }
-
-
-    }).fail((jqXHR, textStatus, errorThrown) => {
-      console.error(jqXHR.responseText);
-    }).always(() => {
-      this.setState({searching: false});
-    });
-  }
-
   onChangeState(e) {
-    this.setState({readyUp: false});
     var temp = {};
     const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
     temp[e.target.name] = value;
     this.setState(temp);
-
-    clearTimeout(this.state.searchTimer);
-    if (e.target.value.length > 0) {
-      this.setState({searchTimer: setTimeout(() => this.findConsoleUser(), 1000)});
-    }
   }
 
-  removeScope(index) {
+  removeAdmin(index) {
     var grant = this.state.grants[index];
 
     return $.ajax({
@@ -365,48 +317,22 @@ class AdminUsers extends React.Component {
     })
     .fail((jqXHR, textStatus, errorThrown) => {
       console.error(jqXHR);
+      if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
+        alert(jqXHR.responseJSON.message);
+      }
     });
   }
 
-  addNewUser(e) {
+  makeAdmin(e) {
     e.preventDefault();
 
-    if (this.state.newUserExistingConsoleGrant){
+    const grant = {
+      user: this.state.newUserInput
+    };
 
-      var newAdmin = this.state.newUserExistingConsoleGrant;
-
-      this.makeAdmin(this.props.app, this.state.newUserExistingConsoleGrant);
-
-
-    } else {
-
-      var newGrant = {
-        user: this.state.newUserInput
-      };
-
-      var app = this.props.app;
-
-      return $.ajax({
-        type: 'POST',
-        url: '/admin/applications/console/grants',
-        contentType: "application/json; charset=utf-8",
-        data: JSON.stringify(newGrant)
-      })
-      .done((data, textStatus, jqXHR) => {
-
-        this.makeAdmin(app, data);
-
-      })
-      .fail((jqXHR, textStatus, errorThrown) => {
-        console.error(jqXHR);
-      });
-    }
-  }
-
-  makeAdmin(app, grant) {
     return $.ajax({
       type: 'POST',
-      url: `/admin/applications/${app}/makeadmin`,
+      url: `/admin/applications/${this.props.app}/makeadmin`,
       contentType: "application/json; charset=utf-8",
       data: JSON.stringify(grant)
     })
@@ -430,7 +356,7 @@ class AdminUsers extends React.Component {
     var adminUsers = this.state.grants.map((grant, index) => {
       return (
         <li key={index} style={{marginBottom: '2px'}}>
-          <button type="button" className="btn btn-danger btn-xs" onClick={this.removeScope.bind(this, index)}>Remove admin</button>
+          <button type="button" className="btn btn-danger btn-xs" onClick={this.removeAdmin.bind(this, index)}>Remove admin</button>
           &nbsp;
           {grant.user}
         </li>
@@ -448,9 +374,9 @@ class AdminUsers extends React.Component {
             className="form-control"
             value={this.state.newUserInput}
             onChange={this.onChangeState}
-            readOnly={this.state.searching}
+            // readOnly={this.state.searching}
             placeholder="Add admin user"/>
-          <button type="submit" onClick={this.addNewUser} disabled={!this.state.readyUp} className="btn btn-default">Opret</button>
+          <button type="submit" onClick={this.makeAdmin} disabled={!this.state.readyUp} className="btn btn-default">Make admin</button>
         </form>
         <ul className="list-unstyled">
           {adminUsers}

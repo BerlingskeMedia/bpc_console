@@ -34,6 +34,7 @@ module.exports = class extends React.Component {
       contentType: "application/json; charset=utf-8",
       data: JSON.stringify(application),
       success: function(data, status){
+        document.cookie = 'console_ticket=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
         location.pathname = `/application/${data.id}`;
         // this.setState((prevState) => {
         //   applications: prevState.applications.push(data);

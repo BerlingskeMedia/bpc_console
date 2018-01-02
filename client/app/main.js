@@ -144,7 +144,7 @@ class ConsoleApp extends React.Component {
 
   getTicketDone(ticket, textStatus, jqXHR) {
     console.log('Get tickets success', ticket, textStatus);
-    this.setState({ authorized: true});
+    this.setState({authorized: true});
     this.setRefreshUserTicketTimeout(ticket);
   }
 
@@ -249,8 +249,8 @@ class Main extends React.Component {
               <Link to={`/admins`}>Console users</Link>
             </li>
           </ul>
-          <Route exact path="/" component={Applications}/>
-          <Route path="/applications" component={Applications}/>
+          <Route exact path="/" component={Applications} />
+          <Route path="/applications" component={Applications} />
           <Route path="/users" component={Users}/>
           <Route path="/admins" component={ConsoleUsers}/>
           <Route path={`/application/:app`} component={Application}/>

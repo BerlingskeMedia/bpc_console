@@ -19,6 +19,9 @@ module.exports = class extends React.Component {
       this.setState({grants: data});
     }).fail((jqXHR) => {
       console.error(jqXHR.responseText);
+      if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
+        alert(jqXHR.responseJSON.message);
+      }
     });
   }
 
@@ -40,6 +43,9 @@ module.exports = class extends React.Component {
       });
     }).fail((jqXHR, textStatus, errorThrown) => {
       console.error(jqXHR.responseText);
+      if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
+        alert(jqXHR.responseJSON.message);
+      }
     });
   }
 
@@ -54,6 +60,9 @@ module.exports = class extends React.Component {
       });
     }).fail((jqXHR, textStatus, errorThrown) => {
       console.error(jqXHR.responseText);
+      if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
+        alert(jqXHR.responseJSON.message);
+      }
     });
   }
 
@@ -69,6 +78,9 @@ module.exports = class extends React.Component {
       }
     }).fail((jqXHR, textStatus, errorThrown) => {
       console.error(jqXHR.responseText);
+      if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
+        alert(jqXHR.responseJSON.message);
+      }
     });
   }
 
@@ -84,6 +96,9 @@ module.exports = class extends React.Component {
       }
     }).fail((jqXHR, textStatus, errorThrown) => {
       console.error(jqXHR.responseText);
+      if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
+        alert(jqXHR.responseJSON.message);
+      }
     });
   }
 
