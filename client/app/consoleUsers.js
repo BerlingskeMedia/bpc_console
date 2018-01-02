@@ -152,8 +152,7 @@ module.exports = class extends React.Component {
     });
 
     return (
-      <div className="users">
-        <h3>Console users</h3>
+      <div className="consoleUsers" style={{paddingTop: '30px'}}>
         <AddConsoleUser createGrant={this.createGrant.bind(this)} />
         <table className="table">
           <tbody>
@@ -207,7 +206,7 @@ class AddConsoleUser extends React.Component {
   render() {
     var inputClasses = 'form-group '.concat(this.state.searchSuccess ? 'has-success' : '');
     return (
-      <form style={{paddingTop: '30px', paddingBottom: '30px'}} onSubmit={this.handleSubmit} className="form-inline">
+      <form style={{paddingBottom: '30px'}} onSubmit={this.handleSubmit} className="form-inline">
         <div className={inputClasses}>
           <input
             type="text"

@@ -18,8 +18,7 @@ module.exports = class extends React.Component {
 
   render() {
     return (
-      <div className="users">
-        <h3>Users</h3>
+      <div className="users" style={{paddingTop: '30px'}}>
         <SearchUser setUsers={this.setUsers} />
         <SearchResult users={this.state.users} />
       </div>
@@ -79,7 +78,7 @@ class SearchUser extends React.Component {
             name="searchBox"
             onChange={this.onChange}
             className="form-control"
-            placeholder="Søg via email eller ID"
+            placeholder="Type email or ID to start search"
             readOnly={this.state.searching}
             ref={(searchBox) => this.searchBox = searchBox} />
         </div>

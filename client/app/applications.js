@@ -74,11 +74,8 @@ module.exports = class extends React.Component {
     }.bind(this));
 
     return (
-      <div className="applications">
-
-        <h3>Applications</h3>
+      <div className="applications" style={{paddingTop: '30px'}}>
         <CreateApplication createApplication={this.createApplication} />
-
         <table className="table">
           <tbody>
             <tr>
@@ -118,7 +115,7 @@ class CreateApplication extends React.Component {
 
   render() {
     return (
-      <form style={{paddingTop: '30px', paddingBottom: '30px'}} onSubmit={this.handleSubmit} className="form-inline">
+      <form style={{paddingBottom: '30px'}} onSubmit={this.handleSubmit} className="form-inline">
         <input
           type="text"
           name="id"

@@ -244,8 +244,8 @@ module.exports = class extends React.Component {
                 className="form-control"
                 value={this.state.newScope}
                 onChange={this.onChangeState}
-                placeholder="Add scope"/>
-              <button type="submit" onClick={this.addScope} className="btn btn-default">Opret</button>
+                placeholder="Scope name"/>
+              <button type="submit" onClick={this.addScope} className="btn btn-default">Add</button>
             </form>
             <ul className="list-unstyled">
               {scopeList}
@@ -375,7 +375,7 @@ class AdminUsers extends React.Component {
             value={this.state.newUserInput}
             onChange={this.onChangeState}
             // readOnly={this.state.searching}
-            placeholder="Add admin user"/>
+            placeholder="Username (email)"/>
           <button type="submit" onClick={this.makeAdmin} disabled={!this.state.readyUp} className="btn btn-default">Make admin</button>
         </form>
         <ul className="list-unstyled">
