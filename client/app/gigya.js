@@ -49,7 +49,7 @@ class CreateUser extends React.Component {
 
       return $.ajax({
         type: 'POST',
-        url: '/admin/users/register',
+        url: '/_b/users/register',
         contentType: "application/json; charset=utf-8",
         data: JSON.stringify(user),
         success: function(data, status){

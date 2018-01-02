@@ -59,7 +59,7 @@ class SearchUser extends React.Component {
 
     return $.ajax({
       type: 'GET',
-      url: `/admin/users?email=${searchText}&id=${searchText}`,
+      url: `/_b/users?email=${searchText}&id=${searchText}`,
       contentType: "application/json; charset=utf-8"
     }).done((data, textStatus, jqXHR) => {
       this.props.setUsers(data);

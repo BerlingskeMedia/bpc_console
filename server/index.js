@@ -21,7 +21,7 @@ server.state('console_ticket', {
 
 server.register(Inert, () => {});
 server.register(Tickets, { routes: { prefix: '/tickets' } }, cb);
-server.register(Proxy, { routes: { prefix: '/admin' } }, cb);
+server.register(Proxy, { routes: { prefix: '/_b' } }, cb);
 
 server.route({
   method: 'GET',

@@ -26,7 +26,7 @@ module.exports = class extends React.Component {
   getApplication() {
     return $.ajax({
       type: 'GET',
-      url: '/admin/applications/'.concat(this.state.app)
+      url: '/_b/applications/'.concat(this.state.app)
     }).done((data, textStatus, jqXHR) => {
       if(data.settings === undefined || data.settings === null){
         data.settings = {};
@@ -43,7 +43,7 @@ module.exports = class extends React.Component {
   updateApplication(application) {
     return $.ajax({
       type: 'PUT',
-      url: '/admin/applications/'.concat(this.state.app),
+      url: '/_b/applications/'.concat(this.state.app),
       contentType: "application/json; charset=utf-8",
       data: JSON.stringify(application)
     }).done((data, textStatus, jqXHR) => {
@@ -60,7 +60,7 @@ module.exports = class extends React.Component {
   deleteApplication() {
     return $.ajax({
       type: 'DELETE',
-      url: '/admin/applications/'.concat(this.state.app),
+      url: '/_b/applications/'.concat(this.state.app),
       contentType: "application/json; charset=utf-8"
     }).done((data, textStatus, jqXHR) => {
       location.pathname = '/applications';
@@ -286,7 +286,7 @@ class AdminUsers extends React.Component {
   getApplicationAdminUsers() {
     return $.ajax({
       type: 'GET',
-      url: `/admin/applications/${this.props.app}/admins`
+      url: `/_b/applications/${this.props.app}/admins`
     }).done((data, textStatus, jqXHR) => {
       this.setState({grants: data});
     }).fail((jqXHR, textStatus, errorThrown) => {
@@ -306,7 +306,7 @@ class AdminUsers extends React.Component {
 
     return $.ajax({
       type: 'POST',
-      url: `/admin/applications/${this.props.app}/removeadmin`,
+      url: `/_b/applications/${this.props.app}/removeadmin`,
       contentType: "application/json; charset=utf-8",
       data: JSON.stringify(grant)
     })
@@ -332,7 +332,7 @@ class AdminUsers extends React.Component {
 
     return $.ajax({
       type: 'POST',
-      url: `/admin/applications/${this.props.app}/makeadmin`,
+      url: `/_b/applications/${this.props.app}/makeadmin`,
       contentType: "application/json; charset=utf-8",
       data: JSON.stringify(grant)
     })

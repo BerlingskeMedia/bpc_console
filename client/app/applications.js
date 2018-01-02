@@ -16,7 +16,7 @@ module.exports = class extends React.Component {
   getApplications() {
     return $.ajax({
       type: 'GET',
-      url: '/admin/applications',
+      url: '/_b/applications',
       contentType: "application/json; charset=utf-8",
       success: function(data, status){
         this.setState({applications: data.filter((a) => {return a.id !== 'console';})});
@@ -30,7 +30,7 @@ module.exports = class extends React.Component {
   createApplication(application) {
     return $.ajax({
       type: 'POST',
-      url: '/admin/applications',
+      url: '/_b/applications',
       contentType: "application/json; charset=utf-8",
       data: JSON.stringify(application),
       success: function(data, status){

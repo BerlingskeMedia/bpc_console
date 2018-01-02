@@ -14,7 +14,7 @@ module.exports = class extends React.Component {
   getConsoleGrants() {
     return $.ajax({
       type: 'GET',
-      url: '/admin/applications/console/grants'
+      url: '/_b/applications/console/grants'
     }).done(data => {
       this.setState({grants: data});
     }).fail((jqXHR) => {
@@ -34,7 +34,7 @@ module.exports = class extends React.Component {
 
     return $.ajax({
       type: 'POST',
-      url: '/admin/applications/console/grants',
+      url: '/_b/applications/console/grants',
       contentType: "application/json; charset=utf-8",
       data: JSON.stringify(grant)
     }).done((data, textStatus, jqXHR) => {
@@ -52,7 +52,7 @@ module.exports = class extends React.Component {
   deleteGrant(grant, index) {
     return $.ajax({
       type: 'DELETE',
-      url: '/admin/applications/console/grants/'.concat(grant.id),
+      url: '/_b/applications/console/grants/'.concat(grant.id),
       contentType: "application/json; charset=utf-8"
     }).done((data, textStatus, jqXHR) => {
       this.setState((prevState) => {
@@ -69,7 +69,7 @@ module.exports = class extends React.Component {
   makeSuperAdmin(grant, index) {
     return $.ajax({
       type: 'POST',
-      url: '/admin/superadmin/'.concat(grant.id)
+      url: '/_b/superadmin/'.concat(grant.id)
     }).done((data, textStatus, jqXHR) => {
       if (index > -1) {
         var grants = this.state.grants;
@@ -87,7 +87,7 @@ module.exports = class extends React.Component {
   demoteSuperAdmin(grant, index) {
     return $.ajax({
       type: 'DELETE',
-      url: '/admin/superadmin/'.concat(grant.id)
+      url: '/_b/superadmin/'.concat(grant.id)
     }).done((data, textStatus, jqXHR) => {
       if (index > -1) {
         var grants = this.state.grants;

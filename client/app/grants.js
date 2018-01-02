@@ -14,8 +14,8 @@ module.exports = class extends React.Component {
   getGrants() {
     return $.ajax({
       type: 'GET',
-      // url: '/admin/grants',
-      url: '/admin/applications/'.concat(this.props.app, '/grants'),
+      // url: '/_b/grants',
+      url: '/_b/applications/'.concat(this.props.app, '/grants'),
       contentType: "application/json; charset=utf-8"
     }).done((data, textStatus, jqXHR) => {
       this.setState({grants: data});
@@ -32,7 +32,7 @@ module.exports = class extends React.Component {
 
     return $.ajax({
       type: 'POST',
-      url: '/admin/applications/'.concat(this.props.app, '/grants'),
+      url: '/_b/applications/'.concat(this.props.app, '/grants'),
       contentType: "application/json; charset=utf-8",
       data: JSON.stringify(grant)
     }).done((data, textStatus, jqXHR) => {
@@ -47,7 +47,7 @@ module.exports = class extends React.Component {
   deleteGrant(grant, index) {
     return $.ajax({
       type: 'DELETE',
-      url: '/admin/applications/'.concat(this.props.app, '/grants/', grant.id)
+      url: '/_b/applications/'.concat(this.props.app, '/grants/', grant.id)
     }).done((data, textStatus, jqXHR) => {
       if(data.n > 0 && index){
         this.setState((prevState) => {
@@ -65,7 +65,7 @@ module.exports = class extends React.Component {
 
     return $.ajax({
       type: 'POST',
-      url: '/admin/applications/'.concat(this.props.app, '/grants/', grant.id),
+      url: '/_b/applications/'.concat(this.props.app, '/grants/', grant.id),
       contentType: "application/json; charset=utf-8",
       data: JSON.stringify(grant)
     }).done((data, textStatus, jqXHR) => {
@@ -84,7 +84,7 @@ module.exports = class extends React.Component {
 
     return $.ajax({
       type: 'POST',
-      url: '/admin/applications/'.concat(this.props.app, '/grants/', grant.id),
+      url: '/_b/applications/'.concat(this.props.app, '/grants/', grant.id),
       contentType: "application/json; charset=utf-8",
       data: JSON.stringify(grant)
     }).done((data, textStatus, jqXHR) => {
@@ -187,7 +187,7 @@ class CreateGrant extends React.Component {
 
     return $.ajax({
       type: 'GET',
-      url: '/admin/users?'.concat('email=', searchText)
+      url: '/_b/users?'.concat('email=', searchText)
     }).done((data, textStatus, jqXHR) => {
       if (data.length === 1){
         this.setState({searchSuccess: true, user: data[0]});
