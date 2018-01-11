@@ -31,23 +31,30 @@ class SearchUser extends React.Component {
 
   constructor(props){
     super(props);
-    this.onChange = this.onChange.bind(this);
-    this.searchUsersByEmail = this.searchUsersByEmail.bind(this);
+    this.onSearchChange = this.onSearchChange.bind(this);
+    this.onClickReload = this.onClickReload.bind(this);
+    this.searchUser = this.searchUser.bind(this);
     this.state = {
       searching: false,
       searchTimer: null
     };
   }
 
-  onChange(e) {
+  onSearchChange(e) {
     // // We're clearing the old timer
     clearTimeout(this.state.searchTimer);
     if (this.searchBox.value.length > 0) {
-      this.setState({searchTimer: setTimeout(this.searchUsersByEmail, 1000)});
+      this.setState({searchTimer: setTimeout(this.searchUser, 1000)});
     }
   }
 
-  searchUsersByEmail() {
+  onClickReload(e) {
+    if (this.searchBox.value.length > 0) {
+      this.searchUser();
+    }
+  }
+
+  searchUser() {
     if(this.state.searching){
       return false;
     }
@@ -72,15 +79,22 @@ class SearchUser extends React.Component {
   render() {
     return (
       <div className="row">
-        <div className="col-xs-12">
+        <div className="col-xs-11">
           <input
             type="text"
             name="searchBox"
-            onChange={this.onChange}
+            onChange={this.onSearchChange}
             className="form-control"
             placeholder="Type email or ID to start search"
             readOnly={this.state.searching}
             ref={(searchBox) => this.searchBox = searchBox} />
+        </div>
+        <div className="col-xs-1">
+          <div className="text-right">
+            <button className="btn btn-default" type="submit">
+              <span className="glyphicon glyphicon-repeat" aria-hidden="true" onClick={this.onClickReload}></span>
+            </button>
+          </div>
         </div>
       </div>
     );
