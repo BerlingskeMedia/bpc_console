@@ -91,8 +91,8 @@ class SearchUser extends React.Component {
         </div>
         <div className="col-xs-1">
           <div className="text-right">
-            <button className="btn btn-default" type="submit">
-              <span className="glyphicon glyphicon-repeat" aria-hidden="true" onClick={this.onClickReload}></span>
+            <button className="btn btn-default" type="submit" onClick={this.onClickReload}>
+              <span className="glyphicon glyphicon-repeat" aria-hidden="true"></span>
             </button>
           </div>
         </div>
