@@ -110,30 +110,68 @@ class SearchResult extends React.Component {
 
   render(){
 
+    if (this.props.users.length !== 1) {
+      return null;
+    }
+
+    const user = this.props.users[0];
+    let dataFromGigya;
+
+    if (user.gigya) {
+      dataFromGigya = Object.keys(user.gigya).map(function(key) {
+        return (
+          <span>
+            <dt>{key}</dt>
+            <dd>{user.gigya[key]}</dd>
+          </span>
+        );
+      });
+    }
+
     return (
       <div style={{marginTop: '30px', marginBottom: '30px'}}>
-        { this.props.users.length === 1 ?
           <div>
           <div className="row">
-            <div className="col-xs-12">
-            <span>
-              <dt>ID</dt>
-              <dd>{this.props.users[0].id}</dd>
-            </span>
+            <div className="col-xs-6">
               <span>
-                <dt>Email</dt>
-                <dd>{this.props.users[0].email}</dd>
+                <dt>ID</dt>
+                <dd>{user.id}</dd>
               </span>
+              <span>
+                <dt>Created</dt>
+                <dd>{user.createdAt}</dd>
+              </span>
+              <span>
+                <dt>Last updated</dt>
+                <dd>{user.lastUpdated}</dd>
+              </span>
+              <span>
+                <dt>Last fetched</dt>
+                <dd>{user.lastFetched}</dd>
+              </span>
+              { user.email
+                ? <span>
+                    <dt>Email (tmp)</dt>
+                    <dd>{user.email}</dd>
+                  </span>
+                : null
+              }
+            </div>
+            <div className="col-xs-6">
+              { dataFromGigya
+                ? <h4>Gigya data</h4>
+                : null
+              }
+              {dataFromGigya}
             </div>
           </div>
           <hr />
           <div className="row">
             <div className="col-xs-12">
-              <DataScopes dataScopes={this.props.users[0].dataScopes} />
+              <DataScopes dataScopes={user.dataScopes} />
             </div>
           </div>
           </div>
-        : null }
       </div>
     );
   }
