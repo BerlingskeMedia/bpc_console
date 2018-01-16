@@ -120,7 +120,7 @@ class SearchResult extends React.Component {
     if (user.gigya) {
       dataFromGigya = Object.keys(user.gigya).map(function(key) {
         return (
-          <span>
+          <span key={key}>
             <dt>{key}</dt>
             <dd>{user.gigya[key]}</dd>
           </span>
