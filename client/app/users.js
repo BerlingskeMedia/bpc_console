@@ -121,7 +121,7 @@ class SearchResult extends React.Component {
       dataFromGigya = Object.keys(user.gigya).map(function(key) {
         return (
           <span key={key}>
-            <dt>{key}</dt>
+            <dt>Gigya {key}</dt>
             <dd>{user.gigya[key]}</dd>
           </span>
         );
@@ -158,10 +158,6 @@ class SearchResult extends React.Component {
               }
             </div>
             <div className="col-xs-6">
-              { dataFromGigya
-                ? <h4>Gigya data</h4>
-                : null
-              }
               {dataFromGigya}
             </div>
           </div>
