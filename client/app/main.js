@@ -7,7 +7,7 @@ const Route = ReactRouterDom.Route;
 const Link = ReactRouterDom.Link;
 const Redirect = ReactRouterDom.Redirect;
 const Applications = require('./applications');
-const Users = require('./users');
+const Permissions = require('./permissions');
 const ConsoleUsers = require('./consoleUsers');
 const Application = require('./application');
 const Gigya = require('./gigya');
@@ -149,6 +149,7 @@ class ConsoleApp extends React.Component {
   }
 
   getTicketFail(jqXHR, textStatus, errorThrown) {
+    console.error(jqXHR);
     console.error(jqXHR.responseText);
     this.setState({ authorized: false });
   }
@@ -240,19 +241,20 @@ class Main extends React.Component {
           <h1>BPC Console</h1>
           <ul className="nav nav-tabs">
             <li role="presentation" className="_active" onClick={this.changemenu}>
-              <Link to={`/applications`}>Applications</Link>
+              <Link to={`/permissions`}>Permissions</Link>
             </li>
             <li role="presentation" onClick={this.changemenu}>
-              <Link to={`/users`}>Users</Link>
+              <Link to={`/applications`}>Applications</Link>
             </li>
             <li role="presentation" onClick={this.changemenu}>
               <Link to={`/admins`}>Console users</Link>
             </li>
           </ul>
-          <Route exact path="/" component={Applications} />
+          <Route exact path="/" component={Permissions} />
+          <Route path="/permissions" component={Permissions}/>
           <Route path="/applications" component={Applications} />
-          <Route path="/users" component={Users}/>
           <Route path="/admins" component={ConsoleUsers}/>
+          <Route path={`/applications/:app`} component={Application}/>
           <Route path={`/application/:app`} component={Application}/>
           <Route path={`/gigya`} component={Gigya}/>
         </div>
