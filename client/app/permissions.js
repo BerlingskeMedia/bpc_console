@@ -83,6 +83,7 @@ class SearchUser extends React.Component {
           <input
             type="text"
             name="searchBox"
+            autoFocus={true}
             onChange={this.onSearchChange}
             className="form-control"
             placeholder="Type email or ID to start search"
