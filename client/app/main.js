@@ -108,7 +108,7 @@ class ConsoleApp extends React.Component {
       return k.concat('=', params[k]);
     }).join('&');
 
-    var url = this.state.bpc_env.href.concat('rsvp?app=', this.state.bpc_env.app_id, '&', rsvpParams)
+    var url = this.state.bpc_env.href.concat('rsvp?app=', this.state.bpc_env.app, '&', rsvpParams)
 
     return $.ajax({
       type: 'GET',

@@ -22,10 +22,9 @@ const BPC_APP_SECRET = process.env.BPC_APP_SECRET;
 console.log('Connecting to BPC on', BPC_URL.host, 'AS', BPC_APP_ID);
 
 module.exports.env = function() {
-  return {
-    href: BPC_URL.href,
-    app_id: BPC_APP_ID,
-  };
+  return Object.assign({}, BPC_URL, {
+    app: BPC_APP_ID,
+  });
 };
 
 function getAppTicket() {
