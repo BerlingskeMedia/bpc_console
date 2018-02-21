@@ -160,6 +160,7 @@ class SearchResult extends React.Component {
             </div>
             <div className="col-xs-6">
               {dataFromGigya}
+              <RecalcPermissionsButton dataScopes={user.dataScopes} />
             </div>
           </div>
           <hr />
@@ -169,6 +170,57 @@ class SearchResult extends React.Component {
             </div>
           </div>
           </div>
+      </div>
+    );
+  }
+}
+
+
+class RecalcPermissionsButton extends React.Component {
+
+  constructor(props){
+    super(props);
+    this.onClick = this.onClick.bind(this);
+    this.state = {
+      recalcPermissionsUrl: null
+    };
+  }
+
+  onClick(e) {
+    return $.ajax({
+      type: 'GET',
+      url: this.state.recalcPermissionsUrl
+    }).done((data, textStatus, jqXHR) => {
+      console.log('recalc', data, textStatus);
+    }).fail((jqXHR, textStatus, errorThrown) => {
+      console.error(jqXHR.responseText);
+    });
+  }
+
+  componentDidMount() {
+    if (this.props.dataScopes.profile && this.props.dataScopes.profile.sso_uid) {
+      const sso_uid = this.props.dataScopes.profile.sso_uid;
+      let recalcPermissionsUrl =
+        window.location.hostname === 'console.berlingskemedia.net' ?
+          'https://admin.kundeunivers.dk/tester?name=sso-'.concat(sso_uid) :
+        window.location.hostname === 'console.berlingskemedia-testing.net' ?
+          'https://admin.kundeunivers-testing.dk/tester?name=sso-'.concat(sso_uid) :
+        null;
+
+      this.setState({recalcPermissionsUrl: recalcPermissionsUrl});
+    }
+  }
+
+  render() {
+
+    return (
+      <div style={{paddingTop: '5px'}}>
+        { this.state.recalcPermissionsUrl
+          ? <button className="btn btn-default" type="button" onClick={this.onClick}>
+              Recalc permissions
+            </button>
+            : null
+        }
       </div>
     );
   }
