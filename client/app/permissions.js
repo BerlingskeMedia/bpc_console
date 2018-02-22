@@ -182,6 +182,7 @@ class RecalcPermissionsButton extends React.Component {
     super(props);
     this.onClick = this.onClick.bind(this);
     this.state = {
+      showButton: false,
       recalcPermissionsUrl: null
     };
   }
@@ -198,16 +199,28 @@ class RecalcPermissionsButton extends React.Component {
   }
 
   componentDidMount() {
-    if (this.props.dataScopes.profile && this.props.dataScopes.profile.sso_uid) {
-      const sso_uid = this.props.dataScopes.profile.sso_uid;
-      let recalcPermissionsUrl =
+    if (this.props.dataScopes && this.props.dataScopes.profile) {
+
+      const sso_uid = this.props.dataScopes.profile.sso_id ?
+        this.props.dataScopes.profile.sso_id :
+        this.props.dataScopes.profile.sso_uid;
+
+      if (sso_uid) {
+        let recalcPermissionsUrl =
         window.location.hostname === 'console.berlingskemedia.net' ?
-          'https://admin.kundeunivers.dk/tester?name=sso-'.concat(sso_uid) :
+        'https://admin.kundeunivers.dk/tester?name=sso-'.concat(sso_uid) :
         window.location.hostname === 'console.berlingskemedia-testing.net' ?
-          'https://admin.kundeunivers-testing.dk/tester?name=sso-'.concat(sso_uid) :
+        'https://admin.kundeunivers-testing.dk/tester?name=sso-'.concat(sso_uid) :
+        window.location.hostname === 'localhost' ?
+        'https://admin.kundeunivers-testing.dk/tester?name=sso-'.concat(sso_uid) :
         null;
 
-      this.setState({recalcPermissionsUrl: recalcPermissionsUrl});
+        this.setState({recalcPermissionsUrl: recalcPermissionsUrl, showButton: true});
+      } else {
+        this.setState({recalcPermissionsUrl: null, showButton: false});
+      }
+    } else {
+      this.setState({recalcPermissionsUrl: null, showButton: false});
     }
   }
 
@@ -215,7 +228,7 @@ class RecalcPermissionsButton extends React.Component {
 
     return (
       <div style={{paddingTop: '5px'}}>
-        { this.state.recalcPermissionsUrl
+        { this.state.showButton
           ? <button className="btn btn-default" type="button" onClick={this.onClick}>
               Recalc permissions
             </button>
