@@ -222,7 +222,7 @@ module.exports = class extends React.Component {
             <label className="col-sm-2 control-label">Ticket duration</label>
             <div className="col-sm-10">
               <p>Minutes until the user ticket needs to be reissued:</p>
-              <input type="number" className="form-control" name="ticketDuration" min="1" placeholder="Default: 60 minutes" onChange={this.onChangeApplicationSettings}></input>
+              <input type="number" className="form-control" name="ticketDuration" value={this.state.application.settings.ticketDuration} min="1" placeholder="Default: 60 minutes" onChange={this.onChangeApplicationSettings}></input>
             </div>
           </div>
           <div className="form-group">
