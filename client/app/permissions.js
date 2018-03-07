@@ -160,7 +160,7 @@ class SearchResult extends React.Component {
             </div>
             <div className="col-xs-6">
               {dataFromGigya}
-              <RecalcPermissionsButton dataScopes={user.dataScopes} />
+              <RecalcPermissionsButton user={user} />
             </div>
           </div>
           <hr />
@@ -199,33 +199,35 @@ class RecalcPermissionsButton extends React.Component {
   }
 
   componentDidMount() {
-    if (this.props.dataScopes && this.props.dataScopes.profile) {
+    let nameQueryParam;
 
-      const sso_uid = this.props.dataScopes.profile.sso_id ?
-        this.props.dataScopes.profile.sso_id :
-        this.props.dataScopes.profile.sso_uid;
-
-      if (sso_uid) {
-        let recalcPermissionsUrl =
-        window.location.hostname === 'console.berlingskemedia.net' ?
-        'https://admin.kundeunivers.dk/tester?name=sso-'.concat(sso_uid) :
-        window.location.hostname === 'console.berlingskemedia-testing.net' ?
-        'https://admin.kundeunivers-testing.dk/tester?name=sso-'.concat(sso_uid) :
-        window.location.hostname === 'localhost' ?
-        'https://admin.kundeunivers-testing.dk/tester?name=sso-'.concat(sso_uid) :
-        null;
-
-        this.setState({recalcPermissionsUrl: recalcPermissionsUrl, showButton: true});
-      } else {
-        this.setState({recalcPermissionsUrl: null, showButton: false});
+    if (this.props.user.gigya.UID) {
+      nameQueryParam = this.props.user.gigya.UID;
+    } else if (this.props.user.dataScopes && this.props.user.dataScopes.profile) {
+      if (this.props.user.dataScopes.profile.sso_id) {
+        nameQueryParam = this.props.user.dataScopes.profile.sso_id;
+      } else if (this.props.user.dataScopes.profile.sso_uid) {
+        nameQueryParam = this.props.user.dataScopes.profile.sso_uid;
       }
+    }
+
+    if (nameQueryParam) {
+      let recalcPermissionsUrl =
+      window.location.hostname === 'console.berlingskemedia.net' ?
+      'https://admin.kundeunivers.dk/tester?name='.concat(nameQueryParam) :
+      window.location.hostname === 'console.berlingskemedia-testing.net' ?
+      'https://admin.kundeunivers-testing.dk/tester?name='.concat(nameQueryParam) :
+      window.location.hostname === 'localhost' ?
+      'https://admin.kundeunivers-testing.dk/tester?name='.concat(nameQueryParam) :
+      null;
+
+      this.setState({recalcPermissionsUrl: recalcPermissionsUrl, showButton: true});
     } else {
       this.setState({recalcPermissionsUrl: null, showButton: false});
     }
   }
 
   render() {
-
     return (
       <div style={{paddingTop: '5px'}}>
         { this.state.showButton
