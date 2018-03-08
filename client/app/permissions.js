@@ -181,16 +181,12 @@ class RecalcPermissionsButton extends React.Component {
   constructor(props){
     super(props);
     this.onClick = this.onClick.bind(this);
-    this.state = {
-      showButton: false,
-      recalcPermissionsUrl: null
-    };
   }
 
-  onClick(e) {
+  onClick(recalcPermissionsUrl) {
     return $.ajax({
       type: 'GET',
-      url: this.state.recalcPermissionsUrl
+      url: recalcPermissionsUrl
     }).done((data, textStatus, jqXHR) => {
       console.log('recalc', data, textStatus);
     }).fail((jqXHR, textStatus, errorThrown) => {
@@ -198,10 +194,10 @@ class RecalcPermissionsButton extends React.Component {
     });
   }
 
-  componentDidMount() {
+  render() {
     let nameQueryParam;
 
-    if (this.props.user.gigya.UID) {
+    if (this.props.user.gigya && this.props.user.gigya.UID) {
       nameQueryParam = this.props.user.gigya.UID;
     } else if (this.props.user.dataScopes && this.props.user.dataScopes.profile) {
       if (this.props.user.dataScopes.profile.sso_id) {
@@ -221,23 +217,16 @@ class RecalcPermissionsButton extends React.Component {
       'https://admin.kundeunivers-testing.dk/tester?name='.concat(nameQueryParam) :
       null;
 
-      this.setState({recalcPermissionsUrl: recalcPermissionsUrl, showButton: true});
+      return (
+        <div style={{paddingTop: '5px'}}>
+          <button className="btn btn-default" type="button" onClick={this.onClick.bind(this, recalcPermissionsUrl)}>
+            Recalc permissions
+          </button>
+        </div>
+      );
     } else {
-      this.setState({recalcPermissionsUrl: null, showButton: false});
+      return null;
     }
-  }
-
-  render() {
-    return (
-      <div style={{paddingTop: '5px'}}>
-        { this.state.showButton
-          ? <button className="btn btn-default" type="button" onClick={this.onClick}>
-              Recalc permissions
-            </button>
-            : null
-        }
-      </div>
-    );
   }
 }
 
