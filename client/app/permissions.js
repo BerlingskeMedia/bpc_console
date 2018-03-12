@@ -220,7 +220,7 @@ class RecalcPermissionsButton extends React.Component {
       return (
         <div style={{paddingTop: '5px'}}>
           <button className="btn btn-default" type="button" onClick={this.onClick.bind(this, recalcPermissionsUrl)}>
-            Recalc permissions
+            Recalc KU permissions
           </button>
         </div>
       );
