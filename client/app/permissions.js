@@ -6,7 +6,7 @@ module.exports = class extends React.Component {
   constructor(props){
     super(props);
     this.setUsers = this.setUsers.bind(this);
-    this.state = {users: []};
+    this.state = {users: null};
   }
 
   setUsers(users) {
@@ -34,6 +34,7 @@ class SearchUser extends React.Component {
     this.onSearchChange = this.onSearchChange.bind(this);
     this.onClickReload = this.onClickReload.bind(this);
     this.searchUser = this.searchUser.bind(this);
+    this.clearSearch = this.clearSearch.bind(this);
     this.state = {
       searching: false,
       searchTimer: null
@@ -45,6 +46,8 @@ class SearchUser extends React.Component {
     clearTimeout(this.state.searchTimer);
     if (this.searchBox.value.length > 0) {
       this.setState({searchTimer: setTimeout(this.searchUser, 1000)});
+    } else {
+      this.setState({searchTimer: setTimeout(this.clearSearch, 1000)});
     }
   }
 
@@ -74,6 +77,10 @@ class SearchUser extends React.Component {
     }).always(() => {
       this.setState({searching: false});
     });
+  }
+
+  clearSearch() {
+    this.props.setUsers(null);
   }
 
   render() {
@@ -111,65 +118,103 @@ class SearchResult extends React.Component {
 
   render(){
 
-    if (this.props.users.length !== 1) {
+    let rows = [];
+
+    if (this.props.users === null) {
+
       return null;
+
+    } else if (this.props.users.length === 0) {
+
+      rows = [
+        <div key={1} className="row">
+          <div className="col-xs-6">
+            <p>No result</p>
+          </div>
+        </div>
+      ];
+
+    } else if (this.props.users.length === 1) {
+
+      rows = [
+        <UserDetails key={1} user={this.props.users[0]} />,
+        <DataScopes key={2} dataScopes={this.props.users[0].dataScopes} />
+      ];
+
+    } else if (this.props.users.length > 1) {
+
+      rows = this.props.users.map((u,i) => {
+        return (
+          <UserDetails key={i} user={u} />
+        );
+      });
+
     }
 
-    const user = this.props.users[0];
+    return (
+      <div style={{marginTop: '30px', marginBottom: '30px'}}>
+        {rows}
+      </div>
+    );
+  }
+}
+
+
+class UserDetails extends React.Component {
+
+  constructor(props){
+    super(props);
+  }
+
+  render() {
     let dataFromGigya;
+    const user = this.props.user;
 
     if (user.gigya) {
       dataFromGigya = Object.keys(user.gigya).map(function(key) {
         return (
           <span key={key}>
-            <dt>Gigya {key}</dt>
-            <dd>{user.gigya[key]}</dd>
+          <dt>Gigya {key}</dt>
+          <dd>{user.gigya[key]}</dd>
           </span>
         );
       });
     }
 
     return (
-      <div style={{marginTop: '30px', marginBottom: '30px'}}>
-          <div>
-          <div className="row">
-            <div className="col-xs-6">
-              <span>
-                <dt>ID</dt>
-                <dd>{user.id}</dd>
-              </span>
-              <span>
-                <dt>Created</dt>
-                <dd>{user.createdAt}</dd>
-              </span>
-              <span>
-                <dt>Last updated</dt>
-                <dd>{user.lastUpdated}</dd>
-              </span>
-              <span>
-                <dt>Last fetched</dt>
-                <dd>{user.lastFetched}</dd>
-              </span>
-              { user.email
-                ? <span>
-                    <dt>Email (tmp)</dt>
-                    <dd>{user.email}</dd>
-                  </span>
-                : null
-              }
-            </div>
-            <div className="col-xs-6">
-              {dataFromGigya}
-              <RecalcPermissionsButton user={user} />
-            </div>
+      <div>
+        <div className="row">
+          <div className="col-xs-6">
+            <span>
+              <dt>ID</dt>
+              <dd>{user.id}</dd>
+            </span>
+            <span>
+              <dt>Created</dt>
+              <dd>{user.createdAt}</dd>
+            </span>
+            <span>
+              <dt>Last updated</dt>
+              <dd>{user.lastUpdated}</dd>
+            </span>
+            <span>
+              <dt>Last fetched</dt>
+              <dd>{user.lastFetched}</dd>
+            </span>
+            { user.email
+              ? <span>
+                  <dt>Email (tmp)</dt>
+                  <dd>{user.email}</dd>
+                </span>
+              : null
+            }
           </div>
-          <hr />
-          <div className="row">
-            <div className="col-xs-12">
-              <DataScopes dataScopes={user.dataScopes} />
-            </div>
+          <div className="col-xs-6">
+            {dataFromGigya}
+            <RecalcPermissionsButton user={user} />
           </div>
-          </div>
+        </div>
+        <hr />
       </div>
     );
   }
@@ -244,8 +289,10 @@ class DataScopes extends React.Component {
     }.bind(this));
 
     return (
-      <div>
-        {scopes}
+      <div className="row">
+        <div className="col-xs-12">
+          {scopes}
+        </div>
       </div>
     );
   }
