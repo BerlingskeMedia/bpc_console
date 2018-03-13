@@ -10,15 +10,6 @@ const Bpc = require('./bpc_client');
 var server = new Hapi.Server();
 server.connection({ port: process.env.PORT ? process.env.PORT : 8000 });
 
-server.state('console_ticket', {
-  ttl: 1000 * 60 * 60 * 24 * 30, // (one month)
-  isHttpOnly: false,
-  isSecure: false,
-  // isSameSite: false,
-  path: '/',
-  encoding: 'base64json'
-});
-
 server.register(Inert, () => {});
 server.register(Tickets, { routes: { prefix: '/tickets' } }, cb);
 server.register(Proxy, { routes: { prefix: '/_b' } }, cb);
