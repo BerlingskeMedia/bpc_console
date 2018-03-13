@@ -22,6 +22,14 @@ class ConsoleApp extends React.Component {
 
   constructor(props) {
     super(props);
+    this.onGoogleSignIn = this.onGoogleSignIn.bind(this);
+    this.getRsvp = this.getRsvp.bind(this);
+    this.setRefreshUserTicketTimeout = this.setRefreshUserTicketTimeout.bind(this);
+    this.getUserTicket = this.getUserTicket.bind(this);
+    this.refreshUserTicket = this.refreshUserTicket.bind(this);
+    this.getTicketDone = this.getTicketDone.bind(this);
+    this.getTicketFail = this.getTicketFail.bind(this);
+    this.deleteUserTicket = this.deleteUserTicket.bind(this);
     this.state = {
       authenticated: false,
       authenticationNeeded: false,
@@ -75,7 +83,11 @@ class ConsoleApp extends React.Component {
       provider: 'google'
     };
 
-    this.setState({ authenticated: true, profile: profile });
+    this.setState({
+      authenticated: true,
+      authenticationNeeded: false,
+      profile: profile
+    });
 
     var ticket = readTicket();
 
@@ -86,9 +98,8 @@ class ConsoleApp extends React.Component {
         this.getUserTicket(response);
       }.bind(this));
     } else {
-      console.log('Already ticket', ticket);
-      this.setState({ authorized: true});
-      this.setRefreshUserTicketTimeout(ticket);
+      console.log('Found ticket in cookie');
+      this.getTicketDone(ticket, ' by cookie');
     }
   }
 
@@ -144,7 +155,7 @@ class ConsoleApp extends React.Component {
 
   getTicketDone(ticket, textStatus, jqXHR) {
     console.log('Get tickets success', ticket, textStatus);
-    this.setState({authorized: true});
+    this.setState({ authorized: true });
     this.setRefreshUserTicketTimeout(ticket);
   }
 
