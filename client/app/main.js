@@ -246,10 +246,19 @@ class ConsoleApp extends React.Component {
 
 class Main extends React.Component {
   render() {
+
+    const environment_style =
+      window.location.hostname === 'console.berlingskemedia.net' ? null :
+      // window.location.hostname === 'console.berlingskemedia.net' ? { backgroundColor: 'crimson', borderRadius: '10px', padding: '10px' } :
+      window.location.hostname === 'console.berlingskemedia-staging.net' ? { backgroundColor: 'coral', borderRadius: '10px', padding: '10px' } :
+      window.location.hostname === 'console.berlingskemedia-testing.net' ? { backgroundColor: 'palegreen', borderRadius: '10px', padding: '10px' } :
+      window.location.hostname === 'localhost' ? { backgroundColor: 'aqua', borderRadius: '10px', padding: '10px' } :
+      null;
+
     return (
       <Router>
         <div>
-          <h1>BPC Console</h1>
+          <h1 style={environment_style}>BPC Console</h1>
           <ul className="nav nav-tabs">
             <li role="presentation" className="_active" onClick={this.changemenu}>
               <Link to={`/permissions`}>Permissions</Link>
