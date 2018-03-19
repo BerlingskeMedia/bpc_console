@@ -3,10 +3,10 @@ var webpack = require('webpack');
 
 module.exports = {
   target: 'web',
-  // entry: path.join(__dirname, 'admin/app/main.js'),
+  // entry: path.join(__dirname, 'admin/src/main.js'),
   entry: {
-    // "build": path.join(__dirname, 'app/main.js'),
-    'client/build': path.join(__dirname, 'client/app/main.js')
+    // "build": path.join(__dirname, 'src/main.js'),
+    'client/build': path.join(__dirname, 'client/src/main.js')
   },
   output: {
     path: path.join(__dirname, '.'),
@@ -17,7 +17,7 @@ module.exports = {
       { test: /\.css$/, loader: 'style!css' },
       // { test: /\.json$/, loader: 'json-loader' },
       // { test: path.join(__dirname, 'client'), loader: 'babel-loader', query: { presets: ['react', 'es2015'] } },
-      { test: path.join(__dirname, 'client/app'), loader: 'babel-loader', query: { presets: ['react', 'es2015'] } },
+      { test: path.join(__dirname, 'client/src'), loader: 'babel-loader', query: { presets: ['react', 'es2015'] } },
     ]
   },
   plugins: [
