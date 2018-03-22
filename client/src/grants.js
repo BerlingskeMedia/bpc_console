@@ -129,23 +129,25 @@ module.exports = class extends React.Component {
       <div className="grants">
         <h3>Grants</h3>
         <CreateGrant createGrant={this.createGrant.bind(this)} />
-        <table className="table">
-          <tbody>
-            <tr>
-              <th className="col-xs-6">User</th>
-              <th className="col-xs-2">Expires</th>
-              <th className="col-xs-2"></th>
-              <th className="col-xs-2"></th>
-            </tr>
-            {grants}
-            {grants === null || grants.length === 0
-              ? <tr><td colSpan="4">(This app has no grants.)</td></tr>
-              : null
-            }
-          </tbody>
-        </table>
+        <p>We cannot show all the grants right now, as they might break the page.</p>
+        <p>Soon you can search a grant.</p>
       </div>
     );
+    // <table className="table">
+    // <tbody>
+    // <tr>
+    // <th className="col-xs-6">User</th>
+    // <th className="col-xs-2">Expires</th>
+    // <th className="col-xs-2"></th>
+    // <th className="col-xs-2"></th>
+    // </tr>
+    // {grants}
+    // {grants === null || grants.length === 0
+    //   ? <tr><td colSpan="4">(This app has no grants.)</td></tr>
+    //   : null
+    // }
+    // </tbody>
+    // </table>
   }
 }
 
