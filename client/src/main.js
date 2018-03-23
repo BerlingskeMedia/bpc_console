@@ -27,8 +27,8 @@ class ConsoleApp extends React.Component {
     this.setRefreshUserTicketTimeout = this.setRefreshUserTicketTimeout.bind(this);
     this.getUserTicket = this.getUserTicket.bind(this);
     this.refreshUserTicket = this.refreshUserTicket.bind(this);
-    this.getTicketDone = this.getTicketDone.bind(this);
-    this.getTicketFail = this.getTicketFail.bind(this);
+    this.getUserTicketDone = this.getUserTicketDone.bind(this);
+    this.getUserTicketFail = this.getUserTicketFail.bind(this);
     this.deleteUserTicket = this.deleteUserTicket.bind(this);
     this.state = {
       authenticated: false,
@@ -89,18 +89,9 @@ class ConsoleApp extends React.Component {
       profile: profile
     });
 
-    var ticket = readTicket();
-
-    // We'll get a new ticket if there's then minutes left
-    if(!ticket || (ticket.exp - (1000 * 60 * 10)) < Date.now()){
-      this.getRsvp(profile).then(function(response){
-        console.log('getRsvp', response);
-        this.getUserTicket(response);
-      }.bind(this));
-    } else {
-      console.log('Found ticket in cookie');
-      this.getTicketDone(ticket, ' by cookie');
-    }
+    this.getRsvp(profile).then((response) => {
+      this.getUserTicket(response);
+    });
   }
 
   onGoogleSignInFailure(err) {
@@ -139,8 +130,8 @@ class ConsoleApp extends React.Component {
       contentType: 'application/json; charset=utf-8',
       data: JSON.stringify(rsvp)
     })
-    .done((ticket, textStatus, jqXHR) => this.getTicketDone(ticket, textStatus, jqXHR))
-    .fail((jqXHR, textStatus, errorThrown) => this.getTicketFail(jqXHR, textStatus, errorThrown));
+    .done((ticket, textStatus, jqXHR) => this.getUserTicketDone(ticket, textStatus, jqXHR))
+    .fail((jqXHR, textStatus, errorThrown) => this.getUserTicketFail(jqXHR, textStatus, errorThrown));
   }
 
   refreshUserTicket() {
@@ -149,17 +140,17 @@ class ConsoleApp extends React.Component {
       url: '/tickets',
       contentType: 'application/json; charset=utf-8'
     })
-    .done((ticket, textStatus, jqXHR) => this.getTicketDone(ticket, textStatus, jqXHR))
-    .fail((jqXHR, textStatus, errorThrown) => this.getTicketFail(jqXHR, textStatus, errorThrown));
+    .done((ticket, textStatus, jqXHR) => this.getUserTicketDone(ticket, textStatus, jqXHR))
+    .fail((jqXHR, textStatus, errorThrown) => this.getUserTicketFail(jqXHR, textStatus, errorThrown));
   }
 
-  getTicketDone(ticket, textStatus, jqXHR) {
+  getUserTicketDone(ticket, textStatus, jqXHR) {
     console.log('Get tickets success', ticket, textStatus);
     this.setState({ authorized: true });
     this.setRefreshUserTicketTimeout(ticket);
   }
 
-  getTicketFail(jqXHR, textStatus, errorThrown) {
+  getUserTicketFail(jqXHR, textStatus, errorThrown) {
     console.error(jqXHR);
     console.error(jqXHR.responseText);
     this.setState({ authorized: false });
