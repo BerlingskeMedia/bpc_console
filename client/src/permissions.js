@@ -284,7 +284,7 @@ class DataScopes extends React.Component {
 
   render() {
 
-    var scopes = Object.keys(this.props.dataScopes).map(function (name, index) {
+    var scopes = Object.keys(this.props.dataScopes ? this.props.dataScopes : {}).map(function (name, index) {
       return <ScopePermissions key={index} name={name} permissions={this.props.dataScopes[name]} />
     }.bind(this));
 
