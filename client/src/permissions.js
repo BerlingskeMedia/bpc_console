@@ -190,6 +190,18 @@ class UserDetails extends React.Component {
               <dd>{user.id}</dd>
             </span>
             <span>
+              <dt>Email</dt>
+              <dd>{user.email}</dd>
+            </span>
+            <span>
+              <dt>Provider</dt>
+              <dd>{user.provider}</dd>
+            </span>
+            <span>
+              <dt>Internt id</dt>
+              <dd>{user._id}</dd>
+            </span>
+            <span>
               <dt>Created</dt>
               <dd>{user.createdAt}</dd>
             </span>
@@ -201,13 +213,6 @@ class UserDetails extends React.Component {
               <dt>Last fetched</dt>
               <dd>{user.lastFetched}</dd>
             </span>
-            { user.email
-              ? <span>
-                  <dt>Email (tmp)</dt>
-                  <dd>{user.email}</dd>
-                </span>
-              : null
-            }
           </div>
           <div className="col-xs-6">
             {dataFromGigya}
