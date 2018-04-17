@@ -170,9 +170,8 @@ module.exports = class extends React.Component {
           <div className="form-group">
             <label className="col-sm-2 control-label" htmlFor="inputProvider">Provider/RSVP</label>
             <div className="col-sm-10">
-              <p>Only allow RSVP from this provider:</p>
+              <p>Validate RSVP against this provider:</p>
               <select className="form-control" value={this.state.application.settings.provider} name="provider" id="inputProvider" onChange={this.onChangeApplicationSettings}>
-                <option value=""></option>
                 <option value="gigya">Gigya</option>
                 <option value="google">Google</option>
               </select>
