@@ -27,7 +27,7 @@ module.exports = class extends React.Component {
 
   createGrant(user) {
     var grant = {
-      user: user,
+      user: user.id,
       scope: [],
       exp: null
     };
@@ -113,9 +113,11 @@ module.exports = class extends React.Component {
     var grants = this.state.grants.map((grant, index) => {
       var isSuperAdmin = grant.scope.indexOf('admin:*') > -1;
 
-      var isAdminOfApp = grant.scope.filter(function(scope){
+      var isAdminOfApp = grant.scope
+      .filter(function(scope){
         return scope !== 'admin:*' && scope.indexOf('admin:') === 0;
-      }).map(function(scope, index) {
+      })
+      .map(function(scope, index) {
         var app = scope.substring('admin:'.length);
         return (
           <span key={index + '.' + app}>
@@ -176,27 +178,80 @@ class AddConsoleUser extends React.Component {
   constructor(props){
     super(props);
     this.onChange = this.onChange.bind(this);
+    this.searchUsers = this.searchUsers.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    // this.state = {
+    //   inputValue: ''
+    // };
     this.state = {
-      inputValue: ''
+      searchText: '',
+      searchInProgress: false,
+      searchTimer: null,
+      searchSuccess: false,
+      foundUser: {},
+      lastSearch: ''
     };
   }
 
+  // onChange(e) {
+  //   this.setState({inputValue: e.target.value});
+  // }
+
   onChange(e) {
-    this.setState({inputValue: e.target.value});
+    const value = e.target.value;
+    this.setState({
+      searchText: value,
+      searchSuccess: false
+    });
+    // We're clearing the old timer
+    clearTimeout(this.state.searchTimer);
+    this.setState({searchTimer: setTimeout(this.searchUsers, 1000)});
+  }
+
+  searchUsers() {
+    if(this.state.searchInProgress){
+      return false;
+    }
+
+    var searchText = this.state.searchText;
+
+    this.setState({searchInProgress: true});
+
+    return $.ajax({
+      type: 'GET',
+      url: `/_b/users?provider=google&id=${searchText}&email=${searchText}`
+    }).done((data, textStatus, jqXHR) => {
+      if (data.length === 1){
+        this.setState({
+          searchSuccess: true,
+          foundUser: data[0]
+        });
+      }
+    }).fail((jqXHR, textStatus, errorThrown) => {
+      console.error(jqXHR.responseText);
+      this.setState({searchSuccess: false})
+    }).always(() => {
+      this.setState({searchInProgress: false})
+    });
   }
 
   handleSubmit(e) {
     e.preventDefault();
-    this.props.createGrant(this.state.inputValue)
+    this.props.createGrant(this.state.foundUser)
     .done(() => {
-      this.setState({inputValue: ''});
+      this.setState({
+        searchText: '',
+        searchSuccess: false
+      });
     })
     .fail((jqXHR, textStatus, errorThrown) => {
       console.log('jqXHR', jqXHR);
       if (jqXHR.status === 409) {
         alert('User already admin');
-        this.setState({inputValue: ''});
+        this.setState({
+          searchText: '',
+          searchSuccess: false
+        });
       } else {
         console.error(jqXHR.responseText);
       }
@@ -206,16 +261,17 @@ class AddConsoleUser extends React.Component {
   render() {
     var inputClasses = 'form-group '.concat(this.state.searchSuccess ? 'has-success' : '');
     return (
-      <form style={{paddingBottom: '30px'}} onSubmit={this.handleSubmit} className="form-inline">
+      <form style={{paddingBottom: '30px'}} onSubmit={this.handleSubmit}>
         <div className={inputClasses}>
           <input
             type="text"
             className='form-control'
-            placeholder="Username"
-            value={this.state.inputValue}
+            placeholder="Search for user"
+            value={this.state.searchText}
+            readOnly={this.state.searchInProgress}
             onChange={this.onChange} />
         </div>
-        <button type="submit" className="btn btn-default">Grant access</button>
+        <button type="submit" className="btn btn-default" disabled={!this.state.searchSuccess}>Grant access</button>
       </form>
     );
   }

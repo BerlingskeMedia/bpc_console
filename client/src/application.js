@@ -236,15 +236,17 @@ module.exports = class extends React.Component {
           <div className="col-xs-6">
             <h3>Scopes</h3>
             <div>Scopes the application is allow to read/write. And users can read.</div>
-            <form style={{paddingTop: '30px', paddingBottom: '30px'}} className="form-inline">
-              <input
-                type="text"
-                name="newScope"
-                className="form-control"
-                value={this.state.newScope}
-                onChange={this.onChangeState}
-                placeholder="Scope name"/>
-              <button type="submit" onClick={this.addScope} className="btn btn-default">Add</button>
+            <form style={{paddingTop: '30px', paddingBottom: '30px'}}>
+              <div className="form-group">
+                <input
+                  type="text"
+                  name="newScope"
+                  className="form-control"
+                  value={this.state.newScope}
+                  onChange={this.onChangeState}
+                  placeholder="Type scope name"/>
+              </div>
+              <button type="submit" onClick={this.addScope} className="btn btn-default">Add scope</button>
             </form>
             <ul className="list-unstyled">
               {scopeList}
@@ -273,12 +275,16 @@ class AdminUsers extends React.Component {
 
   constructor(props){
     super(props);
-    this.onChangeState = this.onChangeState.bind(this);
+    this.onChange = this.onChange.bind(this);
+    this.searchUsers = this.searchUsers.bind(this);
     this.makeAdmin = this.makeAdmin.bind(this);
     this.state = {
       grants: [],
-      newUserInput: '',
-      readyUp: true
+      searchText: '',
+      searchInProgress: false,
+      searchTimer: null,
+      searchSuccess: false,
+      foundUser: {}
     };
   }
 
@@ -293,11 +299,49 @@ class AdminUsers extends React.Component {
     });
   }
 
-  onChangeState(e) {
-    var temp = {};
-    const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
-    temp[e.target.name] = value;
-    this.setState(temp);
+  // onChangeState(e) {
+  //   var temp = {};
+  //   const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+  //   temp[e.target.name] = value;
+  //   this.setState(temp);
+  // }
+
+  onChange(e) {
+    const value = e.target.value;
+    this.setState({
+      searchText: value,
+      searchSuccess: false
+    });
+    // We're clearing the old timer
+    clearTimeout(this.state.searchTimer);
+    this.setState({searchTimer: setTimeout(this.searchUsers, 1000)});
+  }
+
+  searchUsers() {
+    if(this.state.searchInProgress){
+      return false;
+    }
+
+    var searchText = this.state.searchText;
+
+    this.setState({searchInProgress: true});
+
+    return $.ajax({
+      type: 'GET',
+      url: `/_b/users?provider=google&id=${searchText}&email=${searchText}`
+    }).done((data, textStatus, jqXHR) => {
+      if (data.length === 1){
+        this.setState({
+          searchSuccess: true,
+          foundUser: data[0]
+        });
+      }
+    }).fail((jqXHR, textStatus, errorThrown) => {
+      console.error(jqXHR.responseText);
+      this.setState({searchSuccess: false})
+    }).always(() => {
+      this.setState({searchInProgress: false})
+    });
   }
 
   removeAdmin(index) {
@@ -326,7 +370,7 @@ class AdminUsers extends React.Component {
     e.preventDefault();
 
     const grant = {
-      user: this.state.newUserInput
+      user: this.state.foundUser.id
     };
 
     return $.ajax({
@@ -339,7 +383,10 @@ class AdminUsers extends React.Component {
       this.setState((prevState) => {
         grants: prevState.grants.push(grant);
       });
-      this.setState({newUserInput: ''});
+      this.setState({
+        searchText: '',
+        searchSuccess: false
+      });
     })
     .fail((jqXHR, textStatus, errorThrown) => {
       console.error(jqXHR);
@@ -366,16 +413,17 @@ class AdminUsers extends React.Component {
       <div>
         <h3>Admin users</h3>
         <div>Admin users can access this page and change settings. Removing admin user does not remove access to console for that user.</div>
-        <form style={{paddingTop: '30px', paddingBottom: '30px'}} className="form-inline">
-          <input
-            type="text"
-            name="newUserInput"
-            className="form-control"
-            value={this.state.newUserInput}
-            onChange={this.onChangeState}
-            // readOnly={this.state.searching}
-            placeholder="Username (email)"/>
-          <button type="submit" onClick={this.makeAdmin} disabled={!this.state.readyUp} className="btn btn-default">Make admin</button>
+        <form style={{paddingTop: '30px', paddingBottom: '30px'}}>
+          <div className="form-group">
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Search for user"
+              value={this.state.searchText}
+              readOnly={this.state.searchInProgress}
+              onChange={this.onChange} />
+          </div>
+          <button type="submit" className="btn btn-default" onClick={this.makeAdmin} disabled={!this.state.searchSuccess}>Make admin</button>
         </form>
         <ul className="list-unstyled">
           {adminUsers}

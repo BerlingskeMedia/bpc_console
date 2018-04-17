@@ -127,10 +127,11 @@ module.exports = class extends React.Component {
 
     return (
       <div className="grants">
-        <h3>Grants</h3>
+        <h3>Users</h3>
         <CreateGrant createGrant={this.createGrant.bind(this)} />
-        <p>We cannot show all the grants right now, as they might break the page.</p>
-        <p>Soon you can search a grant.</p>
+        <p>We cannot show all the users right now, as they might break the page.</p>
+        <p>Soon you can search a user.</p>
+        <p>And also revoke their access.</p>
       </div>
     );
     // <table className="table">
@@ -226,13 +227,13 @@ class CreateGrant extends React.Component {
   render() {
     var inputClasses = 'form-group '.concat(this.state.searchSuccess ? 'has-success' : '');
     return (
-      <form style={{paddingTop: '30px', paddingBottom: '30px'}} onSubmit={this.handleSubmit} className="form-inline">
+      <form style={{paddingTop: '30px', paddingBottom: '30px'}} onSubmit={this.handleSubmit}>
         <div className={inputClasses}>
           <input
             type="text"
             name="user"
             className="form-control"
-            placeholder="Email"
+            placeholder="Search for user"
             value={this.state.searchText}
             onChange={this.onChange} />
         </div>

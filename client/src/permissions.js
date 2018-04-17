@@ -20,7 +20,10 @@ module.exports = class extends React.Component {
     return (
       <div className="users" style={{paddingTop: '30px'}}>
         <SearchUser setUsers={this.setUsers} />
-        <SearchResult users={this.state.users} />
+        { this.state.users !== null && this.state.users.length === 1
+          ? <Temp user={this.state.users[0]} />
+          : <SearchResult users={this.state.users} />
+        }
       </div>
     );
   }
@@ -36,7 +39,7 @@ class SearchUser extends React.Component {
     this.searchUser = this.searchUser.bind(this);
     this.clearSearch = this.clearSearch.bind(this);
     this.state = {
-      searching: false,
+      searchInProgress: false,
       searchTimer: null
     };
   }
@@ -58,13 +61,13 @@ class SearchUser extends React.Component {
   }
 
   searchUser() {
-    if(this.state.searching){
+    if(this.state.searchInProgress){
       return false;
     }
 
     let searchText = encodeURIComponent(this.searchBox.value);
 
-    this.setState({searching: true});
+    this.setState({searchInProgress: true});
 
     return $.ajax({
       type: 'GET',
@@ -75,7 +78,7 @@ class SearchUser extends React.Component {
     }).fail((jqXHR, textStatus, errorThrown) => {
       console.error(jqXHR.responseText);
     }).always(() => {
-      this.setState({searching: false});
+      this.setState({searchInProgress: false});
     });
   }
 
@@ -94,7 +97,7 @@ class SearchUser extends React.Component {
             onChange={this.onSearchChange}
             className="form-control"
             placeholder="Type email or ID to start search"
-            readOnly={this.state.searching}
+            readOnly={this.state.searchInProgress}
             ref={(searchBox) => this.searchBox = searchBox} />
         </div>
         <div className="col-xs-1">
@@ -136,10 +139,14 @@ class SearchResult extends React.Component {
 
     } else if (this.props.users.length === 1) {
 
+      // Should in theory not happen
+
       rows = [
-        <UserDetails key={1} user={this.props.users[0]} />,
-        <DataScopes key={2} dataScopes={this.props.users[0].dataScopes} />
+        <UserDetails key={1} user={data} />,
+        <DataScopes key={2} dataScopes={data.dataScopes} />,
+        <Grants key={3} dataScopes={data.grants} />
       ];
+
 
     } else if (this.props.users.length > 1) {
 
@@ -155,6 +162,42 @@ class SearchResult extends React.Component {
       <div style={{marginTop: '30px', marginBottom: '30px'}}>
         {rows}
       </div>
+    );
+  }
+}
+
+
+class Temp extends React.Component {
+
+  constructor(props){
+    super(props);
+    this.state = {
+      user: null
+    };
+  }
+
+  componentDidMount() {
+
+    const user_id = this.props.user.id;
+
+    $.ajax({
+      type: 'GET',
+      url: `/_b/users/${user_id}`,
+      contentType: "application/json; charset=utf-8"
+    }).done((data, textStatus, jqXHR) => {
+      this.setState({user: data});
+    });
+  }
+
+  render() {
+    return (
+      this.state.user !== null
+      ? <div style={{marginTop: '30px', marginBottom: '30px'}}>
+          <UserDetails key={1} user={this.state.user} />
+          <DataScopes key={2} dataScopes={this.state.user.dataScopes} />
+          <Grants key={3} grants={this.state.user.grants} />
+        </div>
+      : null
     );
   }
 }
@@ -297,7 +340,59 @@ class DataScopes extends React.Component {
       <div className="row">
         <div className="col-xs-12">
           {scopes}
+          { !scopes || Object.keys(scopes).length === 0
+            ? <div>(This user has no permissions.)</div>
+            : scopes
+          }
         </div>
+      </div>
+    );
+  }
+}
+
+
+class Grants extends React.Component {
+
+  constructor(props){
+    super(props);
+  }
+
+  render() {
+
+    const grants = this.props.grants.map(function(grant, index) {
+      const scopes = grant.scope.map(function(scope){
+        return (
+          <div key={index + '.' + scope}>
+            <span>&nbsp;</span>
+            <span className="label label-info">{scope}</span>
+          </div>
+        );
+      });
+      return (
+        <div key={index} className="row">
+          <div className="col-xs-6">
+            Grant: {grant.app}
+          </div>
+          <div className="col-xs-2">
+            {grant.exp
+              ? <em>Expires: {grant.exp}</em>
+              : <em>Expires: Never</em>
+            }
+          </div>
+          <div className="col-xs-4">
+            {scopes}
+          </div>
+        </div>
+      );
+    });
+
+    return(
+      <div>
+        <hr />
+        { grants === null || grants.length === 0
+          ? <div>(This user has no grants.)</div>
+          : grants
+        }
       </div>
     );
   }
