@@ -26,8 +26,8 @@ module.exports = class extends React.Component {
   }
 
   createGrant(user) {
-    var grant = {
-      user: user.id,
+    const grant = {
+      user: user._id,
       scope: [],
       exp: null
     };

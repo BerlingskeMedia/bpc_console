@@ -370,7 +370,7 @@ class AdminUsers extends React.Component {
     e.preventDefault();
 
     const grant = {
-      user: this.state.foundUser.id
+      user: this.state.foundUser._id
     };
 
     return $.ajax({
