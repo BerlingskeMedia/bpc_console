@@ -62,7 +62,7 @@ module.exports = class extends React.Component {
         );
       });
       return (
-        <tr key={index} className="application">
+        <tr key={application.id} className="application">
           <td className="col-xs-4">
             <Link to={`/application/${application.id}`}>{application.id}</Link>
           </td>

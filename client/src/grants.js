@@ -44,11 +44,14 @@ module.exports = class extends React.Component {
     });
   }
 
-  deleteGrant(grant, index) {
+  deleteGrant(grant) {
     return $.ajax({
       type: 'DELETE',
       url: '/_b/applications/'.concat(this.props.app, '/grants/', grant.id)
     }).done((data, textStatus, jqXHR) => {
+      const index = this.state.grants.findIndex(e => {
+        return e.id === grant.id;
+      });
       if(data.n > 0 && index){
         this.setState((prevState) => {
           grants: prevState.grants.splice(index, 1);
@@ -59,7 +62,7 @@ module.exports = class extends React.Component {
     });
   }
 
-  expireGrant(grant, index) {
+  expireGrant(grant) {
 
     grant.exp = Date.now();
 
@@ -69,7 +72,10 @@ module.exports = class extends React.Component {
       contentType: "application/json; charset=utf-8",
       data: JSON.stringify(grant)
     }).done((data, textStatus, jqXHR) => {
-      console.error(data);
+      const index = this.state.grants.findIndex(e => {
+        return e.id === grant.id;
+      });
+      // TODO: I don't remember is this one is a findOneAndUpdate in MongoDB
       this.setState((prevState) => {
         grants: prevState.grants[index] = grant;
       });
@@ -78,7 +84,7 @@ module.exports = class extends React.Component {
     });
   }
 
-  reactivateGrant(grant, index) {
+  reactivateGrant(grant) {
 
     grant.exp = null;
 
@@ -88,6 +94,9 @@ module.exports = class extends React.Component {
       contentType: "application/json; charset=utf-8",
       data: JSON.stringify(grant)
     }).done((data, textStatus, jqXHR) => {
+      const index = this.state.grants.findIndex(e => {
+        return e.id === grant.id;
+      });
       this.setState((prevState) => {
         grants: prevState.grants[index] = grant;
       });
@@ -102,9 +111,9 @@ module.exports = class extends React.Component {
 
   render() {
 
-    var grants = this.state.grants.map(function(grant, index) {
+    var grants = this.state.grants.map(function(grant) {
       return (
-        <tr key={index}>
+        <tr key={grant.id}>
           <td className="col-xs-8">{grant.user}</td>
           <td className="col-xs-2">
             {grant.exp
@@ -114,12 +123,12 @@ module.exports = class extends React.Component {
           </td>
           <td className="col-xs-2">
             {grant.exp && grant.exp < Date.now()
-             ? <button type="button" className="btn btn-primary btn-sm btn-block" onClick={this.reactivateGrant.bind(this, grant, index)}>Reactivate grant</button>
-             : <button type="button" className="btn btn-warning btn-sm btn-block" onClick={this.expireGrant.bind(this, grant, index)}>Expire grant</button>
+             ? <button type="button" className="btn btn-primary btn-sm btn-block" onClick={this.reactivateGrant.bind(this, grant)}>Reactivate grant</button>
+             : <button type="button" className="btn btn-warning btn-sm btn-block" onClick={this.expireGrant.bind(this, grant)}>Expire grant</button>
             }
           </td>
           <td className="col-xs-2">
-            <button type="button" className="btn btn-danger btn-sm btn-block" onClick={this.deleteGrant.bind(this, grant, index)}>Delete grant</button>
+            <button type="button" className="btn btn-danger btn-sm btn-block" onClick={this.deleteGrant.bind(this, grant)}>Delete grant</button>
           </td>
         </tr>
       );

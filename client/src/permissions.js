@@ -17,13 +17,18 @@ module.exports = class extends React.Component {
   }
 
   render() {
+
+    let content = null;
+    if(this.state.users !== null) {
+      content = this.state.users.length === 1
+        ? <ShowFullUser user={this.state.users[0]} />
+        : <SearchResult users={this.state.users} />;
+    }
+
     return (
       <div className="users" style={{paddingTop: '30px'}}>
         <SearchUser setUsers={this.setUsers} />
-        { this.state.users !== null && this.state.users.length === 1
-          ? <Temp user={this.state.users[0]} />
-          : <SearchResult users={this.state.users} />
-        }
+        {content}
       </div>
     );
   }
@@ -141,18 +146,11 @@ class SearchResult extends React.Component {
 
       // Should in theory not happen
 
-      rows = [
-        <UserDetails key={1} user={data} />,
-        <DataScopes key={2} dataScopes={data.dataScopes} />,
-        <Grants key={3} dataScopes={data.grants} />
-      ];
-
-
     } else if (this.props.users.length > 1) {
 
       rows = this.props.users.map((u,i) => {
         return (
-          <UserDetails key={i} user={u} />
+          <UserDetails key={u.id + 'searchresult'} user={u} />
         );
       });
 
@@ -167,7 +165,7 @@ class SearchResult extends React.Component {
 }
 
 
-class Temp extends React.Component {
+class ShowFullUser extends React.Component {
 
   constructor(props){
     super(props);
@@ -190,12 +188,13 @@ class Temp extends React.Component {
   }
 
   render() {
+    console.log('fulluser', this.state.user);
     return (
       this.state.user !== null
       ? <div style={{marginTop: '30px', marginBottom: '30px'}}>
-          <UserDetails key={1} user={this.state.user} />
-          <DataScopes key={2} dataScopes={this.state.user.dataScopes} />
-          <Grants key={3} grants={this.state.user.grants} />
+          <UserDetails key={this.state.user.id + 'fulluser_1'} user={this.state.user} />
+          <DataScopes key={this.state.user.id + 'fulluser_2'} dataScopes={this.state.user.dataScopes} />
+          <Grants key={this.state.user.id + 'fulluser_3'} grants={this.state.user.grants} />
         </div>
       : null
     );
@@ -214,11 +213,11 @@ class UserDetails extends React.Component {
     const user = this.props.user;
 
     if (user.gigya) {
-      dataFromGigya = Object.keys(user.gigya).map(function(key) {
+      dataFromGigya = Object.keys(user.gigya).map(function(gigya_key) {
         return (
-          <span key={key}>
-          <dt>Gigya {key}</dt>
-          <dd>{user.gigya[key]}</dd>
+          <span key={gigya_key}>
+          <dt>Gigya {gigya_key}</dt>
+          <dd>{user.gigya[gigya_key]}</dd>
           </span>
         );
       });
@@ -351,54 +350,6 @@ class DataScopes extends React.Component {
 }
 
 
-class Grants extends React.Component {
-
-  constructor(props){
-    super(props);
-  }
-
-  render() {
-
-    const grants = this.props.grants.map(function(grant, index) {
-      const scopes = grant.scope.map(function(scope){
-        return (
-          <div key={index + '.' + scope}>
-            <span>&nbsp;</span>
-            <span className="label label-info">{scope}</span>
-          </div>
-        );
-      });
-      return (
-        <div key={index} className="row">
-          <div className="col-xs-6">
-            Grant: {grant.app}
-          </div>
-          <div className="col-xs-2">
-            {grant.exp
-              ? <em>Expires: {grant.exp}</em>
-              : <em>Expires: Never</em>
-            }
-          </div>
-          <div className="col-xs-4">
-            {scopes}
-          </div>
-        </div>
-      );
-    });
-
-    return(
-      <div>
-        <hr />
-        { grants === null || grants.length === 0
-          ? <div>(This user has no grants.)</div>
-          : grants
-        }
-      </div>
-    );
-  }
-}
-
-
 class ScopePermissions extends React.Component {
 
   constructor(props){
@@ -501,6 +452,58 @@ class PermissionField extends React.Component {
           {this.props.data.toString()}
         </td>
       </tr>
+    );
+  }
+}
+
+
+class Grants extends React.Component {
+
+  constructor(props){
+    super(props);
+  }
+
+  render() {
+
+    const grants = this.props.grants.map(function(grant, index) {
+      const scopes = grant.scope.map(function(scope){
+        return (
+          <div key={index + '.' + scope}>
+            <span>&nbsp;</span>
+            <span className="label label-info">{scope}</span>
+          </div>
+        );
+      });
+      return (
+        <div key={index} className="row" style={{paddingBottom: '10px'}}>
+          <div className="col-xs-6">
+            Grant: <strong>{grant.app}</strong>
+          </div>
+          <div className="col-xs-2">
+            {grant.exp
+              ? <span>Expires: <em>{grant.exp}</em></span>
+              : <span>Expires: <em>Never</em></span>
+            }
+          </div>
+          <div className="col-xs-4">
+            Scopes:
+            { scopes.length > 0
+              ? scopes
+              : <span>(ingen)</span>
+            }
+          </div>
+        </div>
+      );
+    });
+
+    return(
+      <div>
+        <hr />
+        { grants === null || grants.length === 0
+          ? <div>(This user has no grants.)</div>
+          : grants
+        }
+      </div>
     );
   }
 }

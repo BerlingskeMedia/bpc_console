@@ -278,8 +278,9 @@ class AdminUsers extends React.Component {
     this.onChange = this.onChange.bind(this);
     this.searchUsers = this.searchUsers.bind(this);
     this.makeAdmin = this.makeAdmin.bind(this);
+    this.removeAdmin = this.removeAdmin.bind(this);
     this.state = {
-      grants: [],
+      adminGrants: [],
       searchText: '',
       searchInProgress: false,
       searchTimer: null,
@@ -293,7 +294,7 @@ class AdminUsers extends React.Component {
       type: 'GET',
       url: `/_b/applications/${this.props.app}/admins`
     }).done((data, textStatus, jqXHR) => {
-      this.setState({grants: data});
+      this.setState({adminGrants: data});
     }).fail((jqXHR, textStatus, errorThrown) => {
       console.error(jqXHR.responseText);
     });
@@ -344,18 +345,19 @@ class AdminUsers extends React.Component {
     });
   }
 
-  removeAdmin(index) {
-    var grant = this.state.grants[index];
-
+  removeAdmin(grant) {
     return $.ajax({
       type: 'POST',
       url: `/_b/applications/${this.props.app}/removeadmin`,
       contentType: "application/json; charset=utf-8",
-      data: JSON.stringify(grant)
+      data: JSON.stringify({ user: grant.user })
     })
     .done((data, textStatus, jqXHR) => {
+      const index = this.state.adminGrants.findIndex(e => {
+        return e.id === grant.id;
+      });
       this.setState((prevState) => {
-        grants: prevState.grants.splice(index, 1);
+        adminGrants: prevState.adminGrants.splice(index, 1);
       });
     })
     .fail((jqXHR, textStatus, errorThrown) => {
@@ -369,7 +371,7 @@ class AdminUsers extends React.Component {
   makeAdmin(e) {
     e.preventDefault();
 
-    const grant = {
+    const payload = {
       user: this.state.foundUser._id
     };
 
@@ -377,11 +379,11 @@ class AdminUsers extends React.Component {
       type: 'POST',
       url: `/_b/applications/${this.props.app}/makeadmin`,
       contentType: "application/json; charset=utf-8",
-      data: JSON.stringify(grant)
+      data: JSON.stringify(payload)
     })
     .done((data, textStatus, jqXHR) => {
       this.setState((prevState) => {
-        grants: prevState.grants.push(grant);
+        adminGrants: prevState.adminGrants.push(data);
       });
       this.setState({
         searchText: '',
@@ -399,14 +401,11 @@ class AdminUsers extends React.Component {
 
   render() {
 
-    var adminUsers = this.state.grants.map((grant, index) => {
-      return (
-        <li key={index} style={{marginBottom: '2px'}}>
-          <button type="button" className="btn btn-danger btn-xs" onClick={this.removeAdmin.bind(this, index)}>Remove admin</button>
-          &nbsp;
-          {grant.user}
-        </li>
-      );
+    var adminUsers = this.state.adminGrants.map((grant, index) => {
+      return <AdminUser
+        key={grant.id}
+        grant={grant}
+        removeAdmin={this.removeAdmin} />
     });
 
     return (
@@ -433,6 +432,53 @@ class AdminUsers extends React.Component {
           : null
         }
       </div>
+    );
+  }
+}
+
+
+class AdminUser extends React.Component {
+  constructor(props){
+    super(props);
+    this.state = {
+      foundUser: null
+    };
+  }
+
+  searchUser(grant) {
+    return $.ajax({
+      type: 'GET',
+      url: `/_b/users?provider=google&id=${grant.user}`
+    }).done((data, textStatus, jqXHR) => {
+      if (data.length === 1) {
+        this.setState({
+          foundUser: data[0]
+        });
+      }
+    }).fail((jqXHR, textStatus, errorThrown) => {
+      console.error(jqXHR.responseText);
+      this.setState({
+        foundUser: null
+      });
+    });
+  }
+
+  componentDidMount() {
+    this.searchUser(this.props.grant);
+  }
+
+  render(){
+    const grant = this.props.grant;
+
+    return (
+      <li key={grant.id} style={{marginBottom: '2px'}}>
+        <button type="button" className="btn btn-danger btn-xs" onClick={this.props.removeAdmin.bind(this, grant)}>Remove admin</button>
+        &nbsp;
+        { this.state.foundUser !== null
+          ? this.state.foundUser.email
+          : grant.user
+        }
+      </li>
     );
   }
 }

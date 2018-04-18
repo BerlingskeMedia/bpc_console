@@ -6,8 +6,11 @@ module.exports = class extends React.Component {
 
   constructor(props) {
     super(props);
+    this.deleteGrant = this.deleteGrant.bind(this);
+    this.makeSuperAdmin = this.makeSuperAdmin.bind(this);
+    this.demoteSuperAdmin = this.demoteSuperAdmin.bind(this);
     this.state = {
-      grants: []
+      consoleGrants: []
     };
   }
 
@@ -16,12 +19,9 @@ module.exports = class extends React.Component {
       type: 'GET',
       url: '/_b/applications/console/grants'
     }).done(data => {
-      this.setState({grants: data});
+      this.setState({consoleGrants: data});
     }).fail((jqXHR) => {
       console.error(jqXHR.responseText);
-      if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
-        alert(jqXHR.responseJSON.message);
-      }
     });
   }
 
@@ -39,66 +39,65 @@ module.exports = class extends React.Component {
       data: JSON.stringify(grant)
     }).done((data, textStatus, jqXHR) => {
       this.setState((prevState) => {
-        grants: prevState.grants.push(data);
+        consoleGrants: prevState.consoleGrants.push(data);
       });
     }).fail((jqXHR, textStatus, errorThrown) => {
       console.error(jqXHR.responseText);
-      if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
-        alert(jqXHR.responseJSON.message);
-      }
     });
   }
 
-  deleteGrant(grant, index) {
+  deleteGrant(grant) {
     return $.ajax({
       type: 'DELETE',
       url: '/_b/applications/console/grants/'.concat(grant.id),
       contentType: "application/json; charset=utf-8"
     }).done((data, textStatus, jqXHR) => {
-      this.setState((prevState) => {
-        grants: prevState.grants.splice(index, 1);
+      const index = this.state.consoleGrants.findIndex(e => {
+        return e.id === grant.id;
       });
+      if (index > -1) {
+        this.setState((prevState) => {
+          consoleGrants: prevState.consoleGrants.splice(index, 1);
+        });
+      }
     }).fail((jqXHR, textStatus, errorThrown) => {
       console.error(jqXHR.responseText);
-      if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
-        alert(jqXHR.responseJSON.message);
-      }
     });
   }
 
-  makeSuperAdmin(grant, index) {
+  makeSuperAdmin(grant) {
     return $.ajax({
       type: 'POST',
       url: '/_b/superadmin/'.concat(grant.id)
     }).done((data, textStatus, jqXHR) => {
+      const index = this.state.consoleGrants.findIndex(e => {
+        return e.id === grant.id;
+      });
       if (index > -1) {
-        var grants = this.state.grants;
-        grants[index].scope.push('admin:*');
-        this.setState({grants: grants});
+        var grants = this.state.consoleGrants;
+        grants[index] = data;
+        this.setState({consoleGrants: grants});
       }
     }).fail((jqXHR, textStatus, errorThrown) => {
       console.error(jqXHR.responseText);
-      if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
-        alert(jqXHR.responseJSON.message);
-      }
     });
   }
 
-  demoteSuperAdmin(grant, index) {
+  demoteSuperAdmin(grant) {
     return $.ajax({
       type: 'DELETE',
       url: '/_b/superadmin/'.concat(grant.id)
     }).done((data, textStatus, jqXHR) => {
+      const index = this.state.consoleGrants.findIndex(e => {
+        return e.id === grant.id;
+      });
       if (index > -1) {
-        var grants = this.state.grants;
-        grants[index].scope.splice(grant.scope.indexOf('admin:*'), 1);
-        this.setState({grants: grants});
+        var grants = this.state.consoleGrants;
+        grants[index] = data;
+        this.setState({consoleGrants: grants});
       }
     }).fail((jqXHR, textStatus, errorThrown) => {
       console.error(jqXHR.responseText);
-      if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
-        alert(jqXHR.responseJSON.message);
-      }
     });
   }
 
@@ -110,47 +109,13 @@ module.exports = class extends React.Component {
 
   render() {
 
-    var grants = this.state.grants.map((grant, index) => {
-      var isSuperAdmin = grant.scope.indexOf('admin:*') > -1;
-
-      var isAdminOfApp = grant.scope
-      .filter(function(scope){
-        return scope !== 'admin:*' && scope.indexOf('admin:') === 0;
-      })
-      .map(function(scope, index) {
-        var app = scope.substring('admin:'.length);
-        return (
-          <span key={index + '.' + app}>
-            <span>&nbsp;</span>
-            <span>
-            </span>
-            <span className="app label label-info">
-              <Link style={{color:'white'}} to={`/application/${app}`}>{app}</Link>
-            </span>
-          </span>
-        );
-      });
-
-      return (
-        <tr key={index}>
-          <td className="col-xs-3">{grant.user}</td>
-          <td className="col-xs-2">
-          { isSuperAdmin
-            ? <button type="button" className="btn btn-warning btn-sm btn-block" onClick={this.demoteSuperAdmin.bind(this, grant, index)}>Demote Superadmin</button>
-            : <button type="button" className="btn btn-info btn-sm btn-block" onClick={this.makeSuperAdmin.bind(this, grant, index)}>Promote to Superadmin</button>
-          }
-          </td>
-          <th className="col-xs-5">
-            {isAdminOfApp}
-          </th>
-          <td className="col-xs-2">
-            { isSuperAdmin
-              ? <button type="button" className="btn btn-danger btn-sm btn-block" disabled="disabled">Is superadmin</button>
-              : <button type="button" className="btn btn-danger btn-sm btn-block" onClick={this.deleteGrant.bind(this, grant, index)}>Remove access</button>
-            }
-          </td>
-        </tr>
-      );
+    var grants = this.state.consoleGrants.map((grant, index) => {
+      return <Grant
+        key={grant.id}
+        grant={grant}
+        makeSuperAdmin={this.makeSuperAdmin}
+        demoteSuperAdmin={this.demoteSuperAdmin}
+        deleteGrant={this.deleteGrant} />
     });
 
     return (
@@ -172,6 +137,87 @@ module.exports = class extends React.Component {
   }
 }
 
+class Grant extends React.Component {
+  constructor(props){
+    super(props);
+    this.state = {
+      foundUser: null
+    };
+  }
+
+  searchUser(grant) {
+    return $.ajax({
+      type: 'GET',
+      url: `/_b/users?provider=google&id=${grant.user}`
+    }).done((data, textStatus, jqXHR) => {
+      if (data.length === 1) {
+        this.setState({
+          foundUser: data[0]
+        });
+      }
+    }).fail((jqXHR, textStatus, errorThrown) => {
+      console.error(jqXHR.responseText);
+      this.setState({
+        foundUser: null
+      });
+    });
+  }
+
+  componentDidMount() {
+    this.searchUser(this.props.grant);
+  }
+
+  render(){
+    const grant = this.props.grant;
+
+    var isSuperAdmin = grant.scope.indexOf('admin:*') > -1;
+
+    var isAdminOfApp = grant.scope
+    .filter(function(scope){
+      return scope !== 'admin:*' && scope.indexOf('admin:') === 0;
+    })
+    .map(function(scope, index) {
+      var app = scope.substring('admin:'.length);
+      return (
+        <span key={index + '.' + app}>
+          <span>&nbsp;</span>
+          <span>
+          </span>
+          <span className="app label label-info">
+            <Link style={{color:'white'}} to={`/application/${app}`}>{app}</Link>
+          </span>
+        </span>
+      );
+    });
+
+    return (
+      <tr key={grant.id}>
+        <td className="col-xs-3">
+          { this.state.foundUser !== null
+            ? this.state.foundUser.email
+            : grant.user
+          }
+        </td>
+        <td className="col-xs-2">
+        { isSuperAdmin
+          ? <button type="button" className="btn btn-warning btn-sm btn-block" onClick={this.props.demoteSuperAdmin.bind(this, grant)}>Demote Superadmin</button>
+          : <button type="button" className="btn btn-info btn-sm btn-block" onClick={this.props.makeSuperAdmin.bind(this, grant)}>Promote to Superadmin</button>
+        }
+        </td>
+        <th className="col-xs-5">
+          {isAdminOfApp}
+        </th>
+        <td className="col-xs-2">
+          { isSuperAdmin
+            ? <button type="button" className="btn btn-danger btn-sm btn-block" disabled="disabled">Is superadmin</button>
+            : <button type="button" className="btn btn-danger btn-sm btn-block" onClick={this.props.deleteGrant.bind(this, grant)}>Remove access</button>
+          }
+        </td>
+      </tr>
+    );
+  }
+}
+
 
 class AddConsoleUser extends React.Component {
 
@@ -180,9 +226,6 @@ class AddConsoleUser extends React.Component {
     this.onChange = this.onChange.bind(this);
     this.searchUsers = this.searchUsers.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
-    // this.state = {
-    //   inputValue: ''
-    // };
     this.state = {
       searchText: '',
       searchInProgress: false,
@@ -192,10 +235,6 @@ class AddConsoleUser extends React.Component {
       lastSearch: ''
     };
   }
-
-  // onChange(e) {
-  //   this.setState({inputValue: e.target.value});
-  // }
 
   onChange(e) {
     const value = e.target.value;
@@ -245,7 +284,6 @@ class AddConsoleUser extends React.Component {
       });
     })
     .fail((jqXHR, textStatus, errorThrown) => {
-      console.log('jqXHR', jqXHR);
       if (jqXHR.status === 409) {
         alert('User already admin');
         this.setState({
