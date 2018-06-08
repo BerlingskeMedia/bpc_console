@@ -6,7 +6,7 @@ module.exports = class extends React.Component {
   constructor(props){
     super(props);
     this.setUsers = this.setUsers.bind(this);
-    this.state = {users: null};
+    this.state = { users: null };
   }
 
   setUsers(users) {
@@ -78,7 +78,7 @@ class SearchUser extends React.Component {
       return false;
     }
 
-    let searchText = encodeURIComponent(this.searchBox.value);
+    const searchText = encodeURIComponent(this.searchBox.value);
 
     this.setState({searchInProgress: true});
 
@@ -87,8 +87,8 @@ class SearchUser extends React.Component {
       url: `/_b/users?email=${searchText}&id=${searchText}`,
       contentType: "application/json; charset=utf-8"
     }).done((data, textStatus, jqXHR) => {
-      this.props.setUsers(data);
       window.history.pushState({ search: searchText }, "search", `/permissions?search=${searchText}`);
+      this.props.setUsers(data);
     }).fail((jqXHR, textStatus, errorThrown) => {
       console.error(jqXHR.responseText);
     }).always(() => {
@@ -97,8 +97,8 @@ class SearchUser extends React.Component {
   }
 
   clearSearch() {
-    this.props.setUsers(null);
     window.history.pushState({ search: "" }, "search", `/permissions`);
+    this.props.setUsers(null);
   }
 
   render() {
@@ -179,15 +179,13 @@ class ShowFullUser extends React.Component {
 
   constructor(props){
     super(props);
+    this.getUserData = this.getUserData.bind(this);
     this.state = {
       user: null
     };
   }
 
-  componentDidMount() {
-
-    const user_id = this.props.user.id;
-
+  getUserData(user_id) {
     $.ajax({
       type: 'GET',
       url: `/_b/users/${user_id}`,
@@ -197,8 +195,16 @@ class ShowFullUser extends React.Component {
     });
   }
 
+  componentDidMount() {
+    this.getUserData(this.props.user.id);
+  }
+  
+  // componentDidMount() {
+  componentWillReceiveProps(nextProps) {
+    this.getUserData(nextProps.user.id);
+  }
+
   render() {
-    console.log('fulluser', this.state.user);
     return (
       this.state.user !== null
       ? <div style={{marginTop: '30px', marginBottom: '30px'}}>
