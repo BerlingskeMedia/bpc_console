@@ -343,7 +343,6 @@ class DataScopes extends React.Component {
     return (
       <div className="row">
         <div className="col-xs-12">
-          {scopes}
           { !scopes || Object.keys(scopes).length === 0
             ? <div>(This user has no permissions.)</div>
             : scopes
