@@ -2,7 +2,7 @@ const $ = require('jquery');
 const React = require('react');
 const ReactDOM = require('react-dom');
 const ReactRouterDom = require('react-router-dom');
-const Router = ReactRouterDom.BrowserRouter;
+const BrowserRouter = ReactRouterDom.BrowserRouter;
 const Route = ReactRouterDom.Route;
 const Link = ReactRouterDom.Link;
 const Redirect = ReactRouterDom.Redirect;
@@ -255,7 +255,7 @@ class Main extends React.Component {
       null;
 
     return (
-      <Router>
+      <BrowserRouter>
         <div>
           <h1 style={environment_style}>BPC Console</h1>
           <ul className="nav nav-tabs">
@@ -266,7 +266,7 @@ class Main extends React.Component {
               <Link to={`/applications`}>Applications</Link>
             </li>
             <li role="presentation" onClick={this.changemenu}>
-              <Link to={`/admins`}>Console users</Link>
+              <Link to={`/admins`}>BPC Console users</Link>
             </li>
           </ul>
           <Route exact path="/" component={Permissions} />
@@ -277,7 +277,7 @@ class Main extends React.Component {
           <Route path={`/application/:app`} component={Application}/>
           <Route path={`/gigya`} component={Gigya}/>
         </div>
-      </Router>
+      </BrowserRouter>
     )
   }
 }
