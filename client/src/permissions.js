@@ -215,46 +215,35 @@ class UserDetails extends React.Component {
     if (user.gigya) {
       dataFromGigya = Object.keys(user.gigya).map(function(gigya_key) {
         return (
-          <span key={gigya_key}>
-          <dt>Gigya {gigya_key}</dt>
-          <dd>{user.gigya[gigya_key]}</dd>
-          </span>
+          <div key={gigya_key}><strong>Gigya {gigya_key}</strong>: {user.gigya[gigya_key]}</div>
         );
       });
+      
+      const gigya_url = `https://console.gigya.com/Site/partners/UserManagement.aspx/User#/details/id/${user.gigya.UID}/identity/all`;
+
+      dataFromGigya.push(
+        <div key="gigya_link">
+          <a href={gigya_url} target="_blank">Link til Gigya</a>
+        </div>
+      );
     }
+
+    const styleProviderColor = 
+      user.provider === 'gigya' ? "#ff0000" : // Red
+      user.provider === 'google' ? "#0000ff" : // Blue
+      "#333"; // Standard dark
 
     return (
       <div>
         <div className="row">
           <div className="col-xs-6">
-            <span>
-              <dt>ID</dt>
-              <dd>{user.id}</dd>
-            </span>
-            <span>
-              <dt>Email</dt>
-              <dd>{user.email}</dd>
-            </span>
-            <span>
-              <dt>Provider</dt>
-              <dd>{user.provider}</dd>
-            </span>
-            <span>
-              <dt>Internt id</dt>
-              <dd>{user._id}</dd>
-            </span>
-            <span>
-              <dt>Created</dt>
-              <dd>{user.createdAt}</dd>
-            </span>
-            <span>
-              <dt>Last updated</dt>
-              <dd>{user.lastUpdated}</dd>
-            </span>
-            <span>
-              <dt>Last fetched</dt>
-              <dd>{user.lastFetched}</dd>
-            </span>
+            <div><strong>ID</strong>: {user.id}</div>
+            <div><strong>Email</strong>: {user.email}</div>
+            <div><strong>Provider</strong>: <span style={{ color: styleProviderColor}}>{user.provider}</span></div>
+            <div><strong>Internt id</strong>: {user._id}</div>
+            <div><strong>Created</strong>: {user.createdAt}</div>
+            <div><strong>Last updated</strong>: {user.lastUpdated}</div>
+            <div><strong>Last fetched</strong>: {user.lastFetched}</div>
           </div>
           <div className="col-xs-6">
             {dataFromGigya}
