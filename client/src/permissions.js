@@ -49,6 +49,14 @@ class SearchUser extends React.Component {
     };
   }
 
+  componentDidMount() {
+    const searchText = getUrlParameter("search");
+    if(searchText.length > 0) {
+      this.searchBox.value = decodeURIComponent(searchText);
+      this.searchUser();
+    }
+  }
+
   onSearchChange(e) {
     // // We're clearing the old timer
     clearTimeout(this.state.searchTimer);
@@ -80,6 +88,7 @@ class SearchUser extends React.Component {
       contentType: "application/json; charset=utf-8"
     }).done((data, textStatus, jqXHR) => {
       this.props.setUsers(data);
+      window.history.pushState({ search: searchText }, "search", `/permissions?search=${searchText}`);
     }).fail((jqXHR, textStatus, errorThrown) => {
       console.error(jqXHR.responseText);
     }).always(() => {
@@ -89,6 +98,7 @@ class SearchUser extends React.Component {
 
   clearSearch() {
     this.props.setUsers(null);
+    window.history.pushState({ search: "" }, "search", `/permissions`);
   }
 
   render() {
@@ -496,3 +506,11 @@ class Grants extends React.Component {
     );
   }
 }
+
+
+function getUrlParameter(name) {
+  name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+  var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+  var results = regex.exec(location.search);
+  return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+};
