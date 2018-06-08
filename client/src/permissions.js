@@ -223,7 +223,7 @@ class UserDetails extends React.Component {
 
       dataFromGigya.push(
         <div key="gigya_link">
-          <a href={gigya_url} target="_blank">Link til Gigya</a>
+          <a href={gigya_url} target="_blank">Link to Gigya</a>
         </div>
       );
     }
