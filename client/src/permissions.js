@@ -6,7 +6,7 @@ module.exports = class extends React.Component {
   constructor(props){
     super(props);
     this.setUsers = this.setUsers.bind(this);
-    this.state = {users: null};
+    this.state = { users: null };
   }
 
   setUsers(users) {
@@ -49,6 +49,14 @@ class SearchUser extends React.Component {
     };
   }
 
+  componentDidMount() {
+    const searchText = getUrlParameter("search");
+    if(searchText.length > 0) {
+      this.searchBox.value = decodeURIComponent(searchText);
+      this.searchUser();
+    }
+  }
+
   onSearchChange(e) {
     // // We're clearing the old timer
     clearTimeout(this.state.searchTimer);
@@ -70,7 +78,7 @@ class SearchUser extends React.Component {
       return false;
     }
 
-    let searchText = encodeURIComponent(this.searchBox.value);
+    const searchText = encodeURIComponent(this.searchBox.value);
 
     this.setState({searchInProgress: true});
 
@@ -79,6 +87,7 @@ class SearchUser extends React.Component {
       url: `/_b/users?email=${searchText}&id=${searchText}`,
       contentType: "application/json; charset=utf-8"
     }).done((data, textStatus, jqXHR) => {
+      window.history.pushState({ search: searchText }, "search", `/permissions?search=${searchText}`);
       this.props.setUsers(data);
     }).fail((jqXHR, textStatus, errorThrown) => {
       console.error(jqXHR.responseText);
@@ -88,6 +97,7 @@ class SearchUser extends React.Component {
   }
 
   clearSearch() {
+    window.history.pushState({ search: "" }, "search", `/permissions`);
     this.props.setUsers(null);
   }
 
@@ -169,15 +179,13 @@ class ShowFullUser extends React.Component {
 
   constructor(props){
     super(props);
+    this.getUserData = this.getUserData.bind(this);
     this.state = {
       user: null
     };
   }
 
-  componentDidMount() {
-
-    const user_id = this.props.user.id;
-
+  getUserData(user_id) {
     $.ajax({
       type: 'GET',
       url: `/_b/users/${user_id}`,
@@ -187,8 +195,16 @@ class ShowFullUser extends React.Component {
     });
   }
 
+  componentDidMount() {
+    this.getUserData(this.props.user.id);
+  }
+  
+  // componentDidMount() {
+  componentWillReceiveProps(nextProps) {
+    this.getUserData(nextProps.user.id);
+  }
+
   render() {
-    console.log('fulluser', this.state.user);
     return (
       this.state.user !== null
       ? <div style={{marginTop: '30px', marginBottom: '30px'}}>
@@ -215,46 +231,35 @@ class UserDetails extends React.Component {
     if (user.gigya) {
       dataFromGigya = Object.keys(user.gigya).map(function(gigya_key) {
         return (
-          <span key={gigya_key}>
-          <dt>Gigya {gigya_key}</dt>
-          <dd>{user.gigya[gigya_key]}</dd>
-          </span>
+          <div key={gigya_key}><strong>Gigya {gigya_key}</strong>: {user.gigya[gigya_key]}</div>
         );
       });
+      
+      const gigya_url = `https://console.gigya.com/Site/partners/UserManagement.aspx/User#/details/id/${user.gigya.UID}/identity/all`;
+
+      dataFromGigya.push(
+        <div key="gigya_link">
+          <a href={gigya_url} target="_blank">Link to Gigya</a>
+        </div>
+      );
     }
+
+    const styleProviderColor = 
+      user.provider === 'gigya' ? "#ff0000" : // Red
+      user.provider === 'google' ? "#0000ff" : // Blue
+      "#333"; // Standard dark
 
     return (
       <div>
         <div className="row">
           <div className="col-xs-6">
-            <span>
-              <dt>ID</dt>
-              <dd>{user.id}</dd>
-            </span>
-            <span>
-              <dt>Email</dt>
-              <dd>{user.email}</dd>
-            </span>
-            <span>
-              <dt>Provider</dt>
-              <dd>{user.provider}</dd>
-            </span>
-            <span>
-              <dt>Internt id</dt>
-              <dd>{user._id}</dd>
-            </span>
-            <span>
-              <dt>Created</dt>
-              <dd>{user.createdAt}</dd>
-            </span>
-            <span>
-              <dt>Last updated</dt>
-              <dd>{user.lastUpdated}</dd>
-            </span>
-            <span>
-              <dt>Last fetched</dt>
-              <dd>{user.lastFetched}</dd>
-            </span>
+            <div><strong>ID</strong>: {user.id}</div>
+            <div><strong>Email</strong>: {user.email}</div>
+            <div><strong>Provider</strong>: <span style={{ color: styleProviderColor}}>{user.provider}</span></div>
+            <div><strong>Internt id</strong>: {user._id}</div>
+            <div><strong>Created</strong>: {user.createdAt}</div>
+            <div><strong>Last updated</strong>: {user.lastUpdated}</div>
+            <div><strong>Last fetched</strong>: {user.lastFetched}</div>
           </div>
           <div className="col-xs-6">
             {dataFromGigya}
@@ -338,7 +343,6 @@ class DataScopes extends React.Component {
     return (
       <div className="row">
         <div className="col-xs-12">
-          {scopes}
           { !scopes || Object.keys(scopes).length === 0
             ? <div>(This user has no permissions.)</div>
             : scopes
@@ -507,3 +511,11 @@ class Grants extends React.Component {
     );
   }
 }
+
+
+function getUrlParameter(name) {
+  name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+  var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+  var results = regex.exec(location.search);
+  return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+};
