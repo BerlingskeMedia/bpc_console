@@ -163,21 +163,13 @@ module.exports = class extends React.Component {
               <dd>{this.state.application.key}</dd>
               <dt>Algorithm</dt>
               <dd>{this.state.application.algorithm}</dd>
+              <dt>Login provider</dt>
+              <dd>{this.state.application.settings.provider}</dd>
             </dl>
           </div>
         </div>
         <h3>Settings</h3>
         <form className="form-horizontal">
-          <div className="form-group">
-            <label className="col-sm-2 control-label" htmlFor="inputProvider">Provider/RSVP</label>
-            <div className="col-sm-10">
-              <p>Validate RSVP against this provider:</p>
-              <select className="form-control" value={this.state.application.settings.provider} name="provider" id="inputProvider" onChange={this.onChangeApplicationSettings}>
-                <option value="gigya">Gigya</option>
-                <option value="google">Google</option>
-              </select>
-            </div>
-          </div>
           <div className="form-group">
             <label className="col-sm-2 control-label">Grants</label>
             <div className="col-sm-10">
@@ -263,7 +255,7 @@ module.exports = class extends React.Component {
         </div>
         <div className="row">
           <div className="col-xs-12">
-            <ApplicationUsers app={this.state.app} />
+            <ApplicationUsers app={this.state.app} provider={this.state.application.settings.provider} />
           </div>
         </div>
       </div>

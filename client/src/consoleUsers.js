@@ -252,7 +252,11 @@ class AddConsoleUser extends React.Component {
       return false;
     }
 
-    var searchText = this.state.searchText;
+    const searchText = this.state.searchText;
+
+    if (searchText.length === 0) {
+      return false;
+    }
 
     this.setState({searchInProgress: true});
 

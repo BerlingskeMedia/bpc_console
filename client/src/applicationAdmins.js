@@ -132,7 +132,7 @@ module.exports = class extends React.Component {
   render() {
 
     var adminUsers = this.state.adminGrants.map((grant, index) => {
-      return <AdminUser
+      return <ApplicationAdmin
         key={grant.id}
         grant={grant}
         removeAdmin={this.removeAdmin} />
@@ -140,8 +140,12 @@ module.exports = class extends React.Component {
 
     return (
       <div>
-        <h3>Admin users</h3>
-        <div>Admin users can access this page and change settings. Removing admin user does not remove access to console for that user.</div>
+        <h3>Admins</h3>
+        <div>
+          Admin users can access this page and change settings.
+          Removing admin user does not remove access to console for that user.
+          Superadmins will still have access.
+        </div>
         <form style={{paddingTop: '30px', paddingBottom: '30px'}}>
           <div className="form-group">
             <input
@@ -167,24 +171,22 @@ module.exports = class extends React.Component {
 }
 
 
-class AdminUser extends React.Component {
+class ApplicationAdmin extends React.Component {
   constructor(props){
     super(props);
     this.state = {
       foundUser: null
     };
   }
-
-  searchUser(grant) {
+  
+  getUser(grant) {
     return $.ajax({
       type: 'GET',
-      url: `/_b/users?provider=google&id=${grant.user}`
+      url: `/_b/users/${grant.user}`
     }).done((data, textStatus, jqXHR) => {
-      if (data.length === 1) {
-        this.setState({
-          foundUser: data[0]
-        });
-      }
+      this.setState({
+        foundUser: data
+      });
     }).fail((jqXHR, textStatus, errorThrown) => {
       console.error(jqXHR.responseText);
       this.setState({
@@ -194,7 +196,7 @@ class AdminUser extends React.Component {
   }
 
   componentDidMount() {
-    this.searchUser(this.props.grant);
+    this.getUser(this.props.grant);
   }
 
   render(){
