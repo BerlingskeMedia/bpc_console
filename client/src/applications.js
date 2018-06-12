@@ -35,7 +35,7 @@ module.exports = class extends React.Component {
       data: JSON.stringify(application),
       success: function(data, status){
         document.cookie = 'console_ticket=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-        location.pathname = `/application/${data.id}`;
+        location.pathname = `/applications/${data.id}`;
         // this.setState((prevState) => {
         //   applications: prevState.applications.push(data);
         // });
@@ -64,7 +64,7 @@ module.exports = class extends React.Component {
       return (
         <tr key={application.id} className="application">
           <td className="col-xs-4">
-            <Link to={`/application/${application.id}`}>{application.id}</Link>
+            <Link to={`/applications/${application.id}`}>{application.id}</Link>
           </td>
           <td className="col-xs-8">
             {scope}

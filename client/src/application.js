@@ -41,6 +41,9 @@ module.exports = class extends React.Component {
       if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
         alert(jqXHR.responseJSON.message);
       }
+      if (jqXHR.status === 403) {
+        window.location = "/applications"; 
+      }
     });
   }
 
