@@ -95,20 +95,33 @@ class CreateApplication extends React.Component {
 
   constructor(props){
     super(props);
-    this.state = {value: ''};
     this.onChange = this.onChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.state = {
+      id: '',
+      provider: 'gigya'
+    };
   }
 
   onChange(e) {
-    this.setState({value: e.target.value});
+    let s = this.state;
+    s[e.target.name] = e.target.value;
+    this.setState(s);
   }
 
   handleSubmit(e) {
     e.preventDefault();
-    if (this.state.value !== '') {
-      this.props.createApplication({id: this.state.value}).done(function() {
-        this.setState({value: ''});
+    if (this.state.id !== '') {
+      this.props.createApplication({
+        id: this.state.id,
+        settings: {
+          provider: this.state.provider
+        }
+      }).done(function() {
+        this.setState({
+          id: '',
+          provider: 'gigya'
+        });
       }.bind(this));
     }
   }
@@ -121,9 +134,16 @@ class CreateApplication extends React.Component {
           name="id"
           className='form-control'
           placeholder="Application ID"
-          value={this.state.value}
+          value={this.state.id}
           onChange={this.onChange} />
-        <button type="submit" className="btn btn-default">Create application</button>
+        <select className="form-control"
+          value={this.state.provider}
+          name="provider"
+          onChange={this.onChange}>
+          <option value="gigya">Gigya</option>
+          <option value="google">Google</option>
+        </select>
+        <button type="submit" className="btn btn-default">Create new application</button>
       </form>
     );
   }

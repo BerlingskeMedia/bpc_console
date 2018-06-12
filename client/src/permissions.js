@@ -80,6 +80,10 @@ class SearchUser extends React.Component {
 
     const searchText = encodeURIComponent(this.searchBox.value);
 
+    if (searchText.length === 0) {
+      return false;
+    }
+
     this.setState({searchInProgress: true});
 
     return $.ajax({
