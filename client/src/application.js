@@ -255,7 +255,9 @@ module.exports = class extends React.Component {
         </div>
         <div className="row">
           <div className="col-xs-12">
-            <ApplicationUsers app={this.state.app} provider={this.state.application.settings.provider} />
+            <ApplicationUsers
+              app={this.state.app}
+              provider={this.state.application.settings.provider} />
           </div>
         </div>
       </div>

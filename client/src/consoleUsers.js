@@ -170,9 +170,9 @@ class Grant extends React.Component {
   render(){
     const grant = this.props.grant;
 
-    var isSuperAdmin = grant.scope.indexOf('admin:*') > -1;
+    const isSuperAdmin = grant.scope.indexOf('admin:*') > -1;
 
-    var isAdminOfApp = grant.scope
+    const adminOfApps = grant.scope
     .filter(function(scope){
       return scope !== 'admin:*' && scope.indexOf('admin:') === 0;
     })
@@ -205,7 +205,7 @@ class Grant extends React.Component {
         }
         </td>
         <th className="col-xs-5">
-          {isAdminOfApp}
+          {adminOfApps}
         </th>
         <td className="col-xs-2">
           { isSuperAdmin

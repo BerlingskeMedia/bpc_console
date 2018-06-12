@@ -6,7 +6,7 @@ module.exports = class extends React.Component {
   constructor(props){
     super(props);
     this.onChange = this.onChange.bind(this);
-    this.searchUsers = this.searchUsers.bind(this);
+    this.searchUser = this.searchUser.bind(this);
     this.makeAdmin = this.makeAdmin.bind(this);
     this.removeAdmin = this.removeAdmin.bind(this);
     this.state = {
@@ -30,13 +30,6 @@ module.exports = class extends React.Component {
     });
   }
 
-  // onChangeState(e) {
-  //   var temp = {};
-  //   const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
-  //   temp[e.target.name] = value;
-  //   this.setState(temp);
-  // }
-
   onChange(e) {
     const value = e.target.value;
     this.setState({
@@ -45,10 +38,10 @@ module.exports = class extends React.Component {
     });
     // We're clearing the old timer
     clearTimeout(this.state.searchTimer);
-    this.setState({searchTimer: setTimeout(this.searchUsers, 1000)});
+    this.setState({searchTimer: setTimeout(this.searchUser, 1000)});
   }
 
-  searchUsers() {
+  searchUser() {
     if(this.state.searchInProgress){
       return false;
     }
@@ -151,7 +144,7 @@ module.exports = class extends React.Component {
             <input
               type="text"
               className="form-control"
-              placeholder="Search for user"
+              placeholder="Type email or ID to start search"
               value={this.state.searchText}
               readOnly={this.state.searchInProgress}
               onChange={this.onChange} />
