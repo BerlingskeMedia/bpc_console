@@ -19,7 +19,10 @@ module.exports = class extends React.Component {
       app: this.props.match.params.app,
       newScope: '',
       application: {
-        settings: {}
+        settings: {
+          includeScopeInPrivatExt: false,
+          ticketDuration: null
+        }
       }
     };
   }
@@ -37,6 +40,9 @@ module.exports = class extends React.Component {
       console.error(jqXHR.responseText);
       if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
         alert(jqXHR.responseJSON.message);
+      }
+      if (jqXHR.status === 403) {
+        window.location = "/applications"; 
       }
     });
   }
@@ -225,6 +231,7 @@ module.exports = class extends React.Component {
             </div>
           </div>
         </form>
+        <hr />
         <div className="row">
           <div className="col-xs-6">
             <h3>Scopes</h3>
@@ -253,6 +260,7 @@ module.exports = class extends React.Component {
             <ApplicationAdmins app={this.state.app} />
           </div>
         </div>
+        <hr />
         <div className="row">
           <div className="col-xs-12">
             <ApplicationUsers

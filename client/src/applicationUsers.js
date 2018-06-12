@@ -65,8 +65,12 @@ module.exports = class extends React.Component {
       data: JSON.stringify(newGrant)
     }).done((data, textStatus, jqXHR) => {
       this.setState((prevState) => {
-        grantscount: prevState.grantscount + 1;
-        grants: prevState.grants.push(newGrant);
+        let temp = prevState.grants.slice();
+        temp.splice(0, 0, data);
+        return {
+          grantscount: prevState.grantscount + 1,
+          grants: temp
+        };
       });
     }).fail((jqXHR, textStatus, errorThrown) => {
       console.error(jqXHR.responseText);
@@ -81,10 +85,14 @@ module.exports = class extends React.Component {
       const index = this.state.grants.findIndex(e => {
         return e.id === grant.id;
       });
-      if(data.status === 'ok' && index > -1){
+      if(data.status === 'ok' && index > -1) {
         this.setState((prevState) => {
-          grantscount: prevState.grantscount - 1;
-          grants: prevState.grants.splice(index, 1);
+          let temp = prevState.grants.slice();
+          temp.splice(index, 1);
+          return {
+            grantscount: prevState.grantscount - 1,
+            grants: temp
+          };
         });
       }
     }).fail((jqXHR, textStatus, errorThrown) => {
@@ -178,23 +186,19 @@ class UserSearch extends React.Component {
     this.handleSubmit = this.handleSubmit.bind(this);
     this.state = {
       user: {},
-      searchText: '',
       searchInProgress: false,
       searchTimer: null,
       searchSuccess: false,
-      lastSearch: '',
       userHasGrant: false,
       grant: {}
     };
   }
 
   onSearchChange(e) {
-    var value = e.target.value;
     // We're clearing the old timer
     clearTimeout(this.state.searchTimer);
     this.setState({
       searchTimer: setTimeout(this.searchUser, 1000),
-      searchText: value,
       searchSuccess: false
     });
   }
@@ -256,14 +260,16 @@ class UserSearch extends React.Component {
     e.preventDefault();
     if (this.state.user !== {}) {
       this.props.createGrant(this.state.user)
-      .done(() => {
-        this.setState({user: {}, searchText: ''});
+      .done((data, textStatus, jqXHR) => {
+        this.searchBox.value = '';
+        this.setState({user: {}});
       })
       .fail((jqXHR, textStatus, errorThrown) => {
         console.log('jqXHR', jqXHR);
         if (jqXHR.status === 409) {
           alert('User already have access');
-          this.setState({user: {}, searchText: ''});
+          this.searchBox.value = '';
+          this.setState({user: {}});
         } else {
           console.error(jqXHR.responseText);
         }
@@ -296,7 +302,7 @@ class UserSearch extends React.Component {
           <div className="col-xs-6">
             <button type="button" className="btn btn-default"
               onClick={this.handleSubmit}
-              disabled={!this.state.searchSuccess || this.state.userHasGrant}>Grants access</button>
+              disabled={!this.state.searchSuccess || this.state.userHasGrant}>Create grant</button>
           </div>
           <div className="col-xs-2">
             {grant.exp || grant.exp === null

@@ -271,7 +271,7 @@ class Main extends React.Component {
           </ul>
           <Route exact path="/" component={Permissions} />
           <Route path="/permissions" component={Permissions}/>
-          <Route path="/applications" component={Applications} />
+          <Route exact path="/applications" component={Applications} />
           <Route path="/admins" component={ConsoleUsers}/>
           <Route path={`/applications/:app`} component={Application}/>
           <Route path={`/application/:app`} component={Application}/>
