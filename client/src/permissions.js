@@ -394,8 +394,8 @@ class PermissionsTable extends React.Component {
     var permissionArrayRows = permissionArray.map(function (value, index) {
       let key = name + '.' + index.toString();
       return typeof permissionArray[index] === 'object'
-        ? <PermissionObject key={key} name={key} data={permissionArray[index]} />
-        : <PermissionField key={key} name={key} data={permissionArray[index]} />
+        ? <PermissionObject key={key} name={key} data={permissionArray[index]} showDataInPre={true} />
+        : <PermissionField key={key} name={key} data={permissionArray[index]} showDataInPre={true} />
     });
 
     return rows.concat(permissionArrayRows);
@@ -412,8 +412,8 @@ class PermissionsTable extends React.Component {
           && this.props.permissions[name].some(this.elementTypeIsAnObject)
         ? this.mapIntoMoreRows(name, this.props.permissions[name])
         : typeof this.props.permissions[name] === 'object'
-          ? <PermissionObject key={index} name={name} data={this.props.permissions[name]} />
-          : <PermissionField key={index} name={name} data={this.props.permissions[name]} />
+          ? <PermissionObject key={index} name={name} data={this.props.permissions[name]} showDataInPre={true} />
+          : <PermissionField key={index} name={name} data={this.props.permissions[name]} showDataInPre={true} />
     }.bind(this));
 
     return (
@@ -435,12 +435,7 @@ class PermissionObject extends React.Component {
 
   render() {
     return (
-      <tr>
-        <td className="col-xs-2">{this.props.name}</td>
-        <td className="col-xs-10">
-          {JSON.stringify(this.props.data)}
-        </td>
-      </tr>
+      <Field name={this.props.name} data={JSON.stringify(this.props.data)} showDataInPre={this.props.showDataInPre} />
     );
   }
 }
@@ -454,16 +449,31 @@ class PermissionField extends React.Component {
 
   render() {
     return (
+      <Field name={this.props.name} data={this.props.data.toString()} showDataInPre={this.props.showDataInPre} />
+    );
+  }
+}
+
+class Field extends React.Component {
+
+  constructor(props){
+    super(props);
+  }
+
+  render() {
+    return (
       <tr>
-        <td className="col-xs-2">{this.props.name}</td>
+        <td className="col-xs-2" style={{'verticalAlign': 'middle'}}>{this.props.name}</td>
         <td className="col-xs-10">
-          {this.props.data.toString()}
+        { this.props.showDataInPre
+          ? <pre>{this.props.data}</pre>
+          : <em>{this.props.data}</em>
+        }
         </td>
       </tr>
     );
   }
 }
-
 
 class Grants extends React.Component {
 
