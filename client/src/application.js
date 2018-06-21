@@ -179,6 +179,12 @@ module.exports = class extends React.Component {
           <div className="form-group">
             <label className="col-sm-2 control-label">Grants</label>
             <div className="col-sm-10">
+            <div className="checkbox">
+                <label>
+                  <input type="checkbox" defaultChecked={this.state.application.settings.allowAutoCreationGrants} name="allowAutoCreationGrants" onClick={this.onChangeApplicationSettings}></input>
+                  Allow grants to be created automatically.
+                </label>
+              </div>
               <div className="checkbox">
                 <label>
                   <input type="checkbox" defaultChecked={this.state.application.settings.disallowAutoCreationGrants} name="disallowAutoCreationGrants" onClick={this.onChangeApplicationSettings}></input>

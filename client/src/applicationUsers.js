@@ -411,7 +411,7 @@ class GrantsList extends React.Component {
 
     return(
       <div style={{paddingTop: '30px', paddingBottom: '30px'}}>
-        <h4>All users</h4>
+        <h4>All grants</h4>
         <table className="table">
           <tbody>
             <tr>
