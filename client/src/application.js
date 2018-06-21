@@ -193,7 +193,7 @@ module.exports = class extends React.Component {
               </div>
               <div className="checkbox">
                 <label>
-                  <input type="checkbox" defaultChecked={this.state.application.settings.disallowGrants} name="disallowGrants" onClick={this.onChangeApplicationSettings}></input>
+                  <input type="checkbox" defaultChecked={this.state.application.settings.disallowUserTickets} name="disallowUserTickets" onClick={this.onChangeApplicationSettings}></input>
                   Do not issue tickets to any users.
                 </label>
               </div>
