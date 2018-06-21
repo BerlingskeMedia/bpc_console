@@ -444,7 +444,7 @@ class DataField extends React.Component {
 
     return (
       <tr>
-        <td className="col-xs-2" style={{'verticalAlign': 'middle'}}>{this.props.name}</td>
+        <td className="col-xs-2" style={{verticalAlign: 'middle'}}>{this.props.name}</td>
         <td className="col-xs-10">
           <pre>{data}</pre>
         </td>
@@ -463,7 +463,7 @@ class EmField extends React.Component {
   render() {
     return (
       <tr>
-        <td className="col-xs-2" style={{'verticalAlign': 'middle'}}>{this.props.name}</td>
+        <td className="col-xs-2" style={{verticalAlign: 'middle'}}>{this.props.name}</td>
         <td className="col-xs-10"><em>{this.props.data}</em></td>
       </tr>
     );

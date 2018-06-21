@@ -23,7 +23,8 @@ module.exports = class extends React.Component {
           includeScopeInPrivatExt: false,
           ticketDuration: ''
         }
-      }
+      },
+      savedSuccessMessageFadeOutTimeout: null
     };
   }
 
@@ -54,7 +55,23 @@ module.exports = class extends React.Component {
       contentType: "application/json; charset=utf-8",
       data: JSON.stringify(application)
     }).done((data, textStatus, jqXHR) => {
-      this.setState({application: application});
+
+      $('.savedSuccessMessage').fadeIn(100);
+      if(this.state.savedSuccessMessageFadeOutTimeout) {
+        clearTimeout(this.state.savedSuccessMessageFadeOutTimeout);
+      }
+      const newSavedSuccessMessageFadeOutTimeout = setTimeout(
+        function() {
+          $('.savedSuccessMessage').fadeOut(600);
+        },
+        3000
+      );
+      
+      this.setState({
+        application: application,
+        savedSuccessMessageFadeOutTimeout: newSavedSuccessMessageFadeOutTimeout
+      });
+
     }).fail((jqXHR, textStatus, errorThrown) => {
       console.error(jqXHR.responseText);
     });
@@ -113,6 +130,7 @@ module.exports = class extends React.Component {
     const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
     application.settings[e.target.name] = value;
     this.setState({ application: application });
+    this.updateApplication(application);
   }
 
   componentDidMount() {
@@ -234,6 +252,7 @@ module.exports = class extends React.Component {
               <button type="button" className="btn btn-primary btn-xs" onClick={this.updateApplication.bind(this, this.state.application)}>
                 Save settings
               </button>
+              <span className="savedSuccessMessage" style={{color: '#008000', verticalAlign: 'middle', marginLeft: '10px', display: 'none'}}>Saved successully</span>
             </div>
           </div>
         </form>
