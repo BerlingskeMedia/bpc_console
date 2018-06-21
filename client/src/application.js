@@ -21,7 +21,7 @@ module.exports = class extends React.Component {
       application: {
         settings: {
           includeScopeInPrivatExt: false,
-          ticketDuration: null
+          ticketDuration: ''
         }
       }
     };

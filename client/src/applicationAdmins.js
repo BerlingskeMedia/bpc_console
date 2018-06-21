@@ -48,6 +48,10 @@ module.exports = class extends React.Component {
 
     var searchText = this.state.searchText;
 
+    if (searchText.length === 0) {
+      return false;
+    }
+
     this.setState({searchInProgress: true});
 
     return $.ajax({
@@ -133,11 +137,11 @@ module.exports = class extends React.Component {
 
     return (
       <div>
-        <h3>Admins</h3>
+        <h3>Application admins</h3>
         <div>
-          Admin users can access this page and change settings.
-          Removing admin user does not remove access to console for that user.
-          Superadmins will still have access.
+          Application admin users can access this page and change settings.
+          Removing admin user does not remove access to BPC Console for that user.<br/>
+          Also, Superadmins will always have access.
         </div>
         <form style={{paddingTop: '30px', paddingBottom: '30px'}}>
           <div className="form-group">
