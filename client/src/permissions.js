@@ -1,5 +1,6 @@
 const $ = require('jquery');
 const React = require('react');
+const Link = require('react-router-dom').Link;
 
 module.exports = class extends React.Component {
 
@@ -491,7 +492,7 @@ class Grants extends React.Component {
       return (
         <div key={index} className="row" style={{paddingBottom: '10px'}}>
           <div className="col-xs-6">
-            Grant: <strong>{grant.app}</strong>
+            Grant: <Link  to={`/application/${grant.app}`}>{grant.app}</Link>
           </div>
           <div className="col-xs-2">
             {grant.exp

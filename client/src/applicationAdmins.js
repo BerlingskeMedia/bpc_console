@@ -22,7 +22,7 @@ module.exports = class extends React.Component {
   getApplicationAdminUsers() {
     return $.ajax({
       type: 'GET',
-      url: `/_b/applications/${this.props.app}/admins`
+      url: `/_b/admins/${this.props.app}`
     }).done((data, textStatus, jqXHR) => {
       this.setState({adminGrants: data});
     }).fail((jqXHR, textStatus, errorThrown) => {
@@ -74,8 +74,8 @@ module.exports = class extends React.Component {
 
   removeAdmin(grant) {
     return $.ajax({
-      type: 'POST',
-      url: `/_b/applications/${this.props.app}/removeadmin`,
+      type: 'DELETE',
+      url: `/_b/admins/${this.props.app}/admin`,
       contentType: "application/json; charset=utf-8",
       data: JSON.stringify({ user: grant.user })
     })
@@ -104,7 +104,7 @@ module.exports = class extends React.Component {
 
     return $.ajax({
       type: 'POST',
-      url: `/_b/applications/${this.props.app}/makeadmin`,
+      url: `/_b/admins/${this.props.app}/admin`,
       contentType: "application/json; charset=utf-8",
       data: JSON.stringify(payload)
     })
