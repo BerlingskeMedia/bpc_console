@@ -222,7 +222,7 @@ class ConsoleApp extends React.Component {
             ? <div>
                 {this.state.authorized === true ? <Main /> : null }
                 {this.state.ticketRefreshFailed === true ? <p>Din session kunne ikke forlænges.</p> : null }
-                {this.state.missingGrant === true ? <p>Du har ikke de fornødne rettigheder</p> : null }
+                {this.state.missingGrant === true ? <p>Du har ikke de fornødne rettigheder.</p> : null }
               </div>
             : null
           }
