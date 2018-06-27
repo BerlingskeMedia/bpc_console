@@ -164,7 +164,7 @@ class SearchResult extends React.Component {
 
       rows = this.props.users.map((u,i) => {
         return (
-          <UserDetails key={u.id + 'searchresult'} user={u} />
+          <UserDetails key={u.id + i + 'searchresult'} user={u} />
         );
       });
 
