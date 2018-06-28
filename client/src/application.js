@@ -9,12 +9,12 @@ module.exports = class extends React.Component {
 
   constructor(props){
     super(props);
-    this.deleteApplication = this.deleteApplication.bind(this)
-    this.addScope = this.addScope.bind(this)
-    this.removeScope = this.removeScope.bind(this)
-    this.onChangeState = this.onChangeState.bind(this)
-    this.onChangeApplication = this.onChangeApplication.bind(this)
-    this.onChangeApplicationSettings = this.onChangeApplicationSettings.bind(this)
+    this.deleteApplication = this.deleteApplication.bind(this);
+    this.addScope = this.addScope.bind(this);
+    this.removeScope = this.removeScope.bind(this);
+    this.onChangeState = this.onChangeState.bind(this);
+    this.onChangeApplication = this.onChangeApplication.bind(this);
+    this.onChangeApplicationSettings = this.onChangeApplicationSettings.bind(this);
     this.state = {
       app: this.props.match.params.app,
       newScope: '',
@@ -197,7 +197,7 @@ module.exports = class extends React.Component {
           <div className="form-group">
             <label className="col-sm-2 control-label">Grants</label>
             <div className="col-sm-10">
-            <div className="checkbox">
+              <div className="checkbox">
                 <label>
                   <input type="checkbox" defaultChecked={this.state.application.settings.allowAutoCreationGrants} name="allowAutoCreationGrants" onClick={this.onChangeApplicationSettings}></input>
                   Allow grants to be created automatically.
