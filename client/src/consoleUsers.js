@@ -345,7 +345,6 @@ class AddConsoleUser extends React.Component {
             className='form-control'
             placeholder="Search for user"
             value={this.state.searchText}
-            readOnly={this.state.searchInProgress}
             onChange={this.onChange} />
         </div>
         <button type="submit" className="btn btn-default" disabled={!this.state.searchSuccess}>Grant access</button>

@@ -294,7 +294,6 @@ class UserSearch extends React.Component {
               onChange={this.onSearchChange}
               className="form-control"
               placeholder="Type email or ID to start search"
-              readOnly={this.state.searchInProgress}
               ref={(searchBox) => this.searchBox = searchBox} />
           </div>
         </form>

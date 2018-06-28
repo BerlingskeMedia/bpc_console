@@ -150,7 +150,6 @@ module.exports = class extends React.Component {
               className="form-control"
               placeholder="Type email or ID to start search"
               value={this.state.searchText}
-              readOnly={this.state.searchInProgress}
               onChange={this.onChange} />
           </div>
           <button type="submit" className="btn btn-default" onClick={this.makeAdmin} disabled={!this.state.searchSuccess}>Make admin</button>
