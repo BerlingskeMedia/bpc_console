@@ -160,8 +160,8 @@ module.exports = class extends React.Component {
           <tbody>
             <tr>
               <th className="col-xs-3">User</th>
-              <th className="col-xs-2"></th>
               <th className="col-xs-5">Admin of app</th>
+              <th className="col-xs-2"></th>
               <th className="col-xs-2"></th>
             </tr>
             {grants}
@@ -231,19 +231,19 @@ class Grant extends React.Component {
             : grant.user
           }
         </td>
-        <td className="col-xs-2">
-        { isSuperAdmin
-          ? <button type="button" disabled={isExpired} className="btn btn-warning btn-sm btn-block" onClick={this.props.demoteSuperAdmin.bind(this, grant)}>Demote Superadmin</button>
-          : <button type="button" disabled={isExpired} className="btn btn-info btn-sm btn-block" onClick={this.props.makeSuperAdmin.bind(this, grant)}>Promote to Superadmin</button>
-        }
-        </td>
         <th className="col-xs-5">
           {adminOfApps}
         </th>
         <td className="col-xs-2">
+          { isSuperAdmin
+            ? <button type="button" disabled={isExpired} className="btn btn-info btn-sm btn-block" onClick={this.props.demoteSuperAdmin.bind(this, grant)}>Demote Superadmin</button>
+            : <button type="button" disabled={isExpired} className="btn btn-default btn-sm btn-block" onClick={this.props.makeSuperAdmin.bind(this, grant)}>Promote to Superadmin</button>
+          }
+        </td>
+        <td className="col-xs-2">
           { isExpired
             ? <button type="button" className="btn btn-primary btn-sm btn-block" onClick={this.props.activateGrant.bind(this, grant)}>Reactivate grant</button>
-            : <button type="button" className="btn btn-danger btn-sm btn-block" onClick={this.props.expireGrant.bind(this, grant)}>Expire grant</button>
+            : <button type="button" className="btn btn-warning btn-sm btn-block" onClick={this.props.expireGrant.bind(this, grant)}>Expire grant</button>
           }
         </td>
       </tr>
