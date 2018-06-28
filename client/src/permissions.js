@@ -184,6 +184,10 @@ class ShowFullUser extends React.Component {
   constructor(props){
     super(props);
     this.getUserData = this.getUserData.bind(this);
+    this.deleteGrant = this.deleteGrant.bind(this);
+    this.expireGrant = this.expireGrant.bind(this);
+    this.reactivateGrant = this.reactivateGrant.bind(this);
+    this.updateGrant = this.updateGrant.bind(this);
     this.state = {
       user: null
     };
@@ -199,6 +203,60 @@ class ShowFullUser extends React.Component {
     });
   }
 
+  deleteGrant(grant) {
+    return $.ajax({
+      type: 'DELETE',
+      url: `/_b/applications/${grant.app}/grants/${grant.id}`
+    }).done((data, textStatus, jqXHR) => {
+      var user = this.state.user;
+      const index = user.grants.findIndex(e => {
+        return e.id === grant.id;
+      });
+      if(data.status === 'ok' && index > -1) {
+        let temp = user.grants.slice();
+        temp.splice(index, 1);
+        user.grants = temp;
+        this.setState({user: user});
+      }
+    }).fail((jqXHR, textStatus, errorThrown) => {
+      console.error(jqXHR.responseText);
+    });
+  }
+
+  expireGrant(grant) {
+
+    grant.exp = Date.now();
+    return this.updateGrant(grant);
+
+  }
+
+  reactivateGrant(grant) {
+
+    grant.exp = null;
+    return this.updateGrant(grant);
+
+  }
+
+
+  updateGrant(grant) {
+    return $.ajax({
+      type: 'POST',
+      url: `/_b/applications/${grant.app}/grants/${grant.id}`,
+      contentType: "application/json; charset=utf-8",
+      data: JSON.stringify(grant)
+    }).done((data, textStatus, jqXHR) => {
+      var user = this.state.user;
+      const index = user.grants.findIndex(e => {
+        return e.id === grant.id;
+      });
+      user.grants[index] = grant;
+      this.setState({user: user});
+    }).fail((jqXHR, textStatus, errorThrown) => {
+      console.error(jqXHR.responseText);
+    });
+  }
+
+
   componentDidMount() {
     this.getUserData(this.props.user.id);
   }
@@ -213,8 +271,17 @@ class ShowFullUser extends React.Component {
       this.state.user !== null
       ? <div style={{marginTop: '30px', marginBottom: '30px'}}>
           <UserDetails key={this.state.user.id + 'fulluser_1'} user={this.state.user} />
+          <hr />
           <DataScopes key={this.state.user.id + 'fulluser_2'} dataScopes={this.state.user.dataScopes} />
-          <Grants key={this.state.user.id + 'fulluser_3'} grants={this.state.user.grants} />
+          <hr />
+          <Grants
+            key={this.state.user.id + 'fulluser_3'}
+            grants={this.state.user.grants}
+            deleteGrant={this.deleteGrant}
+            expireGrant={this.expireGrant}
+            reactivateGrant={this.reactivateGrant} />
+          <hr />
+          <DeleteUser user={this.state.user.id} />
         </div>
       : null
     );
@@ -270,7 +337,6 @@ class UserDetails extends React.Component {
             <RecalcPermissionsButton user={user} />
           </div>
         </div>
-        <hr />
       </div>
     );
   }
@@ -479,48 +545,142 @@ class Grants extends React.Component {
 
   render() {
 
-    const grants = this.props.grants.map(function(grant, index) {
-      const scopes = grant.scope.map(function(scope){
-        return (
-          <div key={index + '.' + scope}>
-            <span>&nbsp;</span>
-            <span className="label label-info">{scope}</span>
-          </div>
-        );
-      });
+    // const grants = this.props.grants.map(function(grant, index) {
+    //   const scopes = grant.scope.map(function(scope){
+    //     return (
+    //       <div key={index + '.' + scope}>
+    //         <span>&nbsp;</span>
+    //         <span className="label label-info">{scope}</span>
+    //       </div>
+    //     );
+    //   });
+    //   return (
+    //     <div key={index} className="row" style={{paddingBottom: '10px'}}>
+    //       <div className="col-xs-6">
+    //         Grant: <Link  to={`/application/${grant.app}`}>{grant.app}</Link>
+    //       </div>
+    //       <div className="col-xs-2">
+    //         {grant.exp
+    //           ? <span>Expires: <em>{grant.exp}</em></span>
+    //           : <span>Expires: <em>Never</em></span>
+    //         }
+    //       </div>
+    //       <div className="col-xs-4">
+    //         Scopes:
+    //         { scopes.length > 0
+    //           ? scopes
+    //           : <span>(ingen)</span>
+    //         }
+    //       </div>
+    //     </div>
+    //   );
+    // });
+
+    // return(
+    //   <div>
+    //     { grants === null || grants.length === 0
+    //       ? <div>(This user has no grants.)</div>
+    //       : grants
+    //     }
+    //   </div>
+    // );
+
+    const grants = this.props.grants.map(function(grant) {
       return (
-        <div key={index} className="row" style={{paddingBottom: '10px'}}>
-          <div className="col-xs-6">
-            Grant: <Link  to={`/application/${grant.app}`}>{grant.app}</Link>
-          </div>
-          <div className="col-xs-2">
+        <tr key={grant.id}>
+          <td className="col-xs-6">
+            <Link to={`/application/${grant.app}`}>{grant.app}</Link>
+          </td>
+          <td className="col-xs-2">
             {grant.exp
-              ? <span>Expires: <em>{grant.exp}</em></span>
-              : <span>Expires: <em>Never</em></span>
+              ? <span>{grant.exp}</span>
+              : <span>Never</span>
             }
-          </div>
-          <div className="col-xs-4">
-            Scopes:
-            { scopes.length > 0
-              ? scopes
-              : <span>(ingen)</span>
+          </td>
+          <td className="col-xs-2">
+            {grant.exp && grant.exp < Date.now()
+             ? <button type="button" className="btn btn-primary btn-sm btn-block" onClick={this.props.reactivateGrant.bind(this, grant)}>Reactivate grant</button>
+             : <button type="button" className="btn btn-warning btn-sm btn-block" onClick={this.props.expireGrant.bind(this, grant)}>Expire grant</button>
             }
-          </div>
-        </div>
+          </td>
+          <td className="col-xs-2">
+            <button type="button" className="btn btn-danger btn-sm btn-block" onClick={this.props.deleteGrant.bind(this, grant)}>Delete grant</button>
+          </td>
+        </tr>
       );
-    });
+    }.bind(this));
 
     return(
-      <div>
-        <hr />
-        { grants === null || grants.length === 0
-          ? <div>(This user has no grants.)</div>
-          : grants
-        }
+      <div style={{paddingTop: '30px', paddingBottom: '30px'}}>
+        <h4>All grants</h4>
+        <table className="table">
+          <tbody>
+            <tr>
+              <th className="col-xs-6">App</th>
+              <th className="col-xs-2">Expires</th>
+              <th className="col-xs-2"></th>
+              <th className="col-xs-2"></th>
+            </tr>
+            { grants !== null && grants.length > 0
+              ? grants
+              : null
+            }
+          </tbody>
+        </table>
       </div>
     );
   }
 }
+
+
+class DeleteUser extends React.Component {
+
+  constructor(props){
+    super(props);
+    this.deleteUser = this.deleteUser.bind(this);
+  }
+
+  warnDeleteUserToggle(){
+    $('.warnDeleteUser').toggle();
+  }
+
+  deleteUser() {
+    return $.ajax({
+      type: 'DELETE',
+      url: '/_b/users/'.concat(this.props.user),
+      contentType: "application/json; charset=utf-8"
+    }).done((data, textStatus, jqXHR) => {
+      location.search = '';
+    }).fail((jqXHR, textStatus, errorThrown) => {
+      console.error(jqXHR.responseText);
+    });
+  }
+
+  render() {
+    return (
+      <div className="row">
+        <div className="col-xs-2 col-xs-offset-6">
+          <div className="warnDeleteUser text-right" style={{display: 'none'}}>
+            Sure?
+          </div>
+        </div>
+        <div className="col-xs-2">
+          <div className="warnDeleteUser" style={{display: 'none'}}>
+            <button type="button" className="btn btn-danger btn-sm btn-block" onClick={this.deleteUser}>Yes</button>
+          </div>
+        </div>
+        <div className="col-xs-2">
+          <div className="warnDeleteUser">
+            <button type="button" className="btn btn-danger btn-sm btn-block" onClick={this.warnDeleteUserToggle}>Delete user</button>
+          </div>
+          <div className="warnDeleteUser" style={{display: 'none'}}>
+            <button type="button" className="btn btn-success btn-sm btn-block" onClick={this.warnDeleteUserToggle}>No</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+};
 
 
 function getUrlParameter(name) {
