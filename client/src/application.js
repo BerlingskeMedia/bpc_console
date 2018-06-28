@@ -1,6 +1,6 @@
 const $ = require('jquery');
 const React = require('react');
-const ApplicationUsers = require('./applicationUsers');
+const ApplicationGrants = require('./applicationGrants');
 const ApplicationAdmins = require('./applicationAdmins');
 const Link = require('react-router-dom').Link;
 const Redirect = require('react-router-dom').Redirect;
@@ -288,7 +288,7 @@ module.exports = class extends React.Component {
         <hr />
         <div className="row">
           <div className="col-xs-12">
-            <ApplicationUsers
+            <ApplicationGrants
               app={this.state.app}
               provider={this.state.application.settings.provider} />
           </div>
