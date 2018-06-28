@@ -61,8 +61,6 @@ module.exports = class extends React.Component {
 
   updateGrant(grant) {
 
-    console.log('grant', grant)
-
     return $.ajax({
       type: 'POST',
       url: `/_b/applications/console/grants/${grant.id}`,
@@ -244,8 +242,8 @@ class Grant extends React.Component {
         </th>
         <td className="col-xs-2">
           { isExpired
-            ? <button type="button" className="btn btn-warning btn-sm btn-block" onClick={this.props.activateGrant.bind(this, grant)}>Grant access</button>
-            : <button type="button" className="btn btn-danger btn-sm btn-block" onClick={this.props.expireGrant.bind(this, grant)}>Remove access</button>
+            ? <button type="button" className="btn btn-primary btn-sm btn-block" onClick={this.props.activateGrant.bind(this, grant)}>Reactivate grant</button>
+            : <button type="button" className="btn btn-danger btn-sm btn-block" onClick={this.props.expireGrant.bind(this, grant)}>Expire grant</button>
           }
         </td>
       </tr>
