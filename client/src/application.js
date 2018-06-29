@@ -141,11 +141,15 @@ module.exports = class extends React.Component {
 
     var scopeList = this.state.application !== undefined && this.state.application.scope !== undefined
       ? this.state.application.scope.map(function(s, i){
+          const scopeElem = s.endsWith(':read') ? <span>{s.substring(0, s.indexOf(':read'))}<strong>{s.substring(s.indexOf(':read'))}</strong></span> : <span>{s}</span>;
+          if (s.endsWith(':read')) {
+
+          }
           return (
             <li key={i} style={{marginBottom: '2px'}}>
               <button type="button" className="btn btn-danger btn-xs" onClick={this.removeScope.bind(this, i)}>Remove scope</button>
               &nbsp;
-              {s}
+              {scopeElem}
             </li>);
         }.bind(this))
       : null;
@@ -261,6 +265,7 @@ module.exports = class extends React.Component {
           <div className="col-xs-6">
             <h3>Scopes</h3>
             <div>Scopes the application is allow to read/write. And users can read.</div>
+            <div>When adding suffix <strong>:read</strong> to the scope, the application can only read.</div>
             <form style={{paddingTop: '30px', paddingBottom: '30px'}}>
               <div className="form-group">
                 <input
