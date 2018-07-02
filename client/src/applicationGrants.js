@@ -310,6 +310,11 @@ class UserSearch extends React.Component {
             }
           </div>
           <div className="col-xs-2">
+            <button type="button" className="btn btn-danger btn-sm btn-block"
+                onClick={this.props.deleteGrant.bind(this, grant)}
+                disabled={!this.state.searchSuccess || !this.state.userHasGrant}>Delete grant</button>
+          </div>
+          <div className="col-xs-2">
             {grant.exp && grant.exp < Date.now()
               ? <button type="button" className="btn btn-primary btn-sm btn-block"
                   onClick={this.props.reactivateGrant.bind(this, grant)}
@@ -318,11 +323,6 @@ class UserSearch extends React.Component {
                   onClick={this.props.expireGrant.bind(this, grant)}
                   disabled={!this.state.searchSuccess || !this.state.userHasGrant}>Expire grant</button>
             }
-          </div>
-          <div className="col-xs-2">
-            <button type="button" className="btn btn-danger btn-sm btn-block"
-              onClick={this.props.deleteGrant.bind(this, grant)}
-              disabled={!this.state.searchSuccess || !this.state.userHasGrant}>Delete grant</button>
           </div>
         </div>
       </div>
@@ -396,13 +396,13 @@ class GrantsList extends React.Component {
             }
           </td>
           <td className="col-xs-2">
+            <button type="button" className="btn btn-danger btn-sm btn-block" onClick={this.props.deleteGrant.bind(this, grant)}>Delete grant</button>
+          </td>
+          <td className="col-xs-2">
             {grant.exp && grant.exp < Date.now()
              ? <button type="button" className="btn btn-primary btn-sm btn-block" onClick={this.props.reactivateGrant.bind(this, grant)}>Reactivate grant</button>
              : <button type="button" className="btn btn-warning btn-sm btn-block" onClick={this.props.expireGrant.bind(this, grant)}>Expire grant</button>
             }
-          </td>
-          <td className="col-xs-2">
-            <button type="button" className="btn btn-danger btn-sm btn-block" onClick={this.props.deleteGrant.bind(this, grant)}>Delete grant</button>
           </td>
         </tr>
       );
