@@ -24,9 +24,9 @@ class ConsoleApp extends React.Component {
     super(props);
     this.onGoogleSignIn = this.onGoogleSignIn.bind(this);
     this.getRsvp = this.getRsvp.bind(this);
-    this.setRefreshUserTicketTimeout = this.setRefreshUserTicketTimeout.bind(this);
+    this.setReissueUserTicketTimeout = this.setReissueUserTicketTimeout.bind(this);
     this.getUserTicket = this.getUserTicket.bind(this);
-    this.refreshUserTicket = this.refreshUserTicket.bind(this);
+    this.reissueUserTicket = this.reissueUserTicket.bind(this);
     this.getUserTicketDone = this.getUserTicketDone.bind(this);
     this.getUserTicketFail = this.getUserTicketFail.bind(this);
     this.deleteUserTicket = this.deleteUserTicket.bind(this);
@@ -35,7 +35,7 @@ class ConsoleApp extends React.Component {
       authenticationNeeded: false,
       authorized: false,
       missingGrant: false,
-      ticketRefreshFailed: false,
+      ticketReissueFailed: false,
       accountInfo: {},
       userprofile: {},
       bpc_env: {}
@@ -99,9 +99,9 @@ class ConsoleApp extends React.Component {
     console.log('Google Sign in error', err);
   }
 
-  setRefreshUserTicketTimeout(ticket) {
+  setReissueUserTicketTimeout(ticket) {
     setTimeout(function () {
-      this.refreshUserTicket();
+      this.reissueUserTicket();
     }.bind(this), ticket.exp - Date.now() - 10000);
   }
 
@@ -138,7 +138,7 @@ class ConsoleApp extends React.Component {
     .fail((jqXHR, textStatus, errorThrown) => this.getUserTicketFail(jqXHR, textStatus, errorThrown));
   }
 
-  refreshUserTicket() {
+  reissueUserTicket() {
     return $.ajax({
       type: 'POST',
       url: '/tickets',
@@ -151,7 +151,7 @@ class ConsoleApp extends React.Component {
   getUserTicketDone(ticket, textStatus, jqXHR) {
     console.log('Get tickets success', ticket, textStatus);
     this.setState({ authorized: true });
-    this.setRefreshUserTicketTimeout(ticket);
+    this.setReissueUserTicketTimeout(ticket);
   }
 
   getUserTicketFail(jqXHR, textStatus, errorThrown) {
@@ -159,7 +159,7 @@ class ConsoleApp extends React.Component {
     console.error(jqXHR.responseText);
     this.setState({
       authorized: false,
-      ticketRefreshFailed: true
+      ticketReissueFailed: true
     });
   }
 
@@ -221,7 +221,7 @@ class ConsoleApp extends React.Component {
           {this.state.authenticated
             ? <div>
                 {this.state.authorized === true ? <Main /> : null }
-                {this.state.ticketRefreshFailed === true ? <p>Din session kunne ikke forlænges.</p> : null }
+                {this.state.ticketReissueFailed === true ? <p>Din session kunne ikke forlænges.</p> : null }
                 {this.state.missingGrant === true ? <p>Du har ikke de fornødne rettigheder.</p> : null }
               </div>
             : null

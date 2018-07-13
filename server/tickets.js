@@ -33,21 +33,24 @@ module.exports.register = function (server, options, next) {
         bpc.getUserTicket(request.payload.rsvp, function (err, userTicket){
           console.log('getUserTicket', err, userTicket);
           if (err){
+            reply.unstate('console_ticket');
             return reply(err);
           }
 
-          reply(userTicket)
-          .state('console_ticket', userTicket);
+          reply.state('console_ticket', userTicket);
+          reply(userTicket);
         });
 
       } else if (request.state && request.state.console_ticket) {
 
         bpc.reissueTicket(request.state.console_ticket, function (err, reissuedTicket){
           if (err) {
+            reply.unstate('console_ticket');
             return reply(err);
           }
-          reply(reissuedTicket)
-            .state('console_ticket', reissuedTicket);
+          
+          reply.state('console_ticket', reissuedTicket);
+          reply(reissuedTicket);
         });
 
       } else {
@@ -71,8 +74,8 @@ module.exports.register = function (server, options, next) {
     },
     handler: function(request, reply) {
       // This is not a global signout.
-      reply()
-        .unstate('console_ticket');
+      reply.unstate('console_ticket');
+      reply();
     }
   });
 
@@ -84,3 +87,5 @@ module.exports.register.attributes = {
   name: 'tickets',
   version: '1.0.0'
 };
+
+

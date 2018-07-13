@@ -9,6 +9,7 @@ const Url = require('url');
 var appTicket = {};
 var BPC_URL;
 
+
 try {
   BPC_URL = Url.parse(process.env.BPC_URL);
 } catch (ex) {
@@ -16,16 +17,20 @@ try {
   process.exit(1);
 }
 
+
 const BPC_APP_ID = process.env.BPC_APP_ID;
 const BPC_APP_SECRET = process.env.BPC_APP_SECRET;
 
+
 console.log('Connecting to BPC on', BPC_URL.host, 'AS', BPC_APP_ID);
+
 
 module.exports.env = function() {
   return Object.assign({}, BPC_URL, {
     app: BPC_APP_ID,
   });
 };
+
 
 function getAppTicket() {
   var app = {
@@ -41,22 +46,23 @@ function getAppTicket() {
     } else {
       console.log('Got the appTicket');
       appTicket = result;
-      setTimeout(refreshAppTicket, result.exp - Date.now() - 10000);
+      setTimeout(reissueAppTicket, result.exp - Date.now() - 10000);
     }
   });
 };
 
+
 getAppTicket();
 
 
-function refreshAppTicket(){
+function reissueAppTicket(){
   callSsoServer({path: '/ticket/reissue', method: 'POST'},  appTicket, function(err, result){
     if (err){
-      console.error('refreshAppTicket:', err);
+      console.error('reissueAppTicket:', err);
       setTimeout(getAppTicket, 1000 * 60 * 5);
     } else {
       appTicket = result;
-      setTimeout(refreshAppTicket, result.exp - Date.now() - 10000);
+      setTimeout(reissueAppTicket, result.exp - Date.now() - 10000);
     }
   });
 };
