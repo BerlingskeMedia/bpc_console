@@ -2,6 +2,7 @@
 'use strict';
 
 const Boom = require('boom');
+const Joi = require('joi');
 const bpc = require('./bpc_client');
 
 module.exports.register = function (server, options, next) {
@@ -24,6 +25,11 @@ module.exports.register = function (server, options, next) {
       state: {
         parse: true,
         failAction: 'log'
+      },
+      validate: {
+        payload: Joi.object().keys({
+
+        })
       }
     },
     handler: function(request, reply) {
