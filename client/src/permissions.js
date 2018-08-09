@@ -164,8 +164,8 @@ class SearchResult extends React.Component {
 
       rows = this.props.users.map((u,i) => {
         return (
-          <div>
-            <UserDetails key={u.id + i + 'searchresult'} user={u} />
+          <div key={u.id + i + 'searchresult'}>
+            <UserDetails user={u} />
             <hr />
           </div>
         );
@@ -284,7 +284,7 @@ class ShowFullUser extends React.Component {
             expireGrant={this.expireGrant}
             reactivateGrant={this.reactivateGrant} />
           <hr />
-          <DeleteUser user={this.state.user.id} />
+          <DeleteUser user={this.state.user._id} />
         </div>
       : null
     );
