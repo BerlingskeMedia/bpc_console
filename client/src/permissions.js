@@ -164,7 +164,10 @@ class SearchResult extends React.Component {
 
       rows = this.props.users.map((u,i) => {
         return (
-          <UserDetails key={u.id + i + 'searchresult'} user={u} />
+          <div>
+            <UserDetails key={u.id + i + 'searchresult'} user={u} />
+            <hr />
+          </div>
         );
       });
 
@@ -258,12 +261,12 @@ class ShowFullUser extends React.Component {
 
 
   componentDidMount() {
-    this.getUserData(this.props.user.id);
+    this.getUserData(this.props.user._id);
   }
   
   // componentDidMount() {
   componentWillReceiveProps(nextProps) {
-    this.getUserData(nextProps.user.id);
+    this.getUserData(nextProps.user._id);
   }
 
   render() {
