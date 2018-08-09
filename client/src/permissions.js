@@ -334,6 +334,7 @@ class UserDetails extends React.Component {
             <div><strong>Created</strong>: {user.createdAt}</div>
             <div><strong>Last updated</strong>: {user.lastUpdated}</div>
             <div><strong>Last fetched</strong>: {user.lastFetched}</div>
+            <div><strong>Last login</strong>: {user.lastLogin}</div>
           </div>
           <div className="col-xs-6">
             {dataFromGigya}

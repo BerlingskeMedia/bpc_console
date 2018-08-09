@@ -209,12 +209,6 @@ module.exports = class extends React.Component {
               </div>
               <div className="checkbox">
                 <label>
-                  <input type="checkbox" defaultChecked={this.state.application.settings.disallowAutoCreationGrants} name="disallowAutoCreationGrants" onClick={this.onChangeApplicationSettings}></input>
-                  Only issue ticket to users with existing grant. If not, grants will be created automatically.
-                </label>
-              </div>
-              <div className="checkbox">
-                <label>
                   <input type="checkbox" defaultChecked={this.state.application.settings.disallowUserTickets} name="disallowUserTickets" onClick={this.onChangeApplicationSettings}></input>
                   Do not issue tickets to any users.
                 </label>
@@ -247,7 +241,7 @@ module.exports = class extends React.Component {
           <div className="form-group">
             <label className="col-sm-2 control-label">Ticket duration</label>
             <div className="col-sm-10">
-              <p>Minutes until the user ticket needs to be reissued:</p>
+              <p>Minutes until the <em>user</em> ticket expires and needs to be reissued (does not apply to app tickets):</p>
               <input type="number" className="form-control" name="ticketDuration" value={this.state.application.settings.ticketDuration} min="1" placeholder="Default: 60 minutes" onChange={this.onChangeApplicationSettings}></input>
             </div>
           </div>
