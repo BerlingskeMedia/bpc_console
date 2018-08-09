@@ -23,10 +23,9 @@ class ConsoleApp extends React.Component {
   constructor(props) {
     super(props);
     this.onGoogleSignIn = this.onGoogleSignIn.bind(this);
-    this.getRsvp = this.getRsvp.bind(this);
-    this.setRefreshUserTicketTimeout = this.setRefreshUserTicketTimeout.bind(this);
+    this.setReissueUserTicketTimeout = this.setReissueUserTicketTimeout.bind(this);
     this.getUserTicket = this.getUserTicket.bind(this);
-    this.refreshUserTicket = this.refreshUserTicket.bind(this);
+    this.reissueUserTicket = this.reissueUserTicket.bind(this);
     this.getUserTicketDone = this.getUserTicketDone.bind(this);
     this.getUserTicketFail = this.getUserTicketFail.bind(this);
     this.deleteUserTicket = this.deleteUserTicket.bind(this);
@@ -35,10 +34,9 @@ class ConsoleApp extends React.Component {
       authenticationNeeded: false,
       authorized: false,
       missingGrant: false,
-      ticketRefreshFailed: false,
+      ticketReissueFailed: false,
       accountInfo: {},
-      userprofile: {},
-      bpc_env: {}
+      userprofile: {}
     };
   }
 
@@ -59,88 +57,52 @@ class ConsoleApp extends React.Component {
   }
 
   componentDidMount() {
-    $.ajax({
-      type: 'GET',
-      url: '/bpc_env',
-    }).done((data, textStatus, jqXHR) => {
-      console.log('GET bpc_env', data, textStatus);
-      this.setState({ bpc_env: data });
-    }).fail((jqXHR, textStatus, errorThrown) => {
-      console.error(jqXHR.responseText);
-    });
   }
 
   onGoogleSignIn(googleUser) {
-    console.log('Google login success');
     // Useful data for your client-side scripts:
     var basicProfile = googleUser.getBasicProfile();
     var authResponse = googleUser.getAuthResponse();
 
-    var profile = {
-      ID: basicProfile.getId(),
-      email: basicProfile.getEmail(),
-      id_token: authResponse.id_token,
-      access_token: authResponse.access_token,
-      provider: 'google'
-    };
-
     this.setState({
       authenticated: true,
-      authenticationNeeded: false,
-      profile: profile
+      authenticationNeeded: false
     });
 
-    this.getRsvp(profile).then((response) => {
-      this.getUserTicket(response);
-    });
+    const getUserTicketPayload = {
+      ID: basicProfile.getId(),
+      id_token: authResponse.id_token,
+      access_token: authResponse.access_token
+    };
+
+
+    this.getUserTicket(getUserTicketPayload);
   }
 
   onGoogleSignInFailure(err) {
     console.log('Google Sign in error', err);
   }
 
-  setRefreshUserTicketTimeout(ticket) {
+  setReissueUserTicketTimeout(ticket) {
     setTimeout(function () {
-      this.refreshUserTicket();
+      this.reissueUserTicket();
     }.bind(this), ticket.exp - Date.now() - 10000);
   }
 
-  getRsvp(params) {
-
-    var rsvpParams = Object.keys(params).map(function(k){
-      return k.concat('=', params[k]);
-    }).join('&');
-
-    var url = this.state.bpc_env.href.concat('rsvp?app=', this.state.bpc_env.app, '&', rsvpParams)
-
-    return $.ajax({
-      type: 'GET',
-      url: url
-    }).done((data, textStatus, jqXHR) => {
-      console.log('GET rsvp', data, textStatus);
-    }).fail((jqXHR, textStatus, errorThrown) => {
-      this.setState({
-        authorized: false,
-        missingGrant: true
-      });
-      console.error(jqXHR.responseText);
-    });
-  }
-
-  getUserTicket(rsvp){
+  getUserTicket(payload){
     return $.ajax({
       type: 'POST',
       url: '/tickets',
       contentType: 'application/json; charset=utf-8',
-      data: JSON.stringify(rsvp)
+      data: JSON.stringify(payload)
     })
     .done((ticket, textStatus, jqXHR) => this.getUserTicketDone(ticket, textStatus, jqXHR))
     .fail((jqXHR, textStatus, errorThrown) => this.getUserTicketFail(jqXHR, textStatus, errorThrown));
   }
 
-  refreshUserTicket() {
+  reissueUserTicket() {
     return $.ajax({
-      type: 'POST',
+      type: 'GET',
       url: '/tickets',
       contentType: 'application/json; charset=utf-8'
     })
@@ -149,9 +111,8 @@ class ConsoleApp extends React.Component {
   }
 
   getUserTicketDone(ticket, textStatus, jqXHR) {
-    console.log('Get tickets success', ticket, textStatus);
     this.setState({ authorized: true });
-    this.setRefreshUserTicketTimeout(ticket);
+    this.setReissueUserTicketTimeout(ticket);
   }
 
   getUserTicketFail(jqXHR, textStatus, errorThrown) {
@@ -159,7 +120,7 @@ class ConsoleApp extends React.Component {
     console.error(jqXHR.responseText);
     this.setState({
       authorized: false,
-      ticketRefreshFailed: true
+      ticketReissueFailed: true
     });
   }
 
@@ -221,7 +182,7 @@ class ConsoleApp extends React.Component {
           {this.state.authenticated
             ? <div>
                 {this.state.authorized === true ? <Main /> : null }
-                {this.state.ticketRefreshFailed === true ? <p>Din session kunne ikke forlænges.</p> : null }
+                {this.state.ticketReissueFailed === true ? <p>Din session kunne ikke forlænges.</p> : null }
                 {this.state.missingGrant === true ? <p>Du har ikke de fornødne rettigheder.</p> : null }
               </div>
             : null

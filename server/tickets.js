@@ -2,6 +2,7 @@
 'use strict';
 
 const Boom = require('boom');
+const Joi = require('joi');
 const bpc = require('./bpc_client');
 
 module.exports.register = function (server, options, next) {
@@ -16,8 +17,54 @@ module.exports.register = function (server, options, next) {
     encoding: 'base64json'
   });
 
+
   server.route({
     method: 'POST',
+    path: '/',
+    config: {
+      cors: false,
+      state: {
+        parse: true,
+        failAction: 'log'
+      },
+      validate: {
+        payload: Joi.object().keys({
+          ID: Joi.string().required(),
+          id_token: Joi.string().required(),
+          access_token: Joi.string().required()
+        })
+      }
+    },
+    handler: function(request, reply) {
+
+      const payload = Object.assign({}, request.payload, { app: bpc.env.app });
+
+      // Doing the RSVP in the backend
+      bpc.request({ path: '/rsvp', method: 'POST', payload: payload }, {}, function (err, response) {
+        if (err){
+          reply.unstate('console_ticket');
+          reply(err);
+          return;
+        }
+
+        bpc.request({ path: '/ticket/user', method: 'POST', payload: response }, null, function (err, userTicket){
+          if (err){
+            reply.unstate('console_ticket');
+            reply(err);
+            return;
+          }
+
+          reply.state('console_ticket', userTicket);
+          reply(userTicket);
+        });
+      });
+
+    }
+  });
+
+
+  server.route({
+    method: 'GET',
     path: '/',
     config: {
       cors: false,
@@ -28,26 +75,16 @@ module.exports.register = function (server, options, next) {
     },
     handler: function(request, reply) {
 
-      if (request.payload && request.payload.rsvp) {
+      if (request.state && request.state.console_ticket) {
 
-        bpc.getUserTicket(request.payload.rsvp, function (err, userTicket){
-          console.log('getUserTicket', err, userTicket);
-          if (err){
-            return reply(err);
-          }
-
-          reply(userTicket)
-          .state('console_ticket', userTicket);
-        });
-
-      } else if (request.state && request.state.console_ticket) {
-
-        bpc.reissueTicket(request.state.console_ticket, function (err, reissuedTicket){
+        bpc.request({ path: '/ticket/reissue', method: 'POST' }, request.state.console_ticket, function (err, reissuedTicket){
           if (err) {
+            reply.unstate('console_ticket');
             return reply(err);
           }
-          reply(reissuedTicket)
-            .state('console_ticket', reissuedTicket);
+
+          reply.state('console_ticket', reissuedTicket);
+          reply(reissuedTicket);
         });
 
       } else {
@@ -58,6 +95,7 @@ module.exports.register = function (server, options, next) {
 
     }
   });
+
 
   server.route({
     method: 'DELETE',
@@ -71,8 +109,8 @@ module.exports.register = function (server, options, next) {
     },
     handler: function(request, reply) {
       // This is not a global signout.
-      reply()
-        .unstate('console_ticket');
+      reply.unstate('console_ticket');
+      reply();
     }
   });
 
@@ -84,3 +122,5 @@ module.exports.register.attributes = {
   name: 'tickets',
   version: '1.0.0'
 };
+
+

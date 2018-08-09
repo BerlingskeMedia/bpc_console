@@ -155,6 +155,15 @@ module.exports = class extends React.Component {
 
     return (
       <div className="consoleUsers" style={{paddingTop: '30px'}}>
+        {/* <div>
+          <p>
+            Console users aka. admin users, are able access this webpage, search for permissions,
+            see the list of existing applications and create/register a new application.
+          </p>
+          <p>
+            Superadmins are able to view and edit the details of all registered applications.
+          </p>
+        </div> */}
         <AddConsoleUser createGrant={this.createGrant.bind(this)} />
         <table className="table">
           <tbody>
