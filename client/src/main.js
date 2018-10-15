@@ -11,6 +11,7 @@ const Permissions = require('./permissions');
 const ConsoleUsers = require('./consoleUsers');
 const Application = require('./application');
 const Gigya = require('./gigya');
+const Tools = require('./tools');
 const GoogleLogin = require('react-google-login').default;
 
 // Add the event handler
@@ -237,6 +238,7 @@ class Main extends React.Component {
           <Route path={`/applications/:app`} component={Application}/>
           <Route path={`/application/:app`} component={Application}/>
           <Route path={`/gigya`} component={Gigya}/>
+          <Route path={`/tools`} component={Tools}/>
         </div>
       </BrowserRouter>
     )
