@@ -1,5 +1,6 @@
 const $ = require('jquery');
 const React = require('react');
+const Link = require('react-router-dom').Link;
 
 module.exports = class extends React.Component {
 
@@ -432,8 +433,8 @@ class ApplicationUser extends React.Component {
 
     return (
       <div>
-        { this.state.user && this.state.user.email
-          ? this.state.user.email
+        { user && user.email
+          ? <Link to={`/permissions?search=${user._id}`}>{user.email}</Link>
           : <span>{grant.user} <span className="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span></span>
         }
       </div>
