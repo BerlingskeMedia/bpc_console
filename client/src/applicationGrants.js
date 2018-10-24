@@ -190,6 +190,7 @@ class UserSearch extends React.Component {
       searchTimer: null,
       searchSuccess: false,
       userHasGrant: false,
+      searchNotFound: false,
       grant: {}
     };
   }
@@ -228,24 +229,33 @@ class UserSearch extends React.Component {
     }).done((data, textStatus, jqXHR) => {
       if (data.length === 1){
 
+        const user = data[0];
+
+        // Checking existing grants
+        // We are setting state in this response so the UI doesn't flicker
         $.ajax({
           type: 'GET',
-          url: `/_b/applications/${this.props.app}/grants?user=${data[0]._id}`
+          url: `/_b/applications/${this.props.app}/grants?user=${user._id}`
         })
         .done((data, textStatus, jqXHR) => {
-          if (data.length === 1){
-            this.setState({
-              userHasGrant: true,
-              grant: data[0]
-            });
-          }
+
+          this.setState({
+            searchSuccess: true,
+            user: user,
+            searchNotFound: false,
+            userHasGrant: data.length === 1,
+            grant: data.length === 1 ? data[0] : null
+          });
         });
 
+      } else if (data.length === 0) {
+
         this.setState({
-          searchSuccess: true,
-          user: data[0]
+          searchNotFound: true
         });
+
       }
+
 
 
     }).fail((jqXHR, textStatus, errorThrown) => {
@@ -298,31 +308,23 @@ class UserSearch extends React.Component {
           </div>
         </form>
         <div className="row">
-          <div className="col-xs-6">
-            <button type="button" className="btn btn-default"
-              onClick={this.handleSubmit}
-              disabled={!this.state.searchSuccess || this.state.userHasGrant}>Create grant</button>
-          </div>
-          <div className="col-xs-2">
-            {grant.exp || grant.exp === null
-              ? <span>Expires: {grant.exp !== null ? grant.exp : 'Never'}</span>
-              : null
-            }
-          </div>
-          <div className="col-xs-2">
-            <button type="button" className="btn btn-danger btn-sm btn-block"
-                onClick={this.props.deleteGrant.bind(this, grant)}
-                disabled={!this.state.searchSuccess || !this.state.userHasGrant}>Delete grant</button>
-          </div>
-          <div className="col-xs-2">
-            {grant.exp && grant.exp < Date.now()
-              ? <button type="button" className="btn btn-primary btn-sm btn-block"
-                  onClick={this.props.reactivateGrant.bind(this, grant)}
-                  disabled={!this.state.searchSuccess || !this.state.userHasGrant}>Reactivate grant</button>
-              : <button type="button" className="btn btn-warning btn-sm btn-block"
-                  onClick={this.props.expireGrant.bind(this, grant)}
-                  disabled={!this.state.searchSuccess || !this.state.userHasGrant}>Expire grant</button>
-            }
+          <div className="col-xs-12">
+          { this.state.searchSuccess && this.state.userHasGrant
+            ? <GrantsTable
+              grants={[this.state.grant]}
+              expireGrant={this.props.expireGrant}
+              reactivateGrant={this.props.reactivateGrant}
+              deleteGrant={this.props.deleteGrant} />
+            : null
+          }
+          { this.state.searchSuccess && !this.state.userHasGrant
+            ? <button type="button" className="btn btn-default" onClick={this.handleSubmit}>Create grant</button>
+            : null
+          }
+          { this.state.searchNotFound
+            ? <div>Bruger ikke fundet</div>
+            : null
+          }
           </div>
         </div>
       </div>
@@ -330,6 +332,25 @@ class UserSearch extends React.Component {
   }
 }
 
+
+class GrantsList extends React.Component {
+  constructor(props){
+    super(props);
+  }
+
+  render() {
+    return(
+      <div style={{paddingTop: '30px', paddingBottom: '30px'}}>
+        <h4>All grants</h4>
+        <GrantsTable
+          grants={this.props.grants}
+          expireGrant={this.props.expireGrant}
+          reactivateGrant={this.props.reactivateGrant}
+          deleteGrant={this.props.deleteGrant} />
+      </div>
+    );
+  }
+}
 
 
 class GrantsPagination extends React.Component {
@@ -377,61 +398,6 @@ class GrantsPagination extends React.Component {
 }
 
 
-class GrantsList extends React.Component {
-  constructor(props){
-    super(props);
-  }
-
-  render() {
-    const grants = this.props.grants.map(function(grant) {
-      return (
-        <tr key={grant.id}>
-          <td className="col-xs-6">
-            <ApplicationUser grant={grant} />
-          </td>
-          <td className="col-xs-2">
-            {grant.exp
-              ? <span>{grant.exp}</span>
-              : <span>Never</span>
-            }
-          </td>
-          <td className="col-xs-2">
-            <button type="button" className="btn btn-danger btn-sm btn-block" onClick={this.props.deleteGrant.bind(this, grant)}>Delete grant</button>
-          </td>
-          <td className="col-xs-2">
-            {grant.exp && grant.exp < Date.now()
-             ? <button type="button" className="btn btn-primary btn-sm btn-block" onClick={this.props.reactivateGrant.bind(this, grant)}>Reactivate grant</button>
-             : <button type="button" className="btn btn-warning btn-sm btn-block" onClick={this.props.expireGrant.bind(this, grant)}>Expire grant</button>
-            }
-          </td>
-        </tr>
-      );
-    }.bind(this));
-
-    return(
-      <div style={{paddingTop: '30px', paddingBottom: '30px'}}>
-        <h4>All grants</h4>
-        <table className="table">
-          <tbody>
-            <tr>
-              <th className="col-xs-6">User</th>
-              <th className="col-xs-2">Expires</th>
-              <th className="col-xs-2"></th>
-              <th className="col-xs-2"></th>
-            </tr>
-            { grants !== null && grants.length > 0
-              ? grants
-              : null
-            }
-          </tbody>
-        </table>
-      </div>
-    );
-  }
-}
-
-
-
 class ApplicationUser extends React.Component {
   constructor(props){
     super(props);
@@ -471,6 +437,82 @@ class ApplicationUser extends React.Component {
           : <span>{grant.user} <span className="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span></span>
         }
       </div>
+    );
+  }
+}
+
+
+class GrantsTable extends React.Component {
+  constructor(props){
+    super(props);
+  }
+
+  render() {
+
+    const grants = this.props.grants.map(function(grant) {
+      return (
+        <Grant
+          key={grant.id}
+          grant={grant}
+          expireGrant={this.props.expireGrant}
+          reactivateGrant={this.props.reactivateGrant}
+          deleteGrant={this.props.deleteGrant} />
+      );
+    }.bind(this));
+
+    return (
+      <table className="table">
+        <tbody>
+          <tr>
+            <th className="col-xs-6">User</th>
+            <th className="col-xs-2">Expires</th>
+            <th className="col-xs-2"></th>
+            <th className="col-xs-2"></th>
+          </tr>
+          { this.props.grants !== null && this.props.grants.length > 0
+            ? grants
+            : null
+          }
+        </tbody>
+      </table>
+    );
+  }
+}
+
+
+class Grant extends React.Component {
+  constructor(props){
+    super(props);
+  }
+
+  render() {
+    
+    const grant = this.props.grant;
+
+    return (
+      <tr>
+        <td className="col-xs-6">
+          <ApplicationUser grant={grant} />
+        </td>
+        <td className="col-xs-2">
+          {grant.exp
+            ? <span>{grant.exp}</span>
+            : <span>Never</span>
+          }
+        </td>
+        <td className="col-xs-2">
+          { grant.exp && grant.exp < Date.now()
+            ? <button type="button" className="btn btn-danger btn-sm btn-block" onClick={this.props.deleteGrant.bind(this, grant)}>Delete grant</button>
+            : null
+          }
+        </td>
+        <td className="col-xs-2">
+          { grant.exp && grant.exp < Date.now()
+            ? <button type="button" className="btn btn-primary btn-sm btn-block" onClick={this.props.reactivateGrant.bind(this, grant)}>Reactivate grant</button>
+            : <button type="button" className="btn btn-warning btn-sm btn-block" onClick={this.props.expireGrant.bind(this, grant)}>Expire grant</button>
+          }
+        </td>
+      </tr>
     );
   }
 }

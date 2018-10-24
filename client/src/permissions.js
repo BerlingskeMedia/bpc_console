@@ -549,46 +549,6 @@ class Grants extends React.Component {
 
   render() {
 
-    // const grants = this.props.grants.map(function(grant, index) {
-    //   const scopes = grant.scope.map(function(scope){
-    //     return (
-    //       <div key={index + '.' + scope}>
-    //         <span>&nbsp;</span>
-    //         <span className="label label-info">{scope}</span>
-    //       </div>
-    //     );
-    //   });
-    //   return (
-    //     <div key={index} className="row" style={{paddingBottom: '10px'}}>
-    //       <div className="col-xs-6">
-    //         Grant: <Link  to={`/application/${grant.app}`}>{grant.app}</Link>
-    //       </div>
-    //       <div className="col-xs-2">
-    //         {grant.exp
-    //           ? <span>Expires: <em>{grant.exp}</em></span>
-    //           : <span>Expires: <em>Never</em></span>
-    //         }
-    //       </div>
-    //       <div className="col-xs-4">
-    //         Scopes:
-    //         { scopes.length > 0
-    //           ? scopes
-    //           : <span>(ingen)</span>
-    //         }
-    //       </div>
-    //     </div>
-    //   );
-    // });
-
-    // return(
-    //   <div>
-    //     { grants === null || grants.length === 0
-    //       ? <div>(This user has no grants.)</div>
-    //       : grants
-    //     }
-    //   </div>
-    // );
-
     const grants = this.props.grants.map(function(grant) {
       return (
         <tr key={grant.id}>
@@ -602,13 +562,16 @@ class Grants extends React.Component {
             }
           </td>
           <td className="col-xs-2">
-            {grant.exp && grant.exp < Date.now()
-             ? <button type="button" className="btn btn-primary btn-sm btn-block" onClick={this.props.reactivateGrant.bind(this, grant)}>Reactivate grant</button>
-             : <button type="button" className="btn btn-warning btn-sm btn-block" onClick={this.props.expireGrant.bind(this, grant)}>Expire grant</button>
+            { grant.exp && grant.exp < Date.now()
+              ? <button type="button" className="btn btn-danger btn-sm btn-block" onClick={this.props.deleteGrant.bind(this, grant)}>Delete grant</button>
+              : null
             }
           </td>
           <td className="col-xs-2">
-            <button type="button" className="btn btn-danger btn-sm btn-block" onClick={this.props.deleteGrant.bind(this, grant)}>Delete grant</button>
+            { grant.exp && grant.exp < Date.now()
+              ? <button type="button" className="btn btn-primary btn-sm btn-block" onClick={this.props.reactivateGrant.bind(this, grant)}>Reactivate grant</button>
+              : <button type="button" className="btn btn-warning btn-sm btn-block" onClick={this.props.expireGrant.bind(this, grant)}>Expire grant</button>
+            }
           </td>
         </tr>
       );
