@@ -75,7 +75,7 @@ module.exports = class extends React.Component {
   removeAdmin(grant) {
     return $.ajax({
       type: 'DELETE',
-      url: `/_b/admins/${this.props.app}/admin`,
+      url: `/_b/admins/${this.props.app}`,
       contentType: "application/json; charset=utf-8",
       data: JSON.stringify({ user: grant.user })
     })
@@ -104,7 +104,7 @@ module.exports = class extends React.Component {
 
     return $.ajax({
       type: 'POST',
-      url: `/_b/admins/${this.props.app}/admin`,
+      url: `/_b/admins/${this.props.app}`,
       contentType: "application/json; charset=utf-8",
       data: JSON.stringify(payload)
     })
