@@ -227,7 +227,7 @@ module.exports = class extends React.Component {
               <div className="checkbox">
                 <label>
                   <input type="checkbox" defaultChecked={this.state.application.delegate} name="delegate" onClick={this.onChangeApplication}></input>
-                  Allow the application to delegate tickets to another applications.
+                  Allow the application to delegate tickets to other applications.
                 </label>
               </div>
               <div className="checkbox">
