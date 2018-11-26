@@ -172,13 +172,23 @@ class ParseTicketID extends React.Component {
               <dt>exp</dt>
               <dd style={{color: this.state.result.exp < Date.now() ? 'red' : 'inherit'}}>{this.state.result.exp}</dd>
               <dt>app</dt>
-              <dd>{this.state.result.app}</dd>
+              <dd>
+                { this.state.result.app !== null
+                  ? <Link to={`/application/${this.state.result.app}`}>{this.state.result.app}</Link>
+                  : null
+                }
+              </dd>
               <dt>scope</dt>
               <dd>{this.state.result.scope.join(', ')}</dd>
               <dt>grant</dt>
               <dd>{this.state.result.grant}</dd>
               <dt>user</dt>
-              <dd>{this.state.result.user}</dd>
+              <dd>
+              { this.state.result.user !== null
+                ? <Link to={`/permissions?search=${this.state.result.user}`}>{this.state.result.user}</Link>
+                : null
+              }
+            </dd>
             </dl>
           </div>
           : null
