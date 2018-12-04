@@ -185,6 +185,7 @@ class UserSearch extends React.Component {
     this.onSearchChange = this.onSearchChange.bind(this);
     this.searchUser = this.searchUser.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.deleteGrant = this.deleteGrant.bind(this);
     this.state = {
       user: {},
       searchInProgress: false,
@@ -290,6 +291,12 @@ class UserSearch extends React.Component {
     }
   }
 
+  deleteGrant(grant) {
+    this.props.deleteGrant(grant);
+    this.setState({user: {}});
+    this.searchUser();
+  }
+
   render() {
     var inputClasses = 'form-group '.concat(this.state.searchSuccess ? 'has-success' : '');
     const grant = this.state.grant;
@@ -315,7 +322,7 @@ class UserSearch extends React.Component {
               grants={[this.state.grant]}
               expireGrant={this.props.expireGrant}
               reactivateGrant={this.props.reactivateGrant}
-              deleteGrant={this.props.deleteGrant} />
+              deleteGrant={this.deleteGrant} />
             : null
           }
           { this.state.searchSuccess && !this.state.userHasGrant
