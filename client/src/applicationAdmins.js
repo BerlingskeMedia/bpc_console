@@ -144,12 +144,12 @@ module.exports = class extends React.Component {
 
     return (
       <div>
-        <h3>Application admins</h3>
+        <h3>Admins</h3>
         <div>
-          Application admin users can access this page and change settings.
-          Removing admin user does not remove access to BPC Console for that user.<br/>
-          Also, superadmins will always have access.
+          Admins are not regular users, but users of this BPC Console and can access this page and change settings.
+          Removing an admin user removes the users access to this page on BPC Console - not their entire access to BPC Console.<br/>
         </div>
+        <div>Also, superadmins will always have access.</div>
         <form style={{paddingTop: '30px', paddingBottom: '30px'}}>
           <div className="form-group">
             <input

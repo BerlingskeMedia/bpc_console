@@ -75,10 +75,13 @@ module.exports = class extends React.Component {
 
     return (
       <div>
-        <h3>Application roles</h3>
+        <h3>Roles</h3>
         <div>
-          Application roles explanation.
+          A role is a special scope, that can be used by the application to activate features.
+          A roles must be added to a grant to be effective.
+          The scope will be safely available only on tickets on this application.
         </div>
+        <div>Note: A role cannot be removed if a grant has the role.</div>
         <form style={{paddingTop: '30px', paddingBottom: '30px'}}>
           <div className="form-group">
             <input

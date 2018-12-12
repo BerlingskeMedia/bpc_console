@@ -40,18 +40,6 @@ module.exports = class extends React.Component {
       if(data.settings === undefined || data.settings === null){
         data.settings = {};
       }
-
-      const fake_roles = [
-        'role:merkur_test:5bb5cfea05ee4f18f3e5b978:editor', // 24syv
-        'role:merkur_test:5bd6ff4c31bef425da7bc83d:editor', // Weekendavisen
-        'role:merkur_test:5bd702dc31bef425da7bcb17:editor', // Berlingske
-        'role:merkur_test:5bd7030431bef425da7bcb46:editor' // BT
-      ];
-
-      if(data.id === 'merkur_test') {
-        // data.scope = data.scope.concat(fake_roles);
-      }
-
       this.setState({application: data});
     }).fail((jqXHR, textStatus, errorThrown) => {
       console.error(jqXHR.responseText);
@@ -274,7 +262,7 @@ module.exports = class extends React.Component {
         <div className="row">
           <div className="col-xs-4">
             <h3>Scopes</h3>
-            <div>Scopes the application is allow to read/write. And users can read.</div>
+            <div>A scope will allow the application to read/write in permissions. And users can read from those same permissions.</div>
             <div>When adding suffix <strong>:read</strong> to the scope, the application can only read.</div>
             <form style={{paddingTop: '30px', paddingBottom: '30px'}}>
               <div className="form-group">
