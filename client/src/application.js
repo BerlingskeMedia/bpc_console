@@ -2,6 +2,7 @@ const $ = require('jquery');
 const React = require('react');
 const ApplicationGrants = require('./applicationGrants');
 const ApplicationAdmins = require('./applicationAdmins');
+const ApplicationRoles = require('./applicationRoles');
 const Link = require('react-router-dom').Link;
 const Redirect = require('react-router-dom').Redirect;
 
@@ -15,10 +16,13 @@ module.exports = class extends React.Component {
     this.onChangeState = this.onChangeState.bind(this);
     this.onChangeApplication = this.onChangeApplication.bind(this);
     this.onChangeApplicationSettings = this.onChangeApplicationSettings.bind(this);
+    this.updateApplication = this.updateApplication.bind(this);
     this.state = {
       app: this.props.match.params.app,
       newScope: '',
       application: {
+        id: null,
+        scope: [],
         settings: {
           includeScopeInPrivatExt: false,
           ticketDuration: ''
@@ -36,6 +40,18 @@ module.exports = class extends React.Component {
       if(data.settings === undefined || data.settings === null){
         data.settings = {};
       }
+
+      const fake_roles = [
+        'role:merkur_test:5bb5cfea05ee4f18f3e5b978:editor', // 24syv
+        'role:merkur_test:5bd6ff4c31bef425da7bc83d:editor', // Weekendavisen
+        'role:merkur_test:5bd702dc31bef425da7bcb17:editor', // Berlingske
+        'role:merkur_test:5bd7030431bef425da7bcb46:editor' // BT
+      ];
+
+      if(data.id === 'merkur_test') {
+        // data.scope = data.scope.concat(fake_roles);
+      }
+
       this.setState({application: data});
     }).fail((jqXHR, textStatus, errorThrown) => {
       console.error(jqXHR.responseText);
@@ -51,7 +67,7 @@ module.exports = class extends React.Component {
   updateApplication(application) {
     return $.ajax({
       type: 'PUT',
-      url: '/_b/applications/'.concat(this.state.app),
+      url: '/_b/applications/'.concat(application.id),
       contentType: "application/json; charset=utf-8",
       data: JSON.stringify(application)
     }).done((data, textStatus, jqXHR) => {
@@ -256,7 +272,7 @@ module.exports = class extends React.Component {
         </form>
         <hr />
         <div className="row">
-          <div className="col-xs-6">
+          <div className="col-xs-4">
             <h3>Scopes</h3>
             <div>Scopes the application is allow to read/write. And users can read.</div>
             <div>When adding suffix <strong>:read</strong> to the scope, the application can only read.</div>
@@ -280,16 +296,22 @@ module.exports = class extends React.Component {
               : null
             }
           </div>
-          <div className="col-xs-6">
-            <ApplicationAdmins app={this.state.app} />
+          <div className="col-xs-4">
+            <ApplicationRoles
+              updateApplication={this.updateApplication}
+              application={this.state.application} />
+          </div>
+          <div className="col-xs-4">
+            <ApplicationAdmins
+              app={this.state.app}
+              application={this.state.application} />
           </div>
         </div>
         <hr />
         <div className="row">
           <div className="col-xs-12">
             <ApplicationGrants
-              app={this.state.app}
-              provider={this.state.application.settings.provider} />
+              application={this.state.application} />
           </div>
         </div>
       </div>

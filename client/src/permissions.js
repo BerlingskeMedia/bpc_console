@@ -208,8 +208,9 @@ class ShowFullUser extends React.Component {
 
   deleteGrant(grant) {
     return $.ajax({
-      type: 'DELETE',
-      url: `/_b/applications/${grant.app}/grants/${grant.id}`
+      type: 'PATCH',
+      url: `/_b/grants`,
+      data: JSON.stringify(grant)
     }).done((data, textStatus, jqXHR) => {
       var user = this.state.user;
       const index = user.grants.findIndex(e => {
