@@ -26,19 +26,19 @@ module.exports.register = function (server, options, next) {
   route_prefix = server.realm.modifiers.route.prefix;
 
   server.route({
-    method: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    method: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     path: '/{obj}/{id?}',
     handler: proxy
   });
 
   server.route({
-    method: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    method: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     path: '/{obj}/{paths*2}',
     handler: proxy
   });
 
   server.route({
-    method: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    method: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     path: '/{obj}/{paths*3}',
     handler: proxy
   });

@@ -22,7 +22,7 @@ module.exports = class extends React.Component {
   getApplicationAdminUsers() {
     return $.ajax({
       type: 'GET',
-      url: `/_b/admins/${this.props.app}`
+      url: `/_b/admins?app=${this.props.app}`
     }).done((data, textStatus, jqXHR) => {
       this.setState({adminGrants: data});
     }).fail((jqXHR, textStatus, errorThrown) => {
@@ -73,11 +73,17 @@ module.exports = class extends React.Component {
   }
 
   removeAdmin(grant) {
+
+    const payload = {
+      app: this.props.app,
+      user: grant.user
+    };
+
     return $.ajax({
-      type: 'DELETE',
-      url: `/_b/admins/${this.props.app}`,
+      type: 'PATCH',
+      url: `/_b/admins`,
       contentType: "application/json; charset=utf-8",
-      data: JSON.stringify({ user: grant.user })
+      data: JSON.stringify(payload)
     })
     .done((data, textStatus, jqXHR) => {
       const index = this.state.adminGrants.findIndex(e => {
@@ -99,12 +105,13 @@ module.exports = class extends React.Component {
     e.preventDefault();
 
     const payload = {
+      app: this.props.app,
       user: this.state.foundUser._id
     };
 
     return $.ajax({
       type: 'POST',
-      url: `/_b/admins/${this.props.app}`,
+      url: `/_b/admins`,
       contentType: "application/json; charset=utf-8",
       data: JSON.stringify(payload)
     })

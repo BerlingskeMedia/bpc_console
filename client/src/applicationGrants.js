@@ -14,14 +14,20 @@ module.exports = class extends React.Component {
     this.pagesizelimit = 30;
     this.state = {
       grantscount: 0,
-      grants: []
+      grants: [],
+      roles: []
     };
   }
 
   getGrantsCount() {
+    const app = this.props.application.id;
+    if(!app) {
+      return;
+    }
+
     return $.ajax({
       type: 'GET',
-      url: `/_b/applications/${this.props.app}/grantscount`,
+      url: `/_b/grants/count?app=${app}`,
       contentType: "application/json; charset=utf-8"
     }).done((data, textStatus, jqXHR) => {
       this.setState({
@@ -33,6 +39,11 @@ module.exports = class extends React.Component {
   }
 
   getGrants(options) {
+    const app = this.props.application.id;
+    if(!app) {
+      return;
+    }
+
     let query;
     if (options && options.skip) {
       query = `limit=${this.pagesizelimit}&skip=${options.skip}`;
@@ -42,7 +53,7 @@ module.exports = class extends React.Component {
 
     return $.ajax({
       type: 'GET',
-      url: `/_b/applications/${this.props.app}/grants?${query}`,
+      url: `/_b/grants?app=${app}&${query}`,
       contentType: "application/json; charset=utf-8"
     }).done((data, textStatus, jqXHR) => {
       this.setState({
@@ -54,14 +65,17 @@ module.exports = class extends React.Component {
   }
 
   createGrant(user) {
+    const app = this.props.application.id;
+
     const newGrant = {
+      app: app,
       user: user._id,
       scope: []
     };
 
     return $.ajax({
       type: 'POST',
-      url: `/_b/applications/${this.props.app}/grants`,
+      url: `/_b/grants`,
       contentType: "application/json; charset=utf-8",
       data: JSON.stringify(newGrant)
     }).done((data, textStatus, jqXHR) => {
@@ -80,8 +94,10 @@ module.exports = class extends React.Component {
 
   deleteGrant(grant) {
     return $.ajax({
-      type: 'DELETE',
-      url: `/_b/applications/${this.props.app}/grants/${grant.id}`
+      type: 'PATCH',
+      url: `/_b/grants`,
+      contentType: "application/json; charset=utf-8",
+      data: JSON.stringify(grant)
     }).done((data, textStatus, jqXHR) => {
       const index = this.state.grants.findIndex(e => {
         return e.id === grant.id;
@@ -107,7 +123,7 @@ module.exports = class extends React.Component {
 
     return $.ajax({
       type: 'POST',
-      url: `/_b/applications/${this.props.app}/grants/${grant.id}`,
+      url: `/_b/grants`,
       contentType: "application/json; charset=utf-8",
       data: JSON.stringify(grant)
     }).done((data, textStatus, jqXHR) => {
@@ -129,7 +145,7 @@ module.exports = class extends React.Component {
 
     return $.ajax({
       type: 'POST',
-      url: `/_b/applications/${this.props.app}/grants/${grant.id}`,
+      url: `/_b/grants`,
       contentType: "application/json; charset=utf-8",
       data: JSON.stringify(grant)
     }).done((data, textStatus, jqXHR) => {
@@ -144,26 +160,31 @@ module.exports = class extends React.Component {
     });
   }
   
-  componentDidMount() {
-    this.getGrantsCount();
-    this.getGrants();
+  componentDidUpdate(prevProps) {
+    if (this.props.application && this.props.application.id &&
+      this.props.application.id !== prevProps.application.id) {
+
+      this.getGrantsCount();
+      this.getGrants();
+    }
   }
   
   render() {
-    
+
+    const scope = this.props.application.scope;
+
     return (
       <div className="grants">
         <h3>Users</h3>
         <div>Total user count: {this.state.grantscount}</div>
         <UserSearch
-          app={this.props.app}
-          provider={this.props.provider}
+          application={this.props.application}
           createGrant={this.createGrant}
           deleteGrant={this.deleteGrant}
           expireGrant={this.expireGrant}
           reactivateGrant={this.reactivateGrant} />
         <GrantsList
-          app={this.props.app}
+          scope={scope}
           grants={this.state.grants}
           deleteGrant={this.deleteGrant}
           expireGrant={this.expireGrant}
@@ -225,9 +246,12 @@ class UserSearch extends React.Component {
 
     this.setState({searchInProgress: true});
 
+    const application = this.props.application;
+    const provider = application.settings.provider;
+
     return $.ajax({
       type: 'GET',
-      url: `/_b/users?provider=${this.props.provider}&id=${searchText}&email=${searchText}`
+      url: `/_b/users?provider=${provider}&id=${searchText}&email=${searchText}`
     }).done((data, textStatus, jqXHR) => {
       if (data.length === 1){
 
@@ -237,7 +261,7 @@ class UserSearch extends React.Component {
         // We are setting state in this response so the UI doesn't flicker
         $.ajax({
           type: 'GET',
-          url: `/_b/applications/${this.props.app}/grants?user=${user._id}`
+          url: `/_b/grants?app=${application.id}&user=${user._id}`
         })
         .done((data, textStatus, jqXHR) => {
 
@@ -257,9 +281,6 @@ class UserSearch extends React.Component {
         });
 
       }
-
-
-
     }).fail((jqXHR, textStatus, errorThrown) => {
       console.error(jqXHR.responseText);
       this.setState({searchSuccess: false})
@@ -300,6 +321,7 @@ class UserSearch extends React.Component {
   render() {
     var inputClasses = 'form-group '.concat(this.state.searchSuccess ? 'has-success' : '');
     const grant = this.state.grant;
+    const application = this.props.application;
 
     return (
       <div style={{paddingTop: '30px', paddingBottom: '30px'}}>
@@ -320,6 +342,7 @@ class UserSearch extends React.Component {
           { this.state.searchSuccess && this.state.userHasGrant
             ? <GrantsTable
               grants={[this.state.grant]}
+              scope={application.scope}
               expireGrant={this.props.expireGrant}
               reactivateGrant={this.props.reactivateGrant}
               deleteGrant={this.deleteGrant} />
@@ -351,6 +374,7 @@ class GrantsList extends React.Component {
       <div style={{paddingTop: '30px', paddingBottom: '30px'}}>
         <h4>All grants</h4>
         <GrantsTable
+          scope={this.props.scope}
           grants={this.props.grants}
           expireGrant={this.props.expireGrant}
           reactivateGrant={this.props.reactivateGrant}
@@ -406,6 +430,104 @@ class GrantsPagination extends React.Component {
 }
 
 
+class GrantsTable extends React.Component {
+  constructor(props){
+    super(props);
+  }
+
+  render() {
+
+    const grants = this.props.grants.map(function(grant) {
+      return (
+        <Grant
+          key={grant.id}
+          grant={grant}
+          scope={this.props.scope}
+          expireGrant={this.props.expireGrant}
+          reactivateGrant={this.props.reactivateGrant}
+          deleteGrant={this.props.deleteGrant} />
+      );
+    }.bind(this));
+
+    return (
+      <table className="table">
+        <tbody>
+          <tr>
+            <th className="col-xs-4">User</th>
+            <th className="col-xs-2">Roles</th>
+            <th className="col-xs-2">Expires</th>
+            <th className="col-xs-2"></th>
+            <th className="col-xs-2"></th>
+          </tr>
+          { this.props.grants !== null && this.props.grants.length > 0
+            ? grants
+            : null
+          }
+        </tbody>
+      </table>
+    );
+  }
+}
+
+
+class Grant extends React.Component {
+  constructor(props){
+    super(props);
+  }
+
+  render() {
+
+    const grant = this.props.grant;
+
+    const rolesList = grant.scope.filter(r => r.indexOf(`role:${grant.app}`) === 0)
+    .map((role, index) => {
+      return <li key={index}>{role}</li>
+    });
+
+    const roleOptions = this.props.scope
+      ? this.props.scope
+        .filter(r => r.indexOf(`role:${grant.app}:`) === 0)
+        .map((role, index) => {
+          return <option key={index} value={role}>{role}</option>;
+        })
+      : [];
+    
+    return (
+      <tr>
+        <td className="col-xs-4">
+          <ApplicationUser grant={grant} />
+        </td>
+        <td className="col-xs-2">
+          <ul className="list-unstyled">{rolesList}</ul>
+          <select defaultValue="N/A" className="form-control input-sm" onChange={this.onChange}>
+            <option key={-1} disabled value='N/A'>Tilføj rolle</option>
+            {roleOptions}
+          </select>
+        </td>
+        <td className="col-xs-2">
+          {grant.exp
+            ? <span>{grant.exp}</span>
+            : <span>Never</span>
+          }
+        </td>
+        <td className="col-xs-2">
+          { grant.exp && grant.exp < Date.now()
+            ? <button type="button" className="btn btn-danger btn-sm btn-block" onClick={this.props.deleteGrant.bind(this, grant)}>Delete grant</button>
+            : null
+          }
+        </td>
+        <td className="col-xs-2">
+          { grant.exp && grant.exp < Date.now()
+            ? <button type="button" className="btn btn-primary btn-sm btn-block" onClick={this.props.reactivateGrant.bind(this, grant)}>Reactivate grant</button>
+            : <button type="button" className="btn btn-warning btn-sm btn-block" onClick={this.props.expireGrant.bind(this, grant)}>Expire grant</button>
+          }
+        </td>
+      </tr>
+    );
+  }
+}
+
+
 class ApplicationUser extends React.Component {
   constructor(props){
     super(props);
@@ -445,82 +567,6 @@ class ApplicationUser extends React.Component {
           : <span>{grant.user} <span className="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span></span>
         }
       </div>
-    );
-  }
-}
-
-
-class GrantsTable extends React.Component {
-  constructor(props){
-    super(props);
-  }
-
-  render() {
-
-    const grants = this.props.grants.map(function(grant) {
-      return (
-        <Grant
-          key={grant.id}
-          grant={grant}
-          expireGrant={this.props.expireGrant}
-          reactivateGrant={this.props.reactivateGrant}
-          deleteGrant={this.props.deleteGrant} />
-      );
-    }.bind(this));
-
-    return (
-      <table className="table">
-        <tbody>
-          <tr>
-            <th className="col-xs-6">User</th>
-            <th className="col-xs-2">Expires</th>
-            <th className="col-xs-2"></th>
-            <th className="col-xs-2"></th>
-          </tr>
-          { this.props.grants !== null && this.props.grants.length > 0
-            ? grants
-            : null
-          }
-        </tbody>
-      </table>
-    );
-  }
-}
-
-
-class Grant extends React.Component {
-  constructor(props){
-    super(props);
-  }
-
-  render() {
-    
-    const grant = this.props.grant;
-
-    return (
-      <tr>
-        <td className="col-xs-6">
-          <ApplicationUser grant={grant} />
-        </td>
-        <td className="col-xs-2">
-          {grant.exp
-            ? <span>{grant.exp}</span>
-            : <span>Never</span>
-          }
-        </td>
-        <td className="col-xs-2">
-          { grant.exp && grant.exp < Date.now()
-            ? <button type="button" className="btn btn-danger btn-sm btn-block" onClick={this.props.deleteGrant.bind(this, grant)}>Delete grant</button>
-            : null
-          }
-        </td>
-        <td className="col-xs-2">
-          { grant.exp && grant.exp < Date.now()
-            ? <button type="button" className="btn btn-primary btn-sm btn-block" onClick={this.props.reactivateGrant.bind(this, grant)}>Reactivate grant</button>
-            : <button type="button" className="btn btn-warning btn-sm btn-block" onClick={this.props.expireGrant.bind(this, grant)}>Expire grant</button>
-          }
-        </td>
-      </tr>
     );
   }
 }

@@ -20,7 +20,7 @@ module.exports = class extends React.Component {
   getConsoleGrants() {
     return $.ajax({
       type: 'GET',
-      url: '/_b/applications/console/grants'
+      url: '/_b/grants?app=console'
     }).done(data => {
       this.setState({consoleGrants: data});
     }).fail((jqXHR) => {
@@ -30,6 +30,7 @@ module.exports = class extends React.Component {
 
   createGrant(user) {
     const grant = {
+      app: 'console',
       user: user._id,
       scope: [],
       exp: null
@@ -37,7 +38,7 @@ module.exports = class extends React.Component {
 
     return $.ajax({
       type: 'POST',
-      url: '/_b/applications/console/grants',
+      url: '/_b/grants',
       contentType: "application/json; charset=utf-8",
       data: JSON.stringify(grant)
     }).done((data, textStatus, jqXHR) => {
@@ -60,10 +61,9 @@ module.exports = class extends React.Component {
   }
 
   updateGrant(grant) {
-
     return $.ajax({
       type: 'POST',
-      url: `/_b/applications/console/grants/${grant.id}`,
+      url: `/_b/grants`,
       contentType: "application/json; charset=utf-8",
       data: JSON.stringify(grant)
     }).done((data, textStatus, jqXHR) => {
@@ -82,9 +82,10 @@ module.exports = class extends React.Component {
 
   deleteGrant(grant) {
     return $.ajax({
-      type: 'DELETE',
-      url: '/_b/applications/console/grants/'.concat(grant.id),
-      contentType: "application/json; charset=utf-8"
+      type: 'PATCH',
+      url: '/_b/grants',
+      contentType: "application/json; charset=utf-8",
+      data: JSON.stringify(grant)
     }).done((data, textStatus, jqXHR) => {
       const index = this.state.consoleGrants.findIndex(e => {
         return e.id === grant.id;
@@ -102,7 +103,9 @@ module.exports = class extends React.Component {
   makeSuperAdmin(grant) {
     return $.ajax({
       type: 'POST',
-      url: '/_b/admins/superadmin/'.concat(grant.id)
+      url: '/_b/superadmins',
+      contentType: "application/json; charset=utf-8",
+      data: JSON.stringify(grant)
     }).done((data, textStatus, jqXHR) => {
       const index = this.state.consoleGrants.findIndex(e => {
         return e.id === grant.id;
@@ -119,8 +122,10 @@ module.exports = class extends React.Component {
 
   demoteSuperAdmin(grant) {
     return $.ajax({
-      type: 'DELETE',
-      url: '/_b/admins/superadmin/'.concat(grant.id)
+      type: 'PATCH',
+      url: '/_b/superadmins',
+      contentType: "application/json; charset=utf-8",
+      data: JSON.stringify(grant)
     }).done((data, textStatus, jqXHR) => {
       const index = this.state.consoleGrants.findIndex(e => {
         return e.id === grant.id;
@@ -150,6 +155,7 @@ module.exports = class extends React.Component {
         makeSuperAdmin={this.makeSuperAdmin}
         demoteSuperAdmin={this.demoteSuperAdmin}
         activateGrant={this.activateGrant}
+        deleteGrant={this.deleteGrant}
         expireGrant={this.expireGrant} />
     });
 
@@ -169,7 +175,8 @@ module.exports = class extends React.Component {
           <tbody>
             <tr>
               <th className="col-xs-3">User</th>
-              <th className="col-xs-5">Admin of app</th>
+              <th className="col-xs-3">Admin of app</th>
+              <th className="col-xs-2"></th>
               <th className="col-xs-2"></th>
               <th className="col-xs-2"></th>
             </tr>
@@ -211,7 +218,7 @@ class Grant extends React.Component {
     this.searchUser(this.props.grant);
   }
 
-  render(){
+  render() {
     const grant = this.props.grant;
 
     const isSuperAdmin = grant.scope.indexOf('admin:*') > -1;
@@ -239,20 +246,28 @@ class Grant extends React.Component {
             ? <Link to={`/permissions?search=${this.state.foundUser.id}`}>{this.state.foundUser.email}</Link>
             : grant.user
           }
-        </td>
-        <th className="col-xs-5">
+        </td> 
+        <td className="col-xs-3">
           {adminOfApps}
-        </th>
+        </td>
         <td className="col-xs-2">
-          { isSuperAdmin
-            ? <button type="button" disabled={isExpired} className="btn btn-info btn-sm btn-block" onClick={this.props.demoteSuperAdmin.bind(this, grant)}>Demote Superadmin</button>
-            : <button type="button" disabled={isExpired} className="btn btn-default btn-sm btn-block" onClick={this.props.makeSuperAdmin.bind(this, grant)}>Promote to Superadmin</button>
+          { isExpired
+            ? null
+            : isSuperAdmin
+              ? <button type="button" disabled={isExpired} className="btn btn-info btn-sm btn-block" onClick={this.props.demoteSuperAdmin.bind(this, grant)}>Demote Superadmin</button>
+              : <button type="button" disabled={isExpired} className="btn btn-default btn-sm btn-block" onClick={this.props.makeSuperAdmin.bind(this, grant)}>Promote to Superadmin</button>
           }
         </td>
         <td className="col-xs-2">
           { isExpired
-            ? <button type="button" className="btn btn-primary btn-sm btn-block" onClick={this.props.activateGrant.bind(this, grant)}>Reactivate grant</button>
-            : <button type="button" className="btn btn-warning btn-sm btn-block" onClick={this.props.expireGrant.bind(this, grant)}>Expire grant</button>
+            ? <button type="button" className="btn btn-warning btn-sm btn-block" onClick={this.props.deleteGrant.bind(this, grant)}>Delete access</button>
+            : null
+          }
+        </td>
+        <td className="col-xs-2">
+          { isExpired
+            ? <button type="button" className="btn btn-primary btn-sm btn-block" onClick={this.props.activateGrant.bind(this, grant)}>Reactivate access</button>
+            : <button type="button" className="btn btn-warning btn-sm btn-block" onClick={this.props.expireGrant.bind(this, grant)}>Expire access</button>
           }
         </td>
       </tr>
