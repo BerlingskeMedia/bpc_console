@@ -8,6 +8,7 @@ module.exports = class extends React.Component {
     super(props);
     this.getGrants = this.getGrants.bind(this);
     this.createGrant = this.createGrant.bind(this);
+    this.updateGrant = this.updateGrant.bind(this);
     this.deleteGrant = this.deleteGrant.bind(this);
     this.expireGrant = this.expireGrant.bind(this);
     this.reactivateGrant = this.reactivateGrant.bind(this);
@@ -64,20 +65,12 @@ module.exports = class extends React.Component {
     });
   }
 
-  createGrant(user) {
-    const app = this.props.application.id;
-
-    const newGrant = {
-      app: app,
-      user: user._id,
-      scope: []
-    };
-
+  createGrant(grant) {
     return $.ajax({
       type: 'POST',
       url: `/_b/grants`,
       contentType: "application/json; charset=utf-8",
-      data: JSON.stringify(newGrant)
+      data: JSON.stringify(grant)
     }).done((data, textStatus, jqXHR) => {
       this.setState((prevState) => {
         let temp = prevState.grants.slice();
@@ -118,31 +111,16 @@ module.exports = class extends React.Component {
   }
 
   expireGrant(grant) {
-
     grant.exp = Date.now();
-
-    return $.ajax({
-      type: 'POST',
-      url: `/_b/grants`,
-      contentType: "application/json; charset=utf-8",
-      data: JSON.stringify(grant)
-    }).done((data, textStatus, jqXHR) => {
-      const index = this.state.grants.findIndex(e => {
-        return e.id === grant.id;
-      });
-      // TODO: I don't remember if this one is a findOneAndUpdate in MongoDB
-      this.setState((prevState) => {
-        grants: prevState.grants[index] = grant;
-      });
-    }).fail((jqXHR, textStatus, errorThrown) => {
-      console.error(jqXHR.responseText);
-    });
+    return this.updateGrant(grant);
   }
 
   reactivateGrant(grant) {
-
     grant.exp = null;
+    return this.updateGrant(grant);
+  }
 
+  updateGrant(grant) {
     return $.ajax({
       type: 'POST',
       url: `/_b/grants`,
@@ -181,12 +159,14 @@ module.exports = class extends React.Component {
           application={this.props.application}
           createGrant={this.createGrant}
           deleteGrant={this.deleteGrant}
+          updateGrant={this.updateGrant}
           expireGrant={this.expireGrant}
           reactivateGrant={this.reactivateGrant} />
         <GrantsList
           scope={scope}
           grants={this.state.grants}
           deleteGrant={this.deleteGrant}
+          updateGrant={this.updateGrant}
           expireGrant={this.expireGrant}
           reactivateGrant={this.reactivateGrant} />
         <GrantsPagination
@@ -292,12 +272,24 @@ class UserSearch extends React.Component {
   handleSubmit(e) {
     e.preventDefault();
     if (this.state.user !== {}) {
-      this.props.createGrant(this.state.user)
+
+      const newGrant = {
+        app: this.props.application.id,
+        user: this.state.user._id,
+        scope: []
+      };
+
+      return this.props.createGrant(newGrant)
       .done((data, textStatus, jqXHR) => {
-        this.searchBox.value = '';
-        this.setState({user: {}});
+        this.setState({
+          searchSuccess: true,
+          searchNotFound: false,
+          userHasGrant: true,
+          grant: data
+        });
       })
       .fail((jqXHR, textStatus, errorThrown) => {
+        this.setState({searchSuccess: false});
         console.log('jqXHR', jqXHR);
         if (jqXHR.status === 409) {
           alert('User already have access');
@@ -306,8 +298,6 @@ class UserSearch extends React.Component {
         } else {
           console.error(jqXHR.responseText);
         }
-      }).always(() => {
-        this.setState({searchSuccess: false});
       });
     }
   }
@@ -343,6 +333,7 @@ class UserSearch extends React.Component {
             ? <GrantsTable
               grants={[this.state.grant]}
               scope={application.scope}
+              updateGrant={this.props.updateGrant}
               expireGrant={this.props.expireGrant}
               reactivateGrant={this.props.reactivateGrant}
               deleteGrant={this.deleteGrant} />
@@ -376,9 +367,10 @@ class GrantsList extends React.Component {
         <GrantsTable
           scope={this.props.scope}
           grants={this.props.grants}
+          deleteGrant={this.props.deleteGrant}
+          updateGrant={this.props.updateGrant}
           expireGrant={this.props.expireGrant}
-          reactivateGrant={this.props.reactivateGrant}
-          deleteGrant={this.props.deleteGrant} />
+          reactivateGrant={this.props.reactivateGrant} />
       </div>
     );
   }
@@ -443,9 +435,10 @@ class GrantsTable extends React.Component {
           key={grant.id}
           grant={grant}
           scope={this.props.scope}
+          deleteGrant={this.props.deleteGrant}
+          updateGrant={this.props.updateGrant}
           expireGrant={this.props.expireGrant}
-          reactivateGrant={this.props.reactivateGrant}
-          deleteGrant={this.props.deleteGrant} />
+          reactivateGrant={this.props.reactivateGrant} />
       );
     }.bind(this));
 
@@ -473,24 +466,42 @@ class GrantsTable extends React.Component {
 class Grant extends React.Component {
   constructor(props){
     super(props);
+    this.onChange = this.onChange.bind(this);
+  }
+
+  onChange(e) {
+    const newScope = e.target.value;
+    const grant = this.props.grant;
+    grant.scope.push(newScope);
+    this.props.updateGrant(grant);
   }
 
   render() {
 
     const grant = this.props.grant;
 
-    const rolesList = grant.scope.filter(r => r.indexOf(`role:${grant.app}`) === 0)
-    .map((role, index) => {
-      return <li key={index}>{role}</li>
-    });
+    const grantIsExpired = grant.exp !== null && grant.exp < Date.now();
 
-    const roleOptions = this.props.scope
-      ? this.props.scope
-        .filter(r => r.indexOf(`role:${grant.app}:`) === 0)
-        .map((role, index) => {
-          return <option key={index} value={role}>{role}</option>;
-        })
-      : [];
+    const applicationRolePrefix = `role:${grant.app}:`;
+
+    const applicationRoles = this.props.scope ? this.props.scope.filter(r => r.indexOf(applicationRolePrefix) === 0) : [];
+
+    // This is the list over roles the user already have
+    const userRoles = grant.scope ? grant.scope.filter(s => s.indexOf(applicationRolePrefix) === 0).filter(r => applicationRoles.indexOf(r) > -1) : [];
+    const userRolesListItems = userRoles.map((role, index) => { return <li key={index}>{ role.substring(applicationRolePrefix.length) }</li> });
+    const roleList = userRolesListItems.length > 0 ? <ul className="list-unstyled">{ userRolesListItems }</ul> : null;
+
+    // This is the selector of the possible roles
+    const roleOptions = applicationRoles.length > 0 ? applicationRoles
+    .filter(r => userRoles.indexOf(r) === -1) // We only want to present the roles the user does not already have
+    .map((role, index) => { return <option key={index} value={role}>{role.substring(applicationRolePrefix.length)}</option>; }) : [];
+
+    const roleSelector = roleOptions.length > 0
+      ? <select defaultValue="N/A" className="form-control input-sm" onChange={this.onChange} disabled={grantIsExpired}>
+          <option key={-1} disabled value='N/A'>Tilføj rolle</option>
+          {roleOptions}
+        </select>
+      : null;
     
     return (
       <tr>
@@ -498,11 +509,8 @@ class Grant extends React.Component {
           <ApplicationUser grant={grant} />
         </td>
         <td className="col-xs-2">
-          <ul className="list-unstyled">{rolesList}</ul>
-          <select defaultValue="N/A" className="form-control input-sm" onChange={this.onChange}>
-            <option key={-1} disabled value='N/A'>Tilføj rolle</option>
-            {roleOptions}
-          </select>
+          <div>{ roleList }</div>
+          <div>{ roleSelector }</div>
         </td>
         <td className="col-xs-2">
           {grant.exp
