@@ -309,8 +309,8 @@ class UserSearch extends React.Component {
   }
 
   render() {
-    var inputClasses = 'form-group '.concat(this.state.searchSuccess ? 'has-success' : '');
-    const grant = this.state.grant;
+    const inputClasses = 'form-group '.concat(this.state.searchSuccess ? 'has-success' : '');
+
     const application = this.props.application;
 
     return (
@@ -467,13 +467,24 @@ class Grant extends React.Component {
   constructor(props){
     super(props);
     this.onChange = this.onChange.bind(this);
+    this.addRoleToGrantScope = this.addRoleToGrantScope.bind(this);
+    this.state = {
+      value: 'N/A'
+    };
   }
 
   onChange(e) {
-    const newScope = e.target.value;
+    this.setState({ value: e.target.value });
+  }
+
+  addRoleToGrantScope(e) {
     const grant = this.props.grant;
-    grant.scope.push(newScope);
-    this.props.updateGrant(grant);
+    grant.scope.push(this.state.value);
+    this.props.updateGrant(grant)
+    .done((data, textStatus, jqXHR) => {
+      this.setState({ value: 'N/A' });
+    }).fail((jqXHR, textStatus, errorThrown) => {
+    });
   }
 
   render() {
@@ -497,11 +508,13 @@ class Grant extends React.Component {
     .map((role, index) => { return <option key={index} value={role}>{role.substring(applicationRolePrefix.length)}</option>; }) : [];
 
     const roleSelector = roleOptions.length > 0
-      ? <select defaultValue="N/A" className="form-control input-sm" onChange={this.onChange} disabled={grantIsExpired}>
-          <option key={-1} disabled value='N/A'>Tilføj rolle</option>
+      ? <select value={this.state.value} className="form-control input-sm" onChange={this.onChange} disabled={grantIsExpired}>
+          <option key={-1} disabled value='N/A'>Select role</option>
           {roleOptions}
         </select>
       : null;
+
+    const addRoleButton = this.state.value !== 'N/A' ? <button type="button" className="btn btn-info btn-xs" onClick={this.addRoleToGrantScope} style={{ marginTop: '2px' }}>Add role</button> : null;
     
     return (
       <tr>
@@ -511,6 +524,7 @@ class Grant extends React.Component {
         <td className="col-xs-2">
           <div>{ roleList }</div>
           <div>{ roleSelector }</div>
+          <div>{ addRoleButton }</div>
         </td>
         <td className="col-xs-2">
           {grant.exp
