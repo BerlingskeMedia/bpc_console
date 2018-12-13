@@ -514,7 +514,7 @@ class Grant extends React.Component {
         </select>
       : null;
 
-    const addRoleButton = this.state.value !== 'N/A' ? <button type="button" className="btn btn-info btn-xs" onClick={this.addRoleToGrantScope}>Add role</button> : null;
+    const addRoleButton = this.state.value !== 'N/A' ? <button type="button" className="btn btn-info btn-xs" onClick={this.addRoleToGrantScope} style={{ marginTop: '2px' }}>Add role</button> : null;
     
     return (
       <tr>
