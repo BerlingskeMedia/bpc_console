@@ -97,7 +97,8 @@ module.exports = class extends React.Component {
     });
   }
 
-  addScope(e) {
+  // addScope(e) {
+  addScope(scope) {
     e.preventDefault();
     var application = Object.assign({}, this.state.application);
     var newLength = application.scope.push(this.state.newScope);
@@ -109,8 +110,9 @@ module.exports = class extends React.Component {
     });
   }
 
-  removeScope(index) {
+  removeScope(scope) {
     var application = Object.assign({}, this.state.application);
+    const index = application.scope.findIndex(s => s === scope);
     application.scope.splice(index, 1);
     this.updateApplication(application);
   }
@@ -144,14 +146,15 @@ module.exports = class extends React.Component {
   render() {
 
     var scopeList = this.state.application !== undefined && this.state.application.scope !== undefined
-      ? this.state.application.scope.map(function(s, i){
+      ? this.state.application.scope.filter(s => s.indexOf('role:') !== 0 ).map(function(s, i){
+    // ? this.state.application.scope.map(function(s, i){
           const scopeElem = s.endsWith(':read') ? <span>{s.substring(0, s.indexOf(':read'))}<strong>{s.substring(s.indexOf(':read'))}</strong></span> : <span>{s}</span>;
           if (s.endsWith(':read')) {
 
           }
           return (
             <li key={i} style={{marginBottom: '2px'}}>
-              <button type="button" className="btn btn-danger btn-xs" onClick={this.removeScope.bind(this, i)}>Remove scope</button>
+              <button type="button" className="btn btn-danger btn-xs" onClick={this.removeScope.bind(this, s)}>Remove scope</button>
               &nbsp;
               {scopeElem}
             </li>);
