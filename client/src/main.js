@@ -93,7 +93,7 @@ class ConsoleApp extends React.Component {
   getUserTicket(payload){
     return $.ajax({
       type: 'POST',
-      url: '/tickets',
+      url: '/authenticate',
       contentType: 'application/json; charset=utf-8',
       data: JSON.stringify(payload)
     })
@@ -104,7 +104,7 @@ class ConsoleApp extends React.Component {
   reissueUserTicket() {
     return $.ajax({
       type: 'GET',
-      url: '/tickets',
+      url: '/authenticate',
       contentType: 'application/json; charset=utf-8'
     })
     .done((ticket, textStatus, jqXHR) => this.getUserTicketDone(ticket, textStatus, jqXHR))
@@ -128,7 +128,7 @@ class ConsoleApp extends React.Component {
   deleteUserTicket(){
     return $.ajax({
       type: 'DELETE',
-      url: '/tickets'
+      url: '/authenticate'
     }).done((data, textStatus, jqXHR) => {
       console.log('DELETE signout success', data, status);
       this.setState({ authenticated: false, authorized: false});
