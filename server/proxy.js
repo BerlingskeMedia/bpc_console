@@ -19,8 +19,7 @@ function proxy (request, h) {
       query: request.query,
       payload: request.payload
     },
-    request.state.console_ticket,
-    h
+    request.state.console_ticket
   );
 }
 
