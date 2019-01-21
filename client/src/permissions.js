@@ -241,11 +241,10 @@ class ShowFullUser extends React.Component {
 
   }
 
-
   updateGrant(grant) {
     return $.ajax({
       type: 'POST',
-      url: `/_b/applications/${grant.app}/grants/${grant.id}`,
+      url: `/_b/grants`,
       contentType: "application/json; charset=utf-8",
       data: JSON.stringify(grant)
     }).done((data, textStatus, jqXHR) => {
