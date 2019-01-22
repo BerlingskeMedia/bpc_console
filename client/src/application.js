@@ -97,8 +97,7 @@ module.exports = class extends React.Component {
     });
   }
 
-  // addScope(e) {
-  addScope(scope) {
+  addScope(e) {
     e.preventDefault();
     var application = Object.assign({}, this.state.application);
     var newLength = application.scope.push(this.state.newScope);
