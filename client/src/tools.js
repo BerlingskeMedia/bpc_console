@@ -1,6 +1,7 @@
 const $ = require('jquery');
 const React = require('react');
 const Link = require('react-router-dom').Link;
+const Hawk = require('hawk');
 
 module.exports = class extends React.Component {
 
@@ -17,6 +18,7 @@ module.exports = class extends React.Component {
         <p>These tools are helpful when learning BPC or debugging tickets.</p>
         <ParseTicketID />
         <ParseHawkAuthHeader />
+        <GenerateHawkAuthHeader />
       </div>
     );
   }
@@ -131,7 +133,7 @@ class ParseHawkAuthHeader extends React.Component {
   onChange(e) {
     const value = e.target.value;
     if(value.length > 0) {
-      this.parseRequest(value)
+      this.parseRequest(value);
     } else {
       this.setState({result: null, error: null});
     }
@@ -171,6 +173,111 @@ class ParseHawkAuthHeader extends React.Component {
         <div style={{ marginTop: '5px' }}>        
           { this.state.result
             ? <pre>{ JSON.stringify(this.state.result, null, 2) }</pre>
+            : null
+          }
+
+          { this.state.error
+            ? <div>Error: {this.state.error.message}</div>
+            : null
+          }
+        </div>
+      </div>
+    );
+  }
+}
+
+
+class GenerateHawkAuthHeader extends React.Component {
+  constructor(props){
+    super(props);
+    this.handleSubmit = this.handleSubmit.bind(this);
+    this.onChange = this.onChange.bind(this);
+    this.generateHawkAuthHeader = this.generateHawkAuthHeader.bind(this);
+    this.state = {
+      result: null,
+      error: null
+    };
+    
+    this.setUriInputRef = element => {
+      this.uri = element;
+    };
+
+    this.setMethodInputRef = element => {
+      this.method = element;
+    };
+    
+    this.setIdInputRef = element => {
+      this.id = element;
+    };
+    
+    this.setKeyInputRef = element => {
+      this.key = element;
+    };
+    
+    this.setAppInputRef = element => {
+      this.app = element;
+    };
+  }
+
+  handleSubmit(e) {
+    e.preventDefault();
+    this.onChange();
+  }
+
+  onChange(e) {
+    e.preventDefault();
+    this.generateHawkAuthHeader();
+  }
+
+  generateHawkAuthHeader() {
+    
+    const uri = this.uri.value;
+    const method = this.method.value || 'GET';
+    const id = this.id.value;
+    const key = this.key.value;
+    const app = this.app.value;
+
+    
+    if(uri && method && id && key) {
+      
+      const options = { credentials: { id, key, algorithm: 'sha256' }, app };
+
+      try {
+        const result = Hawk.client.header(uri, method, options);
+        this.setState({ result: result, error: null });
+      } catch (ex) {
+        this.setState({ result: null, error: ex });
+      }
+    } else {
+      this.setState({ result: null, error: null });
+    }
+  }
+
+  render() {
+
+    return (
+      <div>
+        <h3>Generate Hawk Authorization header</h3>
+        <form onSubmit={this.handleSubmit}>
+          <div className="form-group">
+            <label>URI</label>
+            <input type="text" className="form-control" ref={this.setUriInputRef} onChange={this.onChange} />
+            <label>Method</label>
+            <input type="text" className="form-control" ref={this.setMethodInputRef} onChange={this.onChange} placeholder="GET" />
+            <label>ID</label>
+            <input type="text" className="form-control" ref={this.setIdInputRef} onChange={this.onChange} placeholder="Application ID or Ticket ID" />
+            <label>Key</label>
+            <input type="text" className="form-control" ref={this.setKeyInputRef} onChange={this.onChange} />
+            <label>App</label>
+            <input type="text" className="form-control" ref={this.setAppInputRef} onChange={this.onChange} placeholder="Not needed if using Application ID above" />
+            <label>Algoritm</label>
+            <input type="text" className="form-control" placeholder="sha256" disabled="disabled" />
+          </div>
+        </form>
+
+        <div style={{ marginTop: '5px' }}>        
+          { this.state.result
+            ? <pre>{ this.state.result.header }</pre>
             : null
           }
 
