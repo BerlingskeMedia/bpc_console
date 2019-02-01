@@ -17,8 +17,8 @@ module.exports = class extends React.Component {
         <h1>Tools</h1>
         <p>These tools are helpful when learning BPC or debugging tickets.</p>
         <ParseTicketID />
-        <ParseHawkAuthHeader />
         <GenerateHawkAuthHeader />
+        <ParseHawkAuthHeader />
       </div>
     );
   }
@@ -121,74 +121,6 @@ class ParseTicketID extends React.Component {
 }
 
 
-class ParseHawkAuthHeader extends React.Component {
-  constructor(props){
-    super(props);
-    this.onChange = this.onChange.bind(this);
-    this.state = {
-      result: null,
-      error: null
-    };
-  }
-
-  onChange(e) {
-    const value = e.target.value;
-    if(value.length > 0) {
-      this.parseRequest(value);
-    } else {
-      this.setState({result: null, error: null});
-    }
-  }
-
-  parseRequest(header){
-    const payload = {
-      authorization: header
-    };
-    return $.ajax({
-      type: 'POST',
-      url: `/_b/parse`,
-      contentType: 'application/json; charset=utf-8',
-      data: JSON.stringify(payload)
-    }).done((data, textStatus, jqXHR) => {
-      this.setState({result: data, error: null});
-    }).fail((jqXHR, textStatus, errorThrown) => {
-      console.error(jqXHR.responseText);
-      this.setState({result: null, error: JSON.parse(jqXHR.responseText)});
-    });
-  }
-
-  render() {
-
-    return (
-      <div>
-        <hr />
-        <h3>Parse Hawk Authorization header</h3>
-        <textarea
-          className="form-control"
-          rows="6"
-          cols="55"
-          style={{fontFamily:"monospace", fontSize: "0.9em"}}
-          onChange={this.onChange}
-          placeholder="Paste Hawk Authorization header">
-        </textarea>
-
-        <div style={{ marginTop: '5px' }}>        
-          { this.state.result
-            ? <pre>{ JSON.stringify(this.state.result, null, 2) }</pre>
-            : null
-          }
-
-          { this.state.error
-            ? <div>Error: {this.state.error.message}</div>
-            : null
-          }
-        </div>
-      </div>
-    );
-  }
-}
-
-
 class GenerateHawkAuthHeader extends React.Component {
   constructor(props){
     super(props);
@@ -281,6 +213,74 @@ class GenerateHawkAuthHeader extends React.Component {
         <div style={{ marginTop: '5px' }}>        
           { this.state.result
             ? <pre>{ this.state.result.header }</pre>
+            : null
+          }
+
+          { this.state.error
+            ? <div>Error: {this.state.error.message}</div>
+            : null
+          }
+        </div>
+      </div>
+    );
+  }
+}
+
+
+class ParseHawkAuthHeader extends React.Component {
+  constructor(props){
+    super(props);
+    this.onChange = this.onChange.bind(this);
+    this.state = {
+      result: null,
+      error: null
+    };
+  }
+
+  onChange(e) {
+    const value = e.target.value;
+    if(value.length > 0) {
+      this.parseRequest(value);
+    } else {
+      this.setState({result: null, error: null});
+    }
+  }
+
+  parseRequest(header){
+    const payload = {
+      authorization: header
+    };
+    return $.ajax({
+      type: 'POST',
+      url: `/_b/parse`,
+      contentType: 'application/json; charset=utf-8',
+      data: JSON.stringify(payload)
+    }).done((data, textStatus, jqXHR) => {
+      this.setState({result: data, error: null});
+    }).fail((jqXHR, textStatus, errorThrown) => {
+      console.error(jqXHR.responseText);
+      this.setState({result: null, error: JSON.parse(jqXHR.responseText)});
+    });
+  }
+
+  render() {
+
+    return (
+      <div>
+        <hr />
+        <h3>Parse Hawk Authorization header</h3>
+        <textarea
+          className="form-control"
+          rows="6"
+          cols="55"
+          style={{fontFamily:"monospace", fontSize: "0.9em"}}
+          onChange={this.onChange}
+          placeholder="Paste Hawk Authorization header">
+        </textarea>
+
+        <div style={{ marginTop: '5px' }}>        
+          { this.state.result
+            ? <pre>{ JSON.stringify(this.state.result, null, 2) }</pre>
             : null
           }
 
