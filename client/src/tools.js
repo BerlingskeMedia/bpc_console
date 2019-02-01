@@ -221,6 +221,12 @@ class GenerateHawkAuthHeader extends React.Component {
             : null
           }
         </div>
+
+        <p>
+          <em>Note: </em>
+          The Hawk Authorization header is generated strictly from the id and key info above.
+          It is therefore not tied to this specific instance of BPC.
+        </p>
       </div>
     );
   }
