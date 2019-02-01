@@ -115,6 +115,13 @@ class ParseTicketID extends React.Component {
           }
         </div>
 
+        <div className="bg-info">
+          <small style={{ paddingLeft: '5px' }}>
+            <em>Note: </em>
+            Parsing a ticket ID must be from the this instance of BPC.
+            Parsing a base64 cookie will work with cookies from other BPC instances.
+          </small>
+        </div>
       </div>
     );
   }
@@ -222,11 +229,13 @@ class GenerateHawkAuthHeader extends React.Component {
           }
         </div>
 
-        <p>
-          <em>Note: </em>
-          The Hawk Authorization header is generated strictly from the id and key info above.
-          It is therefore not tied to this specific instance of BPC.
-        </p>
+        <div className="bg-info">
+          <small style={{ paddingLeft: '5px' }}>
+            <em>Note: </em>
+            The Hawk Authorization header is generated only from the ID and key above.
+            It is therefore not tied to this specific instance of BPC.
+          </small>
+        </div>
       </div>
     );
   }
@@ -294,6 +303,13 @@ class ParseHawkAuthHeader extends React.Component {
             ? <div>Error: {this.state.error.message}</div>
             : null
           }
+        </div>
+
+        <div className="bg-info">
+          <small style={{ paddingLeft: '5px' }}>
+            <em>Note: </em>
+            Parsing Hawk Authorization header must be from the this instance of BPC.
+          </small>
         </div>
       </div>
     );
