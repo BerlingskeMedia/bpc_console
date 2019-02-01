@@ -97,48 +97,21 @@ class ParseTicketID extends React.Component {
           cols="50"
           style={{fontFamily:"monospace", fontSize: "0.9em"}}
           onChange={this.onChange}
-          placeholder="Insert ID or cookie">
+          placeholder="Paste ID or cookie">
         </textarea>
 
-        {this.state.result !== null && this.state.result.id !== null
-          ?
-          <div style={{margin: "10px 0px"}}>
-            <dl className="dl-horizontal">
-              <dt>id</dt>
-              <dd style={{wordBreak: "break-word"}}>{this.state.result.id}</dd>
-              <dt>key</dt>
-              <dd>{this.state.result.key}</dd>
-              <dt>algorithm</dt>
-              <dd>{this.state.result.algorithm}</dd>
-              <dt>exp</dt>
-              <dd style={{color: this.state.result.exp < Date.now() ? 'red' : 'inherit'}}>{this.state.result.exp}</dd>
-              <dt>app</dt>
-              <dd>
-                { this.state.result.app !== null
-                  ? <Link to={`/application/${this.state.result.app}`}>{this.state.result.app}</Link>
-                  : null
-                }
-              </dd>
-              <dt>scope</dt>
-              <dd>{this.state.result.scope.join(', ')}</dd>
-              <dt>grant</dt>
-              <dd>{this.state.result.grant}</dd>
-              <dt>user</dt>
-              <dd>
-              { this.state.result.user !== null
-                ? <Link to={`/permissions?search=${this.state.result.user}`}>{this.state.result.user}</Link>
-                : null
-              }
-            </dd>
-            </dl>
-          </div>
-          : null
-        }
+        <div style={{ marginTop: '5px' }}>        
+          { this.state.result
+            ? <pre>{ JSON.stringify(this.state.result, null, 2) }</pre>
+            : null
+          }
 
-        {this.state.error !== null ?
-          <p>Error: {this.state.error.message}</p>
-          : null
-        }
+          { this.state.error
+            ? <div>Error: {this.state.error.message}</div>
+            : null
+          }
+        </div>
+
       </div>
     );
   }
@@ -192,38 +165,20 @@ class ParseHawkAuthHeader extends React.Component {
           cols="55"
           style={{fontFamily:"monospace", fontSize: "0.9em"}}
           onChange={this.onChange}
-          placeholder="Insert Hawk Authorization header">
+          placeholder="Paste Hawk Authorization header">
         </textarea>
 
-        {this.state.result !== null && this.state.result.id !== null
-          ?
-          <div style={{margin: "10px 0px"}}>
-            <dl className="dl-horizontal">
-              <dt>id</dt>
-              <dd style={{wordBreak: "break-word"}}>{this.state.result.id}</dd>
-              <dt>key</dt>
-              <dd>{this.state.result.key}</dd>
-              <dt>algorithm</dt>
-              <dd>{this.state.result.algorithm}</dd>
-              <dt>exp</dt>
-              <dd style={{color: this.state.result.exp < Date.now() ? 'red' : 'inherit'}}>{this.state.result.exp}</dd>
-              <dt>app</dt>
-              <dd>{this.state.result.app}</dd>
-              <dt>scope</dt>
-              <dd>{this.state.result.scope.join(', ')}</dd>
-              <dt>grant</dt>
-              <dd>{this.state.result.grant}</dd>
-              <dt>user</dt>
-              <dd>{this.state.result.user}</dd>
-            </dl>
-          </div>
-          : null
-        }
+        <div style={{ marginTop: '5px' }}>        
+          { this.state.result
+            ? <pre>{ JSON.stringify(this.state.result, null, 2) }</pre>
+            : null
+          }
 
-        {this.state.error !== null ?
-          <p>Error: {this.state.error.message}</p>
-          : null
-        }
+          { this.state.error
+            ? <div>Error: {this.state.error.message}</div>
+            : null
+          }
+        </div>
       </div>
     );
   }
