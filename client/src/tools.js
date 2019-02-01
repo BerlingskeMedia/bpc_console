@@ -60,15 +60,13 @@ class ParseHawkAuthHeader extends React.Component {
 
   render() {
 
-
-
     return (
       <div>
         <h3>Parse Hawk Authorization header</h3>
         <textarea
           className="form-control"
           rows="6"
-          cols="50"
+          cols="55"
           style={{fontFamily:"monospace", fontSize: "0.9em"}}
           onChange={this.onChange}
           placeholder="Insert Hawk Authorization header">
@@ -122,7 +120,21 @@ class ParseTicketID extends React.Component {
   onChange(e) {
     const value = e.target.value;
     if(value.length > 0) {
-      this.parseRequest(value)
+      
+      // It's a ticket ID
+      if(value.substring(0, 8) === "Fe26.2**") {
+        this.parseRequest(value)
+
+      } else {
+        // It's a cookie
+        try {
+          const decodedTicket = window.atob(value);
+          const parsedTicket = JSON.parse(decodedTicket);
+          this.setState({result: parsedTicket, error: null});
+        } catch (ex) {
+          this.setState({result: null, error: ex});
+        }
+      }
     } else {
       this.setState({result: null, error: null});
     }
@@ -149,14 +161,14 @@ class ParseTicketID extends React.Component {
 
     return (
       <div>
-        <h3>Parse BPC Ticket ID</h3>
+        <h3>Parse BPC Ticket ID or base64 cookie</h3>
         <textarea
           className="form-control"
-          rows="6"
+          rows="8"
           cols="50"
           style={{fontFamily:"monospace", fontSize: "0.9em"}}
           onChange={this.onChange}
-          placeholder="Insert BPC Ticket ID">
+          placeholder="Insert ID or cookie">
         </textarea>
 
         {this.state.result !== null && this.state.result.id !== null
