@@ -14,6 +14,7 @@ module.exports = class extends React.Component {
     return (
       <div className="consoleTools">
         <h1>Tools</h1>
+        <p>These tools are helpful when learning BPC or debugging tickets.</p>
         <ParseTicketID />
         <ParseHawkAuthHeader />
       </div>
