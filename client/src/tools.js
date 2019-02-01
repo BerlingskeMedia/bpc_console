@@ -35,21 +35,27 @@ class ParseTicketID extends React.Component {
   onChange(e) {
     const value = e.target.value;
     if(value.length > 0) {
+
+      var parseOperation;
       
       // It's a ticket ID
       if(value.substring(0, 8) === "Fe26.2**") {
-        this.parseRequest(value)
+        parseOperation = this.parseRequest(value)
 
-      } else {
         // It's a cookie
-        try {
-          const decodedTicket = window.atob(value);
-          const parsedTicket = JSON.parse(decodedTicket);
-          this.setState({result: parsedTicket, error: null});
-        } catch (ex) {
-          this.setState({result: null, error: ex});
-        }
+      } else {
+        parseOperation = this.parseCookie(value)
       }
+      
+      parseOperation
+      .done((data, textStatus, jqXHR) => {
+        this.setState({result: data, error: null});
+      }).fail((jqXHR, textStatus, errorThrown) => {
+        // It could an error from the parseRequest or the parseCookie
+        const errorText = jqXHR.responseText ? JSON.parse(jqXHR.responseText) : jqXHR;
+        this.setState({result: null, error: errorText});
+      });
+
     } else {
       this.setState({result: null, error: null});
     }
@@ -64,12 +70,19 @@ class ParseTicketID extends React.Component {
       url: `/_b/parse`,
       contentType: 'application/json; charset=utf-8',
       data: JSON.stringify(payload)
-    }).done((data, textStatus, jqXHR) => {
-      this.setState({result: data, error: null});
-    }).fail((jqXHR, textStatus, errorThrown) => {
-      console.error(jqXHR.responseText);
-      this.setState({result: null, error: JSON.parse(jqXHR.responseText)});
     });
+  }
+
+  parseCookie(value){
+    var dfd = jQuery.Deferred();
+    try {
+      const decodedTicket = window.atob(value);
+      const parsedTicket = JSON.parse(decodedTicket);
+      dfd.resolve(parsedTicket)
+    } catch (ex) {
+      dfd.reject(ex)
+    }
+    return dfd.promise();
   }
 
   render() {
