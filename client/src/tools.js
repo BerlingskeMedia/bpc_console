@@ -92,6 +92,7 @@ class ParseTicketID extends React.Component {
 
     return (
       <div>
+        <hr />
         <h3>Parse BPC Ticket ID or base64 cookie</h3>
         <textarea
           className="form-control"
@@ -160,6 +161,7 @@ class ParseHawkAuthHeader extends React.Component {
 
     return (
       <div>
+        <hr />
         <h3>Parse Hawk Authorization header</h3>
         <textarea
           className="form-control"
@@ -257,9 +259,10 @@ class GenerateHawkAuthHeader extends React.Component {
 
     return (
       <div>
+        <hr />
         <h3>Generate Hawk Authorization header</h3>
         <form onSubmit={this.handleSubmit}>
-          <div className="form-group">
+          <div className="form-group" style={{ marginLeft: '25px' }}>
             <label>URI</label>
             <input type="text" className="form-control" ref={this.setUriInputRef} onChange={this.onChange} />
             <label>Method</label>
@@ -269,7 +272,7 @@ class GenerateHawkAuthHeader extends React.Component {
             <label>Key</label>
             <input type="text" className="form-control" ref={this.setKeyInputRef} onChange={this.onChange} />
             <label>App</label>
-            <input type="text" className="form-control" ref={this.setAppInputRef} onChange={this.onChange} placeholder="Not needed if using Application ID above" />
+            <input type="text" className="form-control" ref={this.setAppInputRef} onChange={this.onChange} placeholder="Not needed when using Application ID above" />
             <label>Algoritm</label>
             <input type="text" className="form-control" placeholder="sha256" disabled="disabled" />
           </div>
