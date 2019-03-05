@@ -92,7 +92,7 @@ class SearchUser extends React.Component {
       url: `/_b/users?email=${searchText}&id=${searchText}`,
       contentType: "application/json; charset=utf-8"
     }).done((data, textStatus, jqXHR) => {
-      window.history.pushState({ search: searchText }, "search", `/permissions?search=${searchText}`);
+      window.history.pushState({ search: searchText }, "search", `/users?search=${searchText}`);
       this.props.setUsers(data);
     }).fail((jqXHR, textStatus, errorThrown) => {
       console.error(jqXHR.responseText);
@@ -102,7 +102,7 @@ class SearchUser extends React.Component {
   }
 
   clearSearch() {
-    window.history.pushState({ search: "" }, "search", `/permissions`);
+    window.history.pushState({ search: "" }, "search", `/users`);
     this.props.setUsers(null);
   }
 
@@ -275,7 +275,7 @@ class ShowFullUser extends React.Component {
       ? <div style={{marginTop: '30px', marginBottom: '30px'}}>
           <UserDetails key={this.state.user.id + 'fulluser_1'} user={this.state.user} />
           <hr />
-          <DataScopes key={this.state.user.id + 'fulluser_2'} dataScopes={this.state.user.dataScopes} />
+          <Permissions key={this.state.user.id + 'fulluser_2'} dataScopes={this.state.user.dataScopes} />
           <hr />
           <Grants
             key={this.state.user.id + 'fulluser_3'}
@@ -402,24 +402,52 @@ class RecalcPermissionsButton extends React.Component {
 }
 
 
-class DataScopes extends React.Component {
+class Permissions extends React.Component {
 
   constructor(props){
     super(props);
   }
 
+  setActiveTab(e) {
+    $('.nav-tabs li').removeClass('active');
+    $('.nav-tabs li.' + e).addClass('active');
+  }
+
   render() {
 
-    var scopes = Object.keys(this.props.dataScopes ? this.props.dataScopes : {}).map(function (name, index) {
+    const scopes = Object.keys(this.props.dataScopes ? this.props.dataScopes : {}).sort();
+
+    var navItems = scopes
+    .map(function (name, index) {
+      return (
+        <li key={index} role="presentation" name={name} onClick={this.setActiveTab.bind(this, name)}>
+          <a>{name}</a>
+        </li>
+      );
+    }.bind(this));
+
+    navItems.push(
+      <li key="raw" role="presentation" name={name} onClick={this.setActiveTab.bind(this, name)}>
+          <a>(RAW)</a>
+      </li>
+    );
+
+    var scopess = scopes
+    .map(function (name, index) {
       return <ScopePermissions key={index} name={name} permissions={this.props.dataScopes[name]} />
     }.bind(this));
 
     return (
       <div className="row">
         <div className="col-xs-12">
-          { !scopes || Object.keys(scopes).length === 0
+          <ul className="nav nav-pills nav-stacked">
+          </ul>
+          {/* <ul className="nav nav-tabs">
+            { navItems }
+          </ul> */}
+          { !scopess || Object.keys(scopess).length === 0
             ? <div>(This user has no scope data.)</div>
-            : scopes
+            : scopess
           }
         </div>
       </div>

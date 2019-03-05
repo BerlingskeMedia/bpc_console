@@ -585,7 +585,7 @@ class ApplicationUser extends React.Component {
     return (
       <div>
         { user && user.email
-          ? <Link to={`/permissions?search=${user._id}`}>{user.email}</Link>
+          ? <Link to={`/users?search=${user._id}`}>{user.email}</Link>
           : <span>{grant.user} <span className="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span></span>
         }
       </div>

@@ -7,7 +7,7 @@ const Route = ReactRouterDom.Route;
 const Link = ReactRouterDom.Link;
 const Redirect = ReactRouterDom.Redirect;
 const Applications = require('./applications');
-const Permissions = require('./permissions');
+const Users = require('./users');
 const ConsoleUsers = require('./consoleUsers');
 const Application = require('./application');
 const Gigya = require('./gigya');
@@ -205,16 +205,39 @@ class ConsoleApp extends React.Component {
   }
 }
 
-class Main extends React.Component {
 
-  setActiveTab(e) {
-    console.log('e')
-    console.log(e)
-    // console.log(e.target)
-    $('.nav-tabs li').removeClass('active');
-    $('.nav-tabs li.' + e).addClass('active');
+class MainMenu extends React.Component {
 
+  render() {
+    
+    const { pathname } = window.location;
+
+    const tabs = [
+      { linkTo: '/users', label: 'Users' },
+      { linkTo: '/applications', label: 'Applications' },
+      { linkTo: '/admins', label: 'BPC Console users' }
+    ].map((tab, index) => {
+
+      const isActive = pathname.indexOf(tab.linkTo) > -1;
+
+      return (
+        <li role="presentation" key={index} className={`${ isActive ? 'active' : '' }`}>
+          <Link to={ tab.linkTo }>{ tab.label }</Link>
+        </li>
+      );
+    });
+
+    return (
+      <ul className="nav nav-tabs">
+       { tabs }
+      </ul>
+    );
   }
+
+}
+
+
+class Main extends React.Component {
 
   render() {
 
@@ -230,19 +253,9 @@ class Main extends React.Component {
       <BrowserRouter>
         <div>
           <h1 style={environment_style}>BPC Console</h1>
-          <ul className="nav nav-tabs">
-            <li role="presentation" className="permissions active" onClick={this.setActiveTab.bind(this, 'permissions')}>
-              <Link to={`/permissions`}>Permissions</Link>
-            </li>
-            <li role="presentation" className="applications" onClick={this.setActiveTab.bind(this, 'applications')}>
-              <Link to={`/applications`}>Applications</Link>
-            </li>
-            <li role="presentation" className="admins" onClick={this.setActiveTab.bind(this, 'admins')}>
-              <Link to={`/admins`}>BPC Console users</Link>
-            </li>
-          </ul>
-          <Route exact path="/" component={Permissions} />
-          <Route path="/permissions" component={Permissions}/>
+          <MainMenu />
+          <Route exact path="/" component={Users} />
+          <Route path="/users" component={Users}/>
           <Route exact path="/applications" component={Applications} />
           <Route path="/admins" component={ConsoleUsers}/>
           <Route path={`/applications/:app`} component={Application}/>
