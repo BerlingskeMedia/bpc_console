@@ -206,6 +206,16 @@ class ConsoleApp extends React.Component {
 }
 
 class Main extends React.Component {
+
+  setActiveTab(e) {
+    console.log('e')
+    console.log(e)
+    // console.log(e.target)
+    $('.nav-tabs li').removeClass('active');
+    $('.nav-tabs li.' + e).addClass('active');
+
+  }
+
   render() {
 
     const environment_style =
@@ -221,13 +231,13 @@ class Main extends React.Component {
         <div>
           <h1 style={environment_style}>BPC Console</h1>
           <ul className="nav nav-tabs">
-            <li role="presentation" className="_active" onClick={this.changemenu}>
+            <li role="presentation" className="permissions active" onClick={this.setActiveTab.bind(this, 'permissions')}>
               <Link to={`/permissions`}>Permissions</Link>
             </li>
-            <li role="presentation" onClick={this.changemenu}>
+            <li role="presentation" className="applications" onClick={this.setActiveTab.bind(this, 'applications')}>
               <Link to={`/applications`}>Applications</Link>
             </li>
-            <li role="presentation" onClick={this.changemenu}>
+            <li role="presentation" className="admins" onClick={this.setActiveTab.bind(this, 'admins')}>
               <Link to={`/admins`}>BPC Console users</Link>
             </li>
           </ul>
