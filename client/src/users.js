@@ -264,9 +264,10 @@ class ShowFullUser extends React.Component {
     this.getUserData(this.props.user._id);
   }
   
-  // componentDidMount() {
-  componentWillReceiveProps(nextProps) {
-    this.getUserData(nextProps.user._id);
+  componentDidUpdate(prevProps) {
+    if (this.props.user._id !== prevProps.user._id) {
+      this.getUserData(this.props.user._id);
+    }
   }
 
   render() {
@@ -275,7 +276,7 @@ class ShowFullUser extends React.Component {
       ? <div style={{marginTop: '30px', marginBottom: '30px'}}>
           <UserDetails key={this.state.user.id + 'fulluser_1'} user={this.state.user} />
           <hr />
-          <Permissions key={this.state.user.id + 'fulluser_2'} dataScopes={this.state.user.dataScopes} />
+          <Permissions key={this.state.user.id + 'fulluser_2'} user={this.state.user} dataScopes={this.state.user.dataScopes} />
           <hr />
           <Grants
             key={this.state.user.id + 'fulluser_3'}
@@ -318,6 +319,10 @@ class UserDetails extends React.Component {
       );
     }
 
+    const hasKuUid = user.dataScopes && user.dataScopes.profile && user.dataScopes.profile.kundeunivers_uid;
+    const showLinkToKu = hasKuUid && window.location.hostname === 'console.berlingskemedia.net';
+    const linkToKu = showLinkToKu ? <a href={`https://admin.kundeunivers.dk/user/${ user.dataScopes.profile.kundeunivers_uid }`} target="_blank">Link til KU Admin</a> : null;
+
     const styleProviderColor = 
       user.provider === 'gigya' ? "#ff0000" : // Red
       user.provider === 'google' ? "#0000ff" : // Blue
@@ -337,8 +342,9 @@ class UserDetails extends React.Component {
             <div><strong>Last login</strong>: {user.lastLogin}</div>
           </div>
           <div className="col-xs-6">
-            {dataFromGigya}
-            <RecalcPermissionsButton user={user} />
+            { dataFromGigya }
+            { linkToKu }
+            <RecalcPermissionsButton user={ user } />
           </div>
         </div>
       </div>
@@ -406,49 +412,68 @@ class Permissions extends React.Component {
 
   constructor(props){
     super(props);
+    this.setActiveTab = this.setActiveTab.bind(this);
+    this.state = {
+      activeTab: null
+    };
+  }
+
+  componentDidMount() {
+    const scopes = Object.keys(this.props.dataScopes ? this.props.dataScopes : {}).sort();
+    this.setState({
+      scopes: scopes,
+      activeTab: scopes.length > 0 ? scopes[0] : null
+    });
   }
 
   setActiveTab(e) {
-    $('.nav-tabs li').removeClass('active');
-    $('.nav-tabs li.' + e).addClass('active');
+    this.setState({ activeTab: e });
   }
 
   render() {
 
-    const scopes = Object.keys(this.props.dataScopes ? this.props.dataScopes : {}).sort();
+    if(!this.state.scopes || Object.keys(this.state.scopes).length === 0) {
+      return <div>(This user has no scope data.)</div>
+    }
 
-    var navItems = scopes
-    .map(function (name, index) {
+    var navItems = this.state.scopes.map(function (name, index) {
+      
+      const isActive = this.state.activeTab === name;
+
       return (
-        <li key={index} role="presentation" name={name} onClick={this.setActiveTab.bind(this, name)}>
+        <li key={index} role="presentation" name={name} className={`${ isActive ? 'active' : '' }`} onClick={this.setActiveTab.bind(this, name)}>
           <a>{name}</a>
         </li>
       );
     }.bind(this));
 
+    // Key __raw__ is unlikelig to be used as a real scope name someday.
     navItems.push(
-      <li key="raw" role="presentation" name={name} onClick={this.setActiveTab.bind(this, name)}>
-          <a>(RAW)</a>
+      <li key="__raw__" role="presentation" name="__raw__" className={`${ this.state.activeTab === "__raw__" ? 'active' : '' }`} onClick={this.setActiveTab.bind(this, "__raw__")}>
+          <a><em>RAW</em></a>
       </li>
     );
 
-    var scopess = scopes
-    .map(function (name, index) {
-      return <ScopePermissions key={index} name={name} permissions={this.props.dataScopes[name]} />
-    }.bind(this));
+    const showScope = this.state.activeTab === '__raw__'
+      ? <RawDataScopes dataScopes={this.props.dataScopes} />
+      : <PermissionScope user={this.props.user._id} scope={this.state.activeTab} />;
 
     return (
-      <div className="row">
-        <div className="col-xs-12">
-          <ul className="nav nav-pills nav-stacked">
-          </ul>
-          {/* <ul className="nav nav-tabs">
-            { navItems }
-          </ul> */}
-          { !scopess || Object.keys(scopess).length === 0
-            ? <div>(This user has no scope data.)</div>
-            : scopess
-          }
+      <div>
+        <div className="row">
+          <div className="col-xs-12">
+            <h4>Permissions</h4>
+          </div>
+        </div>
+        <div className="row">
+          <div className="col-xs-2">
+            <ul className="nav nav-pills nav-stacked">
+              { navItems }
+            </ul>
+          </div>
+          <div className="col-xs-10">
+            { showScope }
+          </div>
         </div>
       </div>
     );
@@ -456,7 +481,93 @@ class Permissions extends React.Component {
 }
 
 
-class ScopePermissions extends React.Component {
+class RawDataScopes extends React.Component {
+  constructor(props){
+    super(props);
+  }
+
+  render() {
+
+    const rawScopes = Object.keys(this.props.dataScopes ? this.props.dataScopes : {}).map((scope, index) => {
+      return <DataScope key={index} scope={scope} dataScope={this.props.dataScopes[scope]} />
+    });
+
+    return (
+      <div className="row">
+        <div className="col-xs-12">
+          { rawScopes }
+        </div>
+      </div>
+    );
+  }
+}
+
+
+class PermissionScope extends React.Component {
+
+  constructor(props){
+    super(props);
+    this.state = {
+      dataScope: {}
+    };
+  }
+
+  componentDidMount() {
+    console.log('comss')
+    console.log(this.props);
+    this.getPermissions(this.props)
+  }
+  
+  componentDidUpdate(prevProps) {
+    console.log('comsssdsdsds')
+    console.log('a', this.props)
+    console.log('b', prevProps)
+    if (this.props.scope !== prevProps.scope || this.props.user !== prevProps.user) {
+      // this.fetchData(this.props.scope);
+      console.log('fedt', this.props.scope)
+      this.getPermissions(this.props)
+    }
+  }
+
+    getPermissions({user, scope}) {
+      return $.ajax({
+        type: 'GET',
+        url: `/_b/users/${user}`
+      }).done((data, textStatus, jqXHR) => {
+
+        const dataScope = data.dataScopes[scope] || {};
+        console.log('dataScope')
+        console.log(dataScope)
+
+        this.setState({ dataScope: dataScope });
+        }).fail((jqXHR, textStatus, errorThrown) => {
+        console.error(jqXHR.responseText);
+        this.setState({ dataScope: null });
+      });
+    }
+
+  // AAAR requrires app key
+  // getPermissions({user, scope}) {
+  //   return $.ajax({
+  //     type: 'GET',
+  //     url: `/_b/permissions/${user}/${scope}`
+  //   }).done((data, textStatus, jqXHR) => {
+  //     this.setState({ dataScope: data });
+  //   }).fail((jqXHR, textStatus, errorThrown) => {
+  //     console.error(jqXHR.responseText);
+  //     this.setState({ dataScope: null });
+  //   });
+  // }
+
+  render() {
+    return (
+      <DataScopeTable dataScope={ this.state.dataScope } />
+    );
+  }
+}
+
+
+class DataScope extends React.Component {
 
   constructor(props){
     super(props);
@@ -467,17 +578,17 @@ class ScopePermissions extends React.Component {
       <div style={{marginBottom: '10px'}}>
         <div className="row">
           <div className="col-xs-12">
-            <h4>Scope: {this.props.name}</h4>
+            <h4>Scope: {this.props.scope}</h4>
           </div>
         </div>
-        <PermissionsTable permissions={this.props.permissions}/>
+        <DataScopeTable dataScope={this.props.dataScope}/>
       </div>
     );
   }
 }
 
 
-class PermissionsTable extends React.Component {
+class DataScopeTable extends React.Component {
 
   constructor(props){
     super(props);
@@ -506,12 +617,12 @@ class PermissionsTable extends React.Component {
   }
 
   render() {
-    let permissions = Object.keys(this.props.permissions).map(function (name, index) {
+    let permissions = Object.keys(this.props.dataScope).map(function (name, index) {
       // If the permission is an array and some elements is an object, then we split the permission over multiple rows
-      return this.props.permissions[name] instanceof Array
-          && this.props.permissions[name].some(this.elementTypeIsAnObject)
-        ? this.mapIntoMoreRows(name, this.props.permissions[name])
-        : <DataField key={index} name={name} data={this.props.permissions[name]} />
+      return this.props.dataScope[name] instanceof Array
+          && this.props.dataScope[name].some(this.elementTypeIsAnObject)
+        ? this.mapIntoMoreRows(name, this.props.dataScope[name])
+        : <DataField key={index} name={name} data={this.props.dataScope[name]} />
     }.bind(this));
 
     return (
