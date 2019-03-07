@@ -513,51 +513,41 @@ class PermissionScope extends React.Component {
   }
 
   componentDidMount() {
-    console.log('comss')
-    console.log(this.props);
     this.getPermissions(this.props)
   }
   
   componentDidUpdate(prevProps) {
-    console.log('comsssdsdsds')
-    console.log('a', this.props)
-    console.log('b', prevProps)
     if (this.props.scope !== prevProps.scope || this.props.user !== prevProps.user) {
-      // this.fetchData(this.props.scope);
-      console.log('fedt', this.props.scope)
       this.getPermissions(this.props)
     }
   }
 
-    getPermissions({user, scope}) {
+  getPermissions({user, scope}) {
+    return $.ajax({
+      type: 'GET',
+      url: `/_b/users/${user}/${scope}`
+    }).done((data, textStatus, jqXHR) => {
+      this.setState({ dataScope: data[scope] });
+    }).fail((jqXHR, textStatus, errorThrown) => {
+
+      // console.error(jqXHR.responseText);
+      // this.setState({ dataScope: null });
+      
+      // In case BPC server has not been released with the above endpoint, we just get the RAW dataScope
+      console.warn('Using fallback endpoint');
+
       return $.ajax({
         type: 'GET',
         url: `/_b/users/${user}`
       }).done((data, textStatus, jqXHR) => {
-
         const dataScope = data.dataScopes[scope] || {};
-        console.log('dataScope')
-        console.log(dataScope)
-
         this.setState({ dataScope: dataScope });
         }).fail((jqXHR, textStatus, errorThrown) => {
         console.error(jqXHR.responseText);
         this.setState({ dataScope: null });
       });
-    }
-
-  // AAAR requrires app key
-  // getPermissions({user, scope}) {
-  //   return $.ajax({
-  //     type: 'GET',
-  //     url: `/_b/permissions/${user}/${scope}`
-  //   }).done((data, textStatus, jqXHR) => {
-  //     this.setState({ dataScope: data });
-  //   }).fail((jqXHR, textStatus, errorThrown) => {
-  //     console.error(jqXHR.responseText);
-  //     this.setState({ dataScope: null });
-  //   });
-  // }
+    });
+  }
 
   render() {
     return (
