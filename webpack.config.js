@@ -3,7 +3,7 @@ var webpack = require('webpack');
 
 module.exports = {
   target: 'web',
-  mode: 'production',
+  mode: process.env.WEBPACK_MODE || 'production', // 'development' || 'production'
   entry: {
     main: './client/src/main.js'
   },
