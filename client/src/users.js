@@ -646,7 +646,7 @@ class DataField extends React.Component {
 
     const dataType = typeof this.props.data;
     const data = dataType === 'object'
-      ? JSON.stringify(this.props.data)
+      ? JSON.stringify(this.props.data, undefined, 2)
       : dataType === 'string'
         ? '"' + this.props.data + '"'
         : this.props.data.toString();
