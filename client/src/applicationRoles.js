@@ -92,7 +92,7 @@ module.exports = class extends React.Component {
               value={this.state.newRole}
               onChange={this.onChangeState} />
           </div>
-          <button type="submit" className="btn btn-default" onClick={this.addRole}>Add role</button>
+          <button type="submit" className="btn btn-default" onClick={this.addRole} disabled={this.state.newRole.length < 2}>Add role</button>
         </form>
         <ul className="list-unstyled">
           {roleList}

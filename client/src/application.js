@@ -276,7 +276,7 @@ module.exports = class extends React.Component {
                   onChange={this.onChangeState}
                   placeholder="Type scope name"/>
               </div>
-              <button type="submit" onClick={this.addScope} className="btn btn-default">Add scope</button>
+              <button type="submit" onClick={this.addScope} className="btn btn-default" disabled={this.state.newScope.length < 2}>Add scope</button>
             </form>
             <ul className="list-unstyled">
               {scopeList}

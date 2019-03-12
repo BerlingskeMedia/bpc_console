@@ -53,7 +53,9 @@ module.exports = class extends React.Component {
   render() {
 
     var applications = this.state.applications.map(function(application, index) {
-      var scope = application.scope.map(function(scope) {
+      var scope = application.scope
+      .filter((scope) => scope.indexOf('role:') !== 0 )
+      .map((scope) => {
         return (
           <span key={index + '.' + scope}>
             <span>&nbsp;</span>
@@ -96,10 +98,13 @@ class CreateApplication extends React.Component {
   constructor(props){
     super(props);
     this.onChange = this.onChange.bind(this);
+    this.showCreateForm = this.showCreateForm.bind(this);
+    this.hideCreateForm = this.hideCreateForm.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.state = {
       id: '',
-      provider: 'gigya'
+      provider: 'gigya',
+      showCreateForm: false
     };
   }
 
@@ -107,6 +112,16 @@ class CreateApplication extends React.Component {
     let s = this.state;
     s[e.target.name] = e.target.value;
     this.setState(s);
+  }
+
+  showCreateForm(e) {
+    e.preventDefault();
+    this.setState({ showCreateForm: true });
+  }
+
+  hideCreateForm(e) {
+    e.preventDefault();
+    this.setState({ showCreateForm: false });
   }
 
   handleSubmit(e) {
@@ -120,31 +135,53 @@ class CreateApplication extends React.Component {
       }).done(function() {
         this.setState({
           id: '',
-          provider: 'gigya'
+          provider: 'gigya',
+          showCreateForm: false
         });
       }.bind(this));
     }
   }
 
   render() {
-    return (
-      <form style={{paddingBottom: '30px'}} onSubmit={this.handleSubmit} className="form-inline">
-        <input
-          type="text"
-          name="id"
-          className='form-control'
-          placeholder="Application ID"
-          value={this.state.id}
-          onChange={this.onChange} />
-        <select className="form-control"
-          value={this.state.provider}
-          name="provider"
-          onChange={this.onChange}>
-          <option value="gigya">Gigya</option>
-          <option value="google">Google</option>
-        </select>
-        <button type="submit" className="btn btn-default">Create new application</button>
+
+    const createForm = this.state.showCreateForm
+    ? (
+      <form onSubmit={this.handleSubmit} className="form-inline">
+        <div className="form-group" style={{margin: '0px 10px'}}>
+          <input
+            type="text"
+            name="id"
+            className='form-control'
+            placeholder="Application ID"
+            value={this.state.id}
+            onChange={this.onChange} />
+        </div>
+        <div className="form-group" style={{margin: '0px 10px'}}>
+          <select
+            className="form-control"
+            value={this.state.provider}
+            name="provider"
+            onChange={this.onChange}>
+            <option value="gigya">Provider: Gigya</option>
+            <option value="google">Provider: Google</option>
+          </select>
+        </div>
+        <button style={{margin: '0px 10px'}} type="submit" className="btn btn-primary">Create</button>
       </form>
+      )
+    : null;
+
+    const openFormButton = this.state.showCreateForm
+      ? <button type="button" className="btn btn-default" onClick={this.hideCreateForm} style={{width: '100%'}}>Cancel</button>
+      : <button type="button" className="btn btn-default" onClick={this.showCreateForm} style={{width: '100%'}}>Create new application</button>
+
+    return (
+      <div style={{paddingBottom: '30px'}}>
+        <div className="row">
+          <div className="col-xs-2">{ openFormButton }</div>
+          <div className="col-xs-10">{ createForm }</div>
+        </div>
+      </div>
     );
   }
 }
