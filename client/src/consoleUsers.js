@@ -43,7 +43,7 @@ module.exports = class extends React.Component {
       data: JSON.stringify(grant)
     }).done((data, textStatus, jqXHR) => {
       this.setState((prevState) => {
-        consoleGrants: prevState.consoleGrants.push(data);
+        return prevState.consoleGrants.push(data);
       });
     }).fail((jqXHR, textStatus, errorThrown) => {
       console.error(jqXHR.responseText);
@@ -72,7 +72,7 @@ module.exports = class extends React.Component {
       });
       if (index > -1) {
         this.setState((prevState) => {
-          consoleGrants: prevState.consoleGrants[index] = grant;
+          return prevState.consoleGrants[index] = grant;
         });
       }
     }).fail((jqXHR, textStatus, errorThrown) => {
@@ -92,7 +92,7 @@ module.exports = class extends React.Component {
       });
       if (index > -1) {
         this.setState((prevState) => {
-          consoleGrants: prevState.consoleGrants.splice(index, 1);
+          return prevState.consoleGrants.splice(index, 1);
         });
       }
     }).fail((jqXHR, textStatus, errorThrown) => {
