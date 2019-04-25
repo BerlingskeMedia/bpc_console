@@ -172,8 +172,8 @@ class CreateApplication extends React.Component {
     : null;
 
     const openFormButton = this.state.showCreateForm
-      ? <button type="button" className="btn btn-default" onClick={this.hideCreateForm} style={{width: '100%'}}>Cancel</button>
-      : <button type="button" className="btn btn-default" onClick={this.showCreateForm} style={{width: '100%'}}>Create new application</button>
+      ? <button type="button" className="btn btn-default" onClick={this.hideCreateForm}>Cancel</button>
+      : <button type="button" className="btn btn-default" onClick={this.showCreateForm}>Create new application</button>
 
     return (
       <div style={{paddingBottom: '30px'}}>
