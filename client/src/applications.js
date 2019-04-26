@@ -53,6 +53,7 @@ module.exports = class extends React.Component {
   render() {
 
     var applications = this.state.applications.map(function(application, index) {
+
       var scope = application.scope
       .filter((scope) => scope.indexOf('role:') !== 0 )
       .map((scope) => {
@@ -63,16 +64,24 @@ module.exports = class extends React.Component {
           </span>
         );
       });
+
+      const provider = application.settings && application.settings.provider;
+      const providerName = provider === 'google' ? 'Google' : provider === 'gigya'  ? 'Gigya' : '';
+
       return (
         <tr key={application.id} className="application">
           <td className="col-xs-4">
             <Link to={`/applications/${application.id}`}>{application.id}</Link>
           </td>
-          <td className="col-xs-8">
+          <td className="col-xs-6">
             {scope}
+          </td>
+          <td className="col-xs-2">
+            {providerName}
           </td>
         </tr>
       );
+
     }.bind(this));
 
     return (
@@ -82,7 +91,8 @@ module.exports = class extends React.Component {
           <tbody>
             <tr>
               <th className="col-xs-4">ID</th>
-              <th className="col-xs-8">Scopes</th>
+              <th className="col-xs-6">Scopes</th>
+              <th className="col-xs-2">Provider</th>
             </tr>
             {applications}
           </tbody>
