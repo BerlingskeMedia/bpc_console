@@ -131,7 +131,7 @@ module.exports = class extends React.Component {
         return e.id === grant.id;
       });
       this.setState((prevState) => {
-        grants: prevState.grants[index] = grant;
+        return prevState.grants[index] = grant;
       });
     }).fail((jqXHR, textStatus, errorThrown) => {
       console.error(jqXHR.responseText);
@@ -186,14 +186,17 @@ class UserSearch extends React.Component {
     this.onSearchChange = this.onSearchChange.bind(this);
     this.searchUser = this.searchUser.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.createGrant = this.createGrant.bind(this);
+    this.createUserAndGrant = this.createUserAndGrant.bind(this);
     this.deleteGrant = this.deleteGrant.bind(this);
     this.state = {
       user: {},
       searchInProgress: false,
       searchTimer: null,
-      searchSuccess: false,
+      userFound: false,
+      userNotFound: false,
       userHasGrant: false,
-      searchNotFound: false,
+      userAndGrantCanBeCreated: false,
       grant: {}
     };
   }
@@ -203,7 +206,8 @@ class UserSearch extends React.Component {
     clearTimeout(this.state.searchTimer);
     this.setState({
       searchTimer: setTimeout(this.searchUser, 1000),
-      searchSuccess: false
+      userFound: false,
+      userNotFound: false
     });
   }
 
@@ -215,6 +219,7 @@ class UserSearch extends React.Component {
 
     this.setState({
       userHasGrant: false,
+      userAndGrantCanBeCreated: false,
       grant: {}
     });
 
@@ -233,9 +238,15 @@ class UserSearch extends React.Component {
       type: 'GET',
       url: `/_b/users?provider=${provider}&id=${searchText}&email=${searchText}`
     }).done((data, textStatus, jqXHR) => {
+
       if (data.length === 1){
 
         const user = data[0];
+
+        this.setState({
+          userFound: true,
+          user: user
+        });
 
         // Checking existing grants
         // We are setting state in this response so the UI doesn't flicker
@@ -246,9 +257,6 @@ class UserSearch extends React.Component {
         .done((data, textStatus, jqXHR) => {
 
           this.setState({
-            searchSuccess: true,
-            user: user,
-            searchNotFound: false,
             userHasGrant: data.length === 1,
             grant: data.length === 1 ? data[0] : null
           });
@@ -257,20 +265,26 @@ class UserSearch extends React.Component {
       } else if (data.length === 0) {
 
         this.setState({
-          searchNotFound: true
+          userFound: false,
+          userNotFound: true,
+          userAndGrantCanBeCreated: provider === 'google' && searchText.indexOf(encodeURIComponent('@')) > 1,
         });
 
       }
+
     }).fail((jqXHR, textStatus, errorThrown) => {
       console.error(jqXHR.responseText);
-      this.setState({searchSuccess: false})
+      this.setState({
+        userFound: false,
+        userNotFound: false
+      })
     }).always(() => {
       this.setState({searchInProgress: false})
     });
   }
 
-  handleSubmit(e) {
-    e.preventDefault();
+
+  createGrant() {
     if (this.state.user !== {}) {
 
       const newGrant = {
@@ -282,14 +296,14 @@ class UserSearch extends React.Component {
       return this.props.createGrant(newGrant)
       .done((data, textStatus, jqXHR) => {
         this.setState({
-          searchSuccess: true,
-          searchNotFound: false,
+          userFound: true,
+          userNotFound: false,
           userHasGrant: true,
           grant: data
         });
       })
       .fail((jqXHR, textStatus, errorThrown) => {
-        this.setState({searchSuccess: false});
+        this.setState({userFound: false});
         console.log('jqXHR', jqXHR);
         if (jqXHR.status === 409) {
           alert('User already have access');
@@ -302,14 +316,47 @@ class UserSearch extends React.Component {
     }
   }
 
+
+  createUserAndGrant() {
+    const payload = {
+      email: this.searchBox.value.trim(),
+      provider: this.props.application.settings.provider
+    };
+
+    return $.ajax({
+      type: 'POST',
+      url: `/_b/users`,
+      contentType: "application/json; charset=utf-8",
+      data: JSON.stringify(payload)
+    }).done((data, textStatus, jqXHR) => {
+      
+      this.setState({
+        userNotFound: false,
+        userAndGrantCanBeCreated: false,
+        userFound: true,
+        user: data
+      });
+
+      return this.createGrant();
+    });
+  }
+
+
   deleteGrant(grant) {
     this.props.deleteGrant(grant);
     this.setState({user: {}});
     this.searchUser();
   }
 
+
+  handleSubmit(e) {
+    e.preventDefault();
+    this.createGrant();
+  }
+
+
   render() {
-    const inputClasses = 'form-group '.concat(this.state.searchSuccess ? 'has-success' : '');
+    const inputClasses = 'form-group '.concat(this.state.userFound ? 'has-success' : '');
 
     const application = this.props.application;
 
@@ -329,7 +376,7 @@ class UserSearch extends React.Component {
         </form>
         <div className="row">
           <div className="col-xs-12">
-          { this.state.searchSuccess && this.state.userHasGrant
+          { this.state.userFound && this.state.userHasGrant
             ? <GrantsTable
               grants={[this.state.grant]}
               scope={application.scope}
@@ -339,12 +386,16 @@ class UserSearch extends React.Component {
               deleteGrant={this.deleteGrant} />
             : null
           }
-          { this.state.searchSuccess && !this.state.userHasGrant
+          { this.state.userFound && !this.state.userHasGrant
             ? <button type="button" className="btn btn-default" onClick={this.handleSubmit}>Create grant</button>
             : null
           }
-          { this.state.searchNotFound
-            ? <div>Bruger ikke fundet</div>
+          { this.state.userNotFound && this.state.userAndGrantCanBeCreated
+            ? <button type="button" className="btn btn-default" onClick={this.createUserAndGrant}>Create user and grant</button>
+            : null
+          }
+          { this.state.userNotFound && !this.state.userAndGrantCanBeCreated
+            ? <div>User not found</div>
             : null
           }
           </div>
