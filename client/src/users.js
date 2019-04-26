@@ -683,6 +683,8 @@ class Grants extends React.Component {
         <tr key={grant.id}>
           <td className="col-xs-6">
             <Link to={`/application/${grant.app}`}>{grant.app}</Link>
+            <br />
+            <small><em>Last login: {grant.lastLogin || 'n/a'}</em></small>
           </td>
           <td className="col-xs-2">
             {grant.exp
