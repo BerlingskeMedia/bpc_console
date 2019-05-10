@@ -23,6 +23,8 @@ COPY ./client /bpc_console/client
 # Installing packages
 RUN npm install --production
 
+# Building the client
+RUN node node_modules/webpack/bin/webpack.js
 
 # Exposing our endpoint to Docker.
 EXPOSE  8000
