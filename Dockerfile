@@ -17,9 +17,12 @@ RUN wget -O - https://nodejs.org/dist/$NODE_VERSION/node-$NODE_VERSION-linux-x64
 WORKDIR /bpc_console
 
 # Copying the code into image. Be aware no config files are including.
-COPY ./node_modules /bpc_console/node_modules
 COPY ./server /bpc_console/server
 COPY ./client /bpc_console/client
+
+# Installing packages
+RUN npm install --production
+
 
 # Exposing our endpoint to Docker.
 EXPOSE  8000
