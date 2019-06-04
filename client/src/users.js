@@ -447,16 +447,16 @@ class Permissions extends React.Component {
       );
     }.bind(this));
 
-    // Key __raw__ is unlikelig to be used as a real scope name someday.
+    // Key __all__ is unlikelig to be used as a real scope name someday.
     navItems.push(
-      <li key="__raw__" role="presentation" name="__raw__" className={`${ this.state.activeTab === "__raw__" ? 'active' : '' }`} onClick={this.setActiveTab.bind(this, "__raw__")}>
-          <a><em>RAW</em></a>
+      <li key="__all__" role="presentation" name="__all__" className={`${ this.state.activeTab === "__all__" ? 'active' : '' }`} onClick={this.setActiveTab.bind(this, "__all__")}>
+          <a><em>(all)</em></a>
       </li>
     );
 
-    const showScope = this.state.activeTab === '__raw__'
-      ? <RawDataScopes dataScopes={this.props.dataScopes} />
-      : <PermissionScope user={this.props.user._id} scope={this.state.activeTab} />;
+    const showScope = this.state.activeTab === '__all__'
+      ? <AllDataScopes dataScopes={this.props.dataScopes} />
+      : <PermissionScope user={this.props.user} scope={this.state.activeTab} />;
 
     return (
       <div>
@@ -481,7 +481,7 @@ class Permissions extends React.Component {
 }
 
 
-class RawDataScopes extends React.Component {
+class AllDataScopes extends React.Component {
   constructor(props){
     super(props);
   }
@@ -523,30 +523,8 @@ class PermissionScope extends React.Component {
   }
 
   getPermissions({user, scope}) {
-    return $.ajax({
-      type: 'GET',
-      url: `/_b/users/${user}/${scope}`
-    }).done((data, textStatus, jqXHR) => {
-      this.setState({ dataScope: data[scope] });
-    }).fail((jqXHR, textStatus, errorThrown) => {
-
-      // console.error(jqXHR.responseText);
-      // this.setState({ dataScope: null });
-      
-      // In case BPC server has not been released with the above endpoint, we just get the RAW dataScope
-      console.warn('Using fallback endpoint');
-
-      return $.ajax({
-        type: 'GET',
-        url: `/_b/users/${user}`
-      }).done((data, textStatus, jqXHR) => {
-        const dataScope = data.dataScopes[scope] || {};
-        this.setState({ dataScope: dataScope });
-        }).fail((jqXHR, textStatus, errorThrown) => {
-        console.error(jqXHR.responseText);
-        this.setState({ dataScope: null });
-      });
-    });
+    const dataScope = user.dataScopes[scope] || null;
+    this.setState({ dataScope: dataScope });
   }
 
   render() {
@@ -688,7 +666,7 @@ class Grants extends React.Component {
           </td>
           <td className="col-xs-2">
             {grant.exp
-              ? <span>{grant.exp}</span>
+              ? <span>{ new Date(grant.exp).toGMTString() }</span>
               : <span>Never</span>
             }
           </td>
