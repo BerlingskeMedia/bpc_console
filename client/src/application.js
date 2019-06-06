@@ -193,7 +193,7 @@ module.exports = class extends React.Component {
             <dl className="dl-horizontal">
               <dt>Application ID</dt>
               <dd>{this.state.application.id}</dd>
-              <dt>Application Key</dt>
+              <dt>Secret Key</dt>
               <dd>{this.state.application.key}</dd>
               <dt>Algorithm</dt>
               <dd>{this.state.application.algorithm}</dd>
