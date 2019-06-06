@@ -21,7 +21,7 @@ COPY ./server /bpc_console/server
 COPY ./client /bpc_console/client
 
 # Installing packages
-RUN npm install --production
+RUN npm install
 
 # Building the client
 RUN node node_modules/webpack/bin/webpack.js
