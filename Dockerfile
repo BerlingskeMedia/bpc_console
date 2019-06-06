@@ -19,6 +19,8 @@ WORKDIR /bpc_console
 # Copying the code into image. Be aware no config files are including.
 COPY ./server /bpc_console/server
 COPY ./client /bpc_console/client
+COPY ./package.json /bpc_console/package.json
+COPY ./webpack.config.js /bpc_console/webpack.config.js
 
 # Installing packages
 RUN npm install
