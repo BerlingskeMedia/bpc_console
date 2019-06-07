@@ -11,7 +11,7 @@ module.exports = class extends React.Component {
     this.updateGrant = this.updateGrant.bind(this);
     this.deleteGrant = this.deleteGrant.bind(this);
     this.expireGrant = this.expireGrant.bind(this);
-    this.reactivateGrant = this.reactivateGrant.bind(this);
+    this.activateGrant = this.activateGrant.bind(this);
     this.pagesizelimit = 30;
     this.state = {
       grantscount: 0,
@@ -39,23 +39,16 @@ module.exports = class extends React.Component {
     });
   }
 
-  getGrants(options) {
+
+  getGrants({ limit = this.pagesizelimit, skip = 0 }) {
     const app = this.props.application.id;
     if(!app) {
       return;
     }
 
-    let query;
-    if (options && options.skip) {
-      query = `limit=${this.pagesizelimit}&skip=${options.skip}`;
-    } else {
-      query = `limit=${this.pagesizelimit}&skip=0`;
-    }
-
     return $.ajax({
       type: 'GET',
-      url: `/_b/grants?app=${app}&${query}`,
-      contentType: "application/json; charset=utf-8"
+      url: `/_b/grants?app=${ app }&limit=${ limit }&skip=${ skip }`
     }).done((data, textStatus, jqXHR) => {
       this.setState({
         grants: data
@@ -64,6 +57,7 @@ module.exports = class extends React.Component {
       console.error(jqXHR.responseText);
     });
   }
+
 
   createGrant(grant) {
     return $.ajax({
@@ -84,6 +78,7 @@ module.exports = class extends React.Component {
       console.error(jqXHR.responseText);
     });
   }
+
 
   deleteGrant(grant) {
     return $.ajax({
@@ -110,15 +105,18 @@ module.exports = class extends React.Component {
     });
   }
 
+
+  activateGrant(grant) {
+    grant.exp = null;
+    return this.updateGrant(grant);
+  }
+
+
   expireGrant(grant) {
     grant.exp = Date.now();
     return this.updateGrant(grant);
   }
 
-  reactivateGrant(grant) {
-    grant.exp = null;
-    return this.updateGrant(grant);
-  }
 
   updateGrant(grant) {
     return $.ajax({
@@ -130,9 +128,11 @@ module.exports = class extends React.Component {
       const index = this.state.grants.findIndex(e => {
         return e.id === grant.id;
       });
-      this.setState((prevState) => {
-        return prevState.grants[index] = grant;
-      });
+      if (index > -1) {
+        this.setState((prevState) => {
+          return prevState.grants[index] = grant;
+        });
+      }
     }).fail((jqXHR, textStatus, errorThrown) => {
       console.error(jqXHR.responseText);
     });
@@ -143,7 +143,7 @@ module.exports = class extends React.Component {
       this.props.application.id !== prevProps.application.id) {
 
       this.getGrantsCount();
-      this.getGrants();
+      this.getGrants({});
     }
   }
   
@@ -161,14 +161,14 @@ module.exports = class extends React.Component {
           deleteGrant={this.deleteGrant}
           updateGrant={this.updateGrant}
           expireGrant={this.expireGrant}
-          reactivateGrant={this.reactivateGrant} />
+          activateGrant={this.activateGrant} />
         <GrantsList
           scope={scope}
           grants={this.state.grants}
           deleteGrant={this.deleteGrant}
           updateGrant={this.updateGrant}
           expireGrant={this.expireGrant}
-          reactivateGrant={this.reactivateGrant} />
+          activateGrant={this.activateGrant} />
         <GrantsPagination
           grantscount={this.state.grantscount}
           getGrants={this.getGrants}
@@ -185,7 +185,6 @@ class UserSearch extends React.Component {
     super(props);
     this.onSearchChange = this.onSearchChange.bind(this);
     this.searchUser = this.searchUser.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
     this.createGrant = this.createGrant.bind(this);
     this.createUserAndGrant = this.createUserAndGrant.bind(this);
     this.deleteGrant = this.deleteGrant.bind(this);
@@ -277,9 +276,9 @@ class UserSearch extends React.Component {
       this.setState({
         userFound: false,
         userNotFound: false
-      })
+      });
     }).always(() => {
-      this.setState({searchInProgress: false})
+      this.setState({searchInProgress: false});
     });
   }
 
@@ -349,12 +348,6 @@ class UserSearch extends React.Component {
   }
 
 
-  handleSubmit(e) {
-    e.preventDefault();
-    this.createGrant();
-  }
-
-
   render() {
     const inputClasses = 'form-group '.concat(this.state.userFound ? 'has-success' : '');
 
@@ -363,7 +356,7 @@ class UserSearch extends React.Component {
     return (
       <div style={{paddingTop: '30px', paddingBottom: '30px'}}>
         <h4>Search user</h4>
-        <form onSubmit={this.handleSubmit}>
+        <form>
           <div className={inputClasses}>
             <input
               type="text"
@@ -382,12 +375,12 @@ class UserSearch extends React.Component {
               scope={application.scope}
               updateGrant={this.props.updateGrant}
               expireGrant={this.props.expireGrant}
-              reactivateGrant={this.props.reactivateGrant}
+              activateGrant={this.props.activateGrant}
               deleteGrant={this.deleteGrant} />
             : null
           }
           { this.state.userFound && !this.state.userHasGrant
-            ? <button type="button" className="btn btn-default" onClick={this.handleSubmit}>Create grant</button>
+            ? <button type="button" className="btn btn-default" onClick={this.createGrant}>Create grant</button>
             : null
           }
           { this.state.userNotFound && this.state.userAndGrantCanBeCreated
@@ -421,7 +414,7 @@ class GrantsList extends React.Component {
           deleteGrant={this.props.deleteGrant}
           updateGrant={this.props.updateGrant}
           expireGrant={this.props.expireGrant}
-          reactivateGrant={this.props.reactivateGrant} />
+          activateGrant={this.props.activateGrant} />
       </div>
     );
   }
@@ -489,7 +482,7 @@ class GrantsTable extends React.Component {
           deleteGrant={this.props.deleteGrant}
           updateGrant={this.props.updateGrant}
           expireGrant={this.props.expireGrant}
-          reactivateGrant={this.props.reactivateGrant} />
+          activateGrant={this.props.activateGrant} />
       );
     }.bind(this));
 
@@ -591,7 +584,7 @@ class Grant extends React.Component {
         </td>
         <td className="col-xs-2">
           { grant.exp && grant.exp < Date.now()
-            ? <button type="button" className="btn btn-primary btn-sm btn-block" onClick={this.props.reactivateGrant.bind(this, grant)}>Reactivate grant</button>
+            ? <button type="button" className="btn btn-primary btn-sm btn-block" onClick={this.props.activateGrant.bind(this, grant)}>Reactivate grant</button>
             : <button type="button" className="btn btn-warning btn-sm btn-block" onClick={this.props.expireGrant.bind(this, grant)}>Expire grant</button>
           }
         </td>
