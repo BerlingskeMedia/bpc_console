@@ -27,10 +27,8 @@ RUN npm install
 RUN npm install webpack
 RUN npm install webpack-cli
 
-RUN npx webpack
-
 # Building the client
-# RUN npm run client:build
+RUN npx webpack
 
 # Exposing our endpoint to Docker.
 EXPOSE  8000
