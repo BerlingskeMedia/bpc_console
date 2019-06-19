@@ -24,9 +24,14 @@ COPY ./webpack.config.js /bpc_console/webpack.config.js
 
 # Installing packages
 RUN npm install
+RUN npm install webpack
+RUN npm install webpack-cli
+RUN npm install babel-preset-env
+
+RUN npx webpack
 
 # Building the client
-RUN npm run client:build
+# RUN npm run client:build
 
 # Exposing our endpoint to Docker.
 EXPOSE  8000
