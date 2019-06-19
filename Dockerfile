@@ -26,7 +26,6 @@ COPY ./webpack.config.js /bpc_console/webpack.config.js
 RUN npm install
 RUN npm install webpack
 RUN npm install webpack-cli
-RUN npm install babel-preset-env
 
 RUN npx webpack
 

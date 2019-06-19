@@ -30,8 +30,8 @@
   },
   "scripts": {
     "start": "node $npm_package_main",
-    "client:build": "node node_modules/webpack/bin/webpack.js",
-    "dev": "webpack --watch & nodemon --inspect --ignore 'client/' server",
+    "client:build": "npx webpack",
+    "dev": "npx webpack --watch & npx nodemon --inspect --ignore 'client/' server",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

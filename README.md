@@ -6,8 +6,6 @@ The BPC console is a special application for managing BPC. It enabled it's users
 
 * node
 * npm
-* gulp (`npm install -g gulp`)
-* webpack (`npm install -g webpack`)
 
 To install Node modules, run:
 
