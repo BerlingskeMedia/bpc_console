@@ -1,9 +1,12 @@
 /*jshint node: true */
 'use strict';
 
+// The env name has changes in hapi-bpc at some point
+process.env.BPC_APP_KEY = process.env.BPC_APP_KEY || process.env.BPC_APP_SECRET;
+
 const log = require('util').log;
-const Hapi = require('hapi');
-const Inert = require('inert');
+const Hapi = require('@hapi/hapi');
+const Inert = require('@hapi/inert');
 const Proxy = require('./proxy');
 const HapiBpc = require('hapi-bpc');
 
