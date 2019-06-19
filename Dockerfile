@@ -26,7 +26,7 @@ COPY ./webpack.config.js /bpc_console/webpack.config.js
 RUN npm install
 
 # Building the client
-RUN node node_modules/webpack/bin/webpack.js
+RUN npm run client:build
 
 # Exposing our endpoint to Docker.
 EXPOSE  8000

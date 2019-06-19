@@ -1,7 +1,6 @@
 const $ = require('jquery');
 const React = require('react');
 const Link = require('react-router-dom').Link;
-const Hawk = require('hawk');
 
 module.exports = class extends React.Component {
 
@@ -184,7 +183,7 @@ class GenerateHawkAuthHeader extends React.Component {
       const options = { credentials: { id, key, algorithm: 'sha256' }, app };
 
       try {
-        const result = Hawk.client.header(uri, method, options);
+        const result = hawk.client.header(uri, method, options);
         this.setState({ result: result, error: null });
       } catch (ex) {
         this.setState({ result: null, error: ex });
