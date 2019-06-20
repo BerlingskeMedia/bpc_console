@@ -210,19 +210,25 @@ module.exports = class extends React.Component {
               <div className="checkbox">
                 <label>
                   <input type="checkbox" defaultChecked={this.state.application.settings.allowAutoCreationGrants} name="allowAutoCreationGrants" onClick={this.onChangeApplicationSettings}></input>
-                  Allow grants to be created automatically.
+                  Allow grants to be created automatically and stored in the database.
                 </label>
               </div>
               <div className="checkbox">
                 <label>
-                  <input type="checkbox" defaultChecked={this.state.application.settings.disallowUserTickets} name="disallowUserTickets" onClick={this.onChangeApplicationSettings}></input>
-                  Do not issue tickets to any users.
+                  <input type="checkbox" defaultChecked={this.state.application.settings.useDynamicGrants} name="useDynamicGrants" onClick={this.onChangeApplicationSettings}></input>
+                  Grants will be dynamic for each user ticket and not stored in the database.
                 </label>
               </div>
               <div className="checkbox">
                 <label>
                   <input type="checkbox" defaultChecked={this.state.application.settings.allowAnonymousUsers} name="allowAnonymousUsers" onClick={this.onChangeApplicationSettings}></input>
                   Allow issue of anonymous tickets.
+                </label>
+              </div>
+              <div className="checkbox">
+                <label>
+                  <input type="checkbox" defaultChecked={this.state.application.settings.disallowUserTickets} name="disallowUserTickets" onClick={this.onChangeApplicationSettings}></input>
+                  Do not issue tickets to any users.
                 </label>
               </div>
             </div>
