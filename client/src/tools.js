@@ -15,6 +15,7 @@ module.exports = class extends React.Component {
       <div className="consoleTools">
         <h1>Tools</h1>
         <p>These tools are helpful when learning BPC or debugging tickets.</p>
+        <ParseBase64Cookie />
         <ParseTicketID />
         <GenerateHawkAuthHeader />
         <ParseHawkAuthHeader />
@@ -23,6 +24,84 @@ module.exports = class extends React.Component {
   }
 };
 
+
+class ParseBase64Cookie extends React.Component {
+  constructor(props){
+    super(props);
+    this.onChange = this.onChange.bind(this);
+    this.state = {
+      result: null,
+      error: null
+    };
+  }
+
+  onChange(e) {
+    const value = e.target.value;
+    if(value.length > 0) {
+      
+      this.parseCookie(value)
+      .done((data, textStatus, jqXHR) => {
+        this.setState({result: data, error: null});
+      }).fail((jqXHR, textStatus, errorThrown) => {
+        // It could an error from the parseRequest or the parseCookie
+        const errorText = jqXHR.responseText ? JSON.parse(jqXHR.responseText) : jqXHR;
+        this.setState({result: null, error: errorText});
+      });
+
+    } else {
+      this.setState({result: null, error: null});
+    }
+  }
+
+  parseCookie(value){
+    var dfd = jQuery.Deferred();
+    try {
+      const decodedTicket = window.atob(value);
+      const parsedTicket = JSON.parse(decodedTicket);
+      dfd.resolve(parsedTicket)
+    } catch (ex) {
+      dfd.reject(ex)
+    }
+    return dfd.promise();
+  }
+
+  render() {
+
+    return (
+      <div>
+        <hr />
+        <h3>Parse base64 cookie</h3>
+        <textarea
+          className="form-control"
+          rows="8"
+          cols="50"
+          style={{fontFamily:"monospace", fontSize: "0.9em"}}
+          onChange={this.onChange}
+          placeholder="Paste base64 cookie">
+        </textarea>
+
+        <div style={{ marginTop: '5px' }}>        
+          { this.state.result
+            ? <pre>{ JSON.stringify(this.state.result, null, 2) }</pre>
+            : null
+          }
+
+          { this.state.error
+            ? <div>Error: {this.state.error.message}</div>
+            : null
+          }
+        </div>
+
+        <div className="bg-info">
+          <small style={{ paddingLeft: '5px' }}>
+            <em>Note: </em>
+            Parsing a base64 cookie will work with cookies from other BPC instances.
+          </small>
+        </div>
+      </div>
+    );
+  }
+}
 
 class ParseTicketID extends React.Component {
   constructor(props){
@@ -38,18 +117,7 @@ class ParseTicketID extends React.Component {
     const value = e.target.value;
     if(value.length > 0) {
 
-      var parseOperation;
-      
-      // It's a ticket ID
-      if(value.substring(0, 8) === "Fe26.2**") {
-        parseOperation = this.parseRequest(value)
-
-        // It's a cookie
-      } else {
-        parseOperation = this.parseCookie(value)
-      }
-      
-      parseOperation
+      this.parseRequest(value)
       .done((data, textStatus, jqXHR) => {
         this.setState({result: data, error: null});
       }).fail((jqXHR, textStatus, errorThrown) => {
@@ -75,31 +143,19 @@ class ParseTicketID extends React.Component {
     });
   }
 
-  parseCookie(value){
-    var dfd = jQuery.Deferred();
-    try {
-      const decodedTicket = window.atob(value);
-      const parsedTicket = JSON.parse(decodedTicket);
-      dfd.resolve(parsedTicket)
-    } catch (ex) {
-      dfd.reject(ex)
-    }
-    return dfd.promise();
-  }
-
   render() {
 
     return (
       <div>
         <hr />
-        <h3>Parse BPC Ticket ID or base64 cookie</h3>
+        <h3>Parse BPC Ticket ID</h3>
         <textarea
           className="form-control"
           rows="8"
           cols="50"
           style={{fontFamily:"monospace", fontSize: "0.9em"}}
           onChange={this.onChange}
-          placeholder="Paste ID or cookie">
+          placeholder="Paste ticket ID">
         </textarea>
 
         <div style={{ marginTop: '5px' }}>        
@@ -118,7 +174,6 @@ class ParseTicketID extends React.Component {
           <small style={{ paddingLeft: '5px' }}>
             <em>Note: </em>
             Parsing a ticket ID must be from the this instance of BPC.
-            Parsing a base64 cookie will work with cookies from other BPC instances.
           </small>
         </div>
       </div>
