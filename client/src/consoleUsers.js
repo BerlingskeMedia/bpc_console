@@ -13,7 +13,7 @@ module.exports = class extends React.Component {
     this.deleteGrant = this.deleteGrant.bind(this);
     this.makeSuperAdmin = this.makeSuperAdmin.bind(this);
     this.demoteSuperAdmin = this.demoteSuperAdmin.bind(this);
-    this.pagesizelimit = 6;
+    this.pagesizelimit = 50;
     this.state = {
       grantscount: 0,
       grants: []
