@@ -127,14 +127,13 @@ module.exports = class extends React.Component {
     var application = this.state.application;
     const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
     application[e.target.name] = value;
-    this.setState({ application: application });
+    this.updateApplication(application);
   }
 
   onChangeApplicationSettings(e) {
     var application = this.state.application;
     const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
     application.settings[e.target.name] = value;
-    this.setState({ application: application });
     this.updateApplication(application);
   }
 
@@ -283,6 +282,7 @@ module.exports = class extends React.Component {
                   placeholder="Type scope name"/>
               </div>
               <button type="submit" onClick={this.addScope} className="btn btn-default" disabled={this.state.newScope.length < 2}>Add scope</button>
+              <span className="savedSuccessMessage" style={{color: '#008000', verticalAlign: 'middle', marginLeft: '10px', display: 'none'}}>Saved successully</span>
             </form>
             <ul className="list-unstyled">
               {scopeList}
@@ -293,21 +293,16 @@ module.exports = class extends React.Component {
             }
           </div>
           <div className="col-xs-4">
-            <ApplicationRoles
-              updateApplication={this.updateApplication}
-              application={this.state.application} />
+            <ApplicationRoles updateApplication={this.updateApplication} application={this.state.application} />
           </div>
           <div className="col-xs-4">
-            <ApplicationAdmins
-              app={this.state.app}
-              application={this.state.application} />
+            <ApplicationAdmins app={this.state.app} application={this.state.application} />
           </div>
         </div>
         <hr />
         <div className="row">
           <div className="col-xs-12">
-            <ApplicationGrants
-              application={this.state.application} />
+            <ApplicationGrants application={this.state.application} />
           </div>
         </div>
       </div>

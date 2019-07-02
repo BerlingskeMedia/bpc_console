@@ -160,6 +160,7 @@ module.exports = class extends React.Component {
               onChange={this.onChange} />
           </div>
           <button type="submit" className="btn btn-default" onClick={this.makeAdmin} disabled={!this.state.searchSuccess}>Make admin</button>
+          <span className="savedSuccessMessage" style={{color: '#008000', verticalAlign: 'middle', marginLeft: '10px', display: 'none'}}>Saved successully</span>
         </form>
         <ul className="list-unstyled">
           {adminUsers}

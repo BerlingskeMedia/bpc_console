@@ -93,6 +93,7 @@ module.exports = class extends React.Component {
               onChange={this.onChangeState} />
           </div>
           <button type="submit" className="btn btn-default" onClick={this.addRole} disabled={this.state.newRole.length < 2}>Add role</button>
+          <span className="savedSuccessMessage" style={{color: '#008000', verticalAlign: 'middle', marginLeft: '10px', display: 'none'}}>Saved successully</span>
         </form>
         <ul className="list-unstyled">
           {roleList}
