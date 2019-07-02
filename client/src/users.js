@@ -11,6 +11,8 @@ module.exports = class extends React.Component {
   }
 
   setUsers(users) {
+    // We clear state so that it triggers a re-render in the SearchResult component
+    this.setState({users: []});
     this.setState({users: users});
   }
 
