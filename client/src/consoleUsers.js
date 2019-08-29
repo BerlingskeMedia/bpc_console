@@ -379,7 +379,7 @@ class Grant extends React.Component {
       <tr key={grant.id}>
         <td className="col-xs-3">
           { this.state.foundUser !== null
-            ? <Link to={`/users?search=${this.state.foundUser.id}`}>{this.state.foundUser.email}</Link>
+            ? <Link to={`/users?search=${this.state.foundUser._id}`}>{this.state.foundUser.email}</Link>
             : grant.user
           }
         </td> 
