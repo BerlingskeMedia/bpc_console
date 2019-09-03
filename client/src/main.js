@@ -10,7 +10,6 @@ const Applications = require('./applications');
 const Users = require('./users');
 const ConsoleUsers = require('./consoleUsers');
 const Application = require('./application');
-const Gigya = require('./gigya');
 const Tools = require('./tools');
 const GoogleLogin = require('react-google-login').default;
 
@@ -172,10 +171,6 @@ class ConsoleApp extends React.Component {
     }
   }
 
-  showLoginScreen() {
-    gigya.accounts.showScreenSet({screenSet:'Default-RegistrationLogin'});
-  }
-
   render() {
 
     return (
@@ -260,7 +255,6 @@ class Main extends React.Component {
           <Route path="/admins" component={ConsoleUsers}/>
           <Route path={`/applications/:app`} component={Application}/>
           <Route path={`/application/:app`} component={Application}/>
-          <Route path={`/gigya`} component={Gigya}/>
           <Route path={`/tools`} component={Tools}/>
         </div>
       </BrowserRouter>
