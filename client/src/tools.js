@@ -15,11 +15,11 @@ module.exports = class extends React.Component {
       <div className="consoleTools">
         <h1>Tools</h1>
         <p>These tools are helpful when learning BPC or debugging tickets.</p>
-        <ParseBase64Cookie />
-        <ParseTicketID />
+        <GetGoogleRsvp />
         <GenerateHawkAuthHeader />
         <ParseHawkAuthHeader />
-        <GetGoogleRsvp />
+        <ParseTicketID />
+        <ParseBase64Cookie />
       </div>
     );
   }
@@ -347,7 +347,7 @@ class ParseHawkAuthHeader extends React.Component {
           placeholder="Paste Hawk Authorization header">
         </textarea>
 
-        <div style={{ marginTop: '5px' }}>        
+        <div style={{ marginTop: '5px' }}>
           { this.state.result
             ? <pre>{ JSON.stringify(this.state.result, null, 2) }</pre>
             : null
@@ -383,8 +383,6 @@ class GetGoogleRsvp extends React.Component {
 
   getRsvp() {
     const auth = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse();
-    console.log(auth)
-    console.log(this.input.current.value)
     const payload = {
       id_token: auth.id_token,
       access_token: auth.access_token,
@@ -397,22 +395,22 @@ class GetGoogleRsvp extends React.Component {
 
     return (
       <div>
-        <h3>Get payload for Google app RSVP</h3>
-        <input type="text" className="form-control" placeholder="Application ID" ref={this.input} />
-        {/* <input
-            type="text"
-            name="app"
-            
-            placeholder="Application ID"
-            value={this.state.id}
-            onChange={this.onChange} /> */}
-
+        <hr />
+        <h3>Generate payload for /rsvp (for Google apps)</h3>
+        <input type="text" className="form-control" placeholder="Insert app ID" ref={this.input} />
         <button type="button" className="btn btn-default btn-sm" onClick={this.getRsvp}>Get RSVP</button>
         
         { this.state.payload
           ? <pre>{ JSON.stringify(this.state.payload, null, 2) }</pre>
           : null
         }
+
+        <div className="bg-info" style={{ marginTop: '5px' }}>
+          <small style={{ paddingLeft: '5px' }}>
+            <em>Note: </em>
+            The rsvp only works with Google apps.
+          </small>
+        </div>
       </div>
     );
   }
