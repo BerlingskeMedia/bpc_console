@@ -19,11 +19,11 @@ module.exports = class extends React.Component {
         <ParseTicketID />
         <GenerateHawkAuthHeader />
         <ParseHawkAuthHeader />
+        <GetGoogleRsvp />
       </div>
     );
   }
 };
-
 
 class ParseBase64Cookie extends React.Component {
   constructor(props){
@@ -365,6 +365,54 @@ class ParseHawkAuthHeader extends React.Component {
             Parsing Hawk Authorization header must be from the this instance of BPC.
           </small>
         </div>
+      </div>
+    );
+  }
+}
+
+
+class GetGoogleRsvp extends React.Component {
+  constructor(props){
+    super(props);
+    this.getRsvp = this.getRsvp.bind(this);
+    this.input = React.createRef();
+    this.state = {
+      payload: null
+    };
+  }
+
+  getRsvp() {
+    const auth = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse();
+    console.log(auth)
+    console.log(this.input.current.value)
+    const payload = {
+      id_token: auth.id_token,
+      access_token: auth.access_token,
+      app: this.input.current.value
+    };
+    this.setState({ payload });
+  }
+
+  render() {
+
+    return (
+      <div>
+        <h3>Get payload for Google app RSVP</h3>
+        <input type="text" className="form-control" placeholder="Application ID" ref={this.input} />
+        {/* <input
+            type="text"
+            name="app"
+            
+            placeholder="Application ID"
+            value={this.state.id}
+            onChange={this.onChange} /> */}
+
+        <button type="button" className="btn btn-default btn-sm" onClick={this.getRsvp}>Get RSVP</button>
+        
+        { this.state.payload
+          ? <pre>{ JSON.stringify(this.state.payload, null, 2) }</pre>
+          : null
+        }
       </div>
     );
   }
