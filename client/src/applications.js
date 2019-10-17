@@ -137,11 +137,13 @@ class CreateApplication extends React.Component {
   handleSubmit(e) {
     e.preventDefault();
     if (this.state.id !== '') {
+      if(this.state.id.length < 3) {
+        alert('Application ID too short');
+        return;
+      }
       this.props.createApplication({
         id: this.state.id,
-        settings: {
-          provider: this.state.provider
-        }
+        provider: this.state.provider
       }).done(function() {
         this.setState({
           id: '',
