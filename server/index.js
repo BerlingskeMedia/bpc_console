@@ -66,6 +66,7 @@ const init = async () => {
   });
 
 
+  await server.bpc.connect();
   await server.start();
   log(`Server running at: ${server.info.uri}`);
 };
