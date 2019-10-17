@@ -197,7 +197,7 @@ module.exports = class extends React.Component {
               <dt>Algorithm</dt>
               <dd>{this.state.application.algorithm}</dd>
               <dt>Login provider</dt>
-              <dd>{this.state.application.settings.provider}</dd>
+              <dd>{this.state.application.provider || this.state.application.settings.provider}</dd>
             </dl>
           </div>
         </div>

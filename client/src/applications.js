@@ -65,7 +65,7 @@ module.exports = class extends React.Component {
         );
       });
 
-      const provider = application.settings && application.settings.provider;
+      const provider = application.provider || (application.settings && application.settings.provider);
       const providerName = provider === 'google' ? 'Google' : provider === 'gigya'  ? 'Gigya' : '';
 
       return (

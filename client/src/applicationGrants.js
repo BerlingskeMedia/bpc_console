@@ -231,7 +231,7 @@ class UserSearch extends React.Component {
     this.setState({searchInProgress: true});
 
     const application = this.props.application;
-    const provider = application.settings.provider;
+    const provider = application.provider || application.settings.provider;
 
     return $.ajax({
       type: 'GET',
@@ -319,7 +319,7 @@ class UserSearch extends React.Component {
   createUserAndGrant() {
     const payload = {
       email: this.searchBox.value.trim(),
-      provider: this.props.application.settings.provider
+      provider: this.props.application.provider || this.props.application.settings.provider
     };
 
     return $.ajax({
