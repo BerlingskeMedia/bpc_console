@@ -11,6 +11,7 @@ const Users = require('./users');
 const ConsoleUsers = require('./consoleUsers');
 const Application = require('./application');
 const Tools = require('./tools');
+const Companies = require('./companies');
 const GoogleLogin = require('react-google-login').default;
 
 // Add the event handler
@@ -208,6 +209,7 @@ class MainMenu extends React.Component {
       { linkTo: '/users', label: 'Users' },
       { linkTo: '/applications', label: 'Applications' },
       { linkTo: '/admins', label: 'BPC Console users' }
+      // { linkTo: '/companies', label: 'Companies' }
     ].map((tab, index) => {
 
       const isActive = pathname.indexOf(tab.linkTo) > -1;
@@ -253,6 +255,7 @@ class Main extends React.Component {
           <Route path={`/applications/:app`} component={Application}/>
           <Route path={`/application/:app`} component={Application}/>
           <Route path={`/tools`} component={Tools}/>
+          <Route path={`/companies`} component={Companies}/>
         </div>
       </BrowserRouter>
     )
