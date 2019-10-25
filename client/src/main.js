@@ -40,7 +40,7 @@ class ConsoleApp extends React.Component {
     };
   }
 
-  componentWillMount() {
+  componentDidMount() {
     window.gapi.load('auth2', function () {
       window.gapi.auth2.init({
         clientId: gapiClientId,
@@ -54,9 +54,6 @@ class ConsoleApp extends React.Component {
         }
       }.bind(this));
     }.bind(this));
-  }
-
-  componentDidMount() {
   }
 
   onGoogleSignIn(googleUser) {
