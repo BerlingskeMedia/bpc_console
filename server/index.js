@@ -15,6 +15,18 @@ const server = Hapi.server({
 });
 
 
+const Good = require('@hapi/good');
+const goodOptions = {
+  reporters: {
+    myConsoleReporter: [
+      { module: '@hapi/good-squeeze', name: 'Squeeze', args: [{ log: '*', response: { exclude: 'good_exclude' }}] },
+      { module: '@hapi/good-console' },
+      'stdout'
+    ]
+  }
+};
+
+
 const init = async () => {
 
   await server.register(Inert);
@@ -24,6 +36,9 @@ const init = async () => {
   server.route({
     method: 'GET',
     path: '/favicon.ico',
+    config: {
+      tags: ['good_exclude']
+    },
     handler: function(request, h){
       return '';
     }
@@ -32,6 +47,9 @@ const init = async () => {
   server.route({
     method: 'get',
     path: '/build/{param*}',
+    config: {
+      tags: ['good_exclude']
+    },
     handler: {
       directory: {
         path: './client/build'
@@ -42,6 +60,9 @@ const init = async () => {
   server.route({
     method: 'get',
     path: '/assets/hawk.js',
+    config: {
+      tags: ['good_exclude']
+    },
     handler: {
       file: './node_modules/@hapi/hawk/lib/browser.js'
     }
@@ -50,6 +71,9 @@ const init = async () => {
   server.route({
     method: 'get',
     path: '/assets/{param*}',
+    config: {
+      tags: ['good_exclude']
+    },
     handler: {
       directory: {
         path: './client/assets'
@@ -60,12 +84,16 @@ const init = async () => {
   server.route({
     method: 'get',
     path: '/{param*}',
+    config: {
+      tags: ['good_exclude']
+    },
     handler: {
       file: './client/index.html'
     }
   });
 
 
+  await server.register({ plugin: Good, options: goodOptions });
   await server.bpc.connect();
   await server.start();
   log(`Server running at: ${server.info.uri}`);
