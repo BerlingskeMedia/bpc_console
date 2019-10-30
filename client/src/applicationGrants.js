@@ -28,7 +28,7 @@ module.exports = class extends React.Component {
 
     return $.ajax({
       type: 'GET',
-      url: `/_b/grants/count?app=${app}`,
+      url: `/api/grants/count?app=${app}`,
       contentType: "application/json; charset=utf-8"
     }).done((data, textStatus, jqXHR) => {
       this.setState({
@@ -48,7 +48,7 @@ module.exports = class extends React.Component {
 
     return $.ajax({
       type: 'GET',
-      url: `/_b/grants?app=${ app }&limit=${ limit }&skip=${ skip }`
+      url: `/api/grants?app=${ app }&limit=${ limit }&skip=${ skip }`
     }).done((data, textStatus, jqXHR) => {
       this.setState({
         grants: data
@@ -62,7 +62,7 @@ module.exports = class extends React.Component {
   createGrant(grant) {
     return $.ajax({
       type: 'POST',
-      url: `/_b/grants`,
+      url: `/api/grants`,
       contentType: "application/json; charset=utf-8",
       data: JSON.stringify(grant)
     }).done((data, textStatus, jqXHR) => {
@@ -83,7 +83,7 @@ module.exports = class extends React.Component {
   deleteGrant(grant) {
     return $.ajax({
       type: 'PATCH',
-      url: `/_b/grants`,
+      url: `/api/grants`,
       contentType: "application/json; charset=utf-8",
       data: JSON.stringify(grant)
     }).done((data, textStatus, jqXHR) => {
@@ -121,7 +121,7 @@ module.exports = class extends React.Component {
   updateGrant(grant) {
     return $.ajax({
       type: 'POST',
-      url: `/_b/grants`,
+      url: `/api/grants`,
       contentType: "application/json; charset=utf-8",
       data: JSON.stringify(grant)
     }).done((data, textStatus, jqXHR) => {
@@ -235,7 +235,7 @@ class UserSearch extends React.Component {
 
     return $.ajax({
       type: 'GET',
-      url: `/_b/users?provider=${provider}&id=${searchText}&email=${searchText}`
+      url: `/api/users?provider=${provider}&id=${searchText}&email=${searchText}`
     }).done((data, textStatus, jqXHR) => {
 
       if (data.length === 1){
@@ -251,7 +251,7 @@ class UserSearch extends React.Component {
         // We are setting state in this response so the UI doesn't flicker
         $.ajax({
           type: 'GET',
-          url: `/_b/grants?app=${application.id}&user=${user._id}`
+          url: `/api/grants?app=${application.id}&user=${user._id}`
         })
         .done((data, textStatus, jqXHR) => {
 
@@ -324,7 +324,7 @@ class UserSearch extends React.Component {
 
     return $.ajax({
       type: 'POST',
-      url: `/_b/users`,
+      url: `/api/users`,
       contentType: "application/json; charset=utf-8",
       data: JSON.stringify(payload)
     }).done((data, textStatus, jqXHR) => {
@@ -605,7 +605,7 @@ class ApplicationUser extends React.Component {
   getUser(grant) {
     return $.ajax({
       type: 'GET',
-      url: `/_b/users/${grant.user}`
+      url: `/api/users/${grant.user}`
     }).done((data, textStatus, jqXHR) => {
       this.setState({
         user: data

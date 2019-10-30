@@ -35,7 +35,7 @@ module.exports = class extends React.Component {
   getApplication() {
     return $.ajax({
       type: 'GET',
-      url: '/_b/applications/'.concat(this.state.app)
+      url: '/api/applications/'.concat(this.state.app)
     }).done((data, textStatus, jqXHR) => {
       if(data.settings === undefined || data.settings === null){
         data.settings = {};
@@ -55,7 +55,7 @@ module.exports = class extends React.Component {
   updateApplication(application) {
     return $.ajax({
       type: 'PUT',
-      url: '/_b/applications/'.concat(application.id),
+      url: '/api/applications/'.concat(application.id),
       contentType: "application/json; charset=utf-8",
       data: JSON.stringify(application)
     }).done((data, textStatus, jqXHR) => {
@@ -88,7 +88,7 @@ module.exports = class extends React.Component {
   deleteApplication() {
     return $.ajax({
       type: 'DELETE',
-      url: '/_b/applications/'.concat(this.state.app),
+      url: '/api/applications/'.concat(this.state.app),
       contentType: "application/json; charset=utf-8"
     }).done((data, textStatus, jqXHR) => {
       location.pathname = '/applications';

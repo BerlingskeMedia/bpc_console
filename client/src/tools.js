@@ -137,7 +137,7 @@ class ParseTicketID extends React.Component {
     };
     return $.ajax({
       type: 'POST',
-      url: `/_b/parse`,
+      url: `/api/parse`,
       contentType: 'application/json; charset=utf-8',
       data: JSON.stringify(payload)
     });
@@ -321,7 +321,7 @@ class ParseHawkAuthHeader extends React.Component {
     };
     return $.ajax({
       type: 'POST',
-      url: `/_b/parse`,
+      url: `/api/parse`,
       contentType: 'application/json; charset=utf-8',
       data: JSON.stringify(payload)
     }).done((data, textStatus, jqXHR) => {

@@ -31,7 +31,7 @@ const init = async () => {
 
   await server.register(Inert);
   await server.register(HapiBpc);
-  await server.register(Proxy, { routes: { prefix: '/_b' } });
+  await server.register(Proxy, { routes: { prefix: '/api' } });
 
   server.route({
     method: 'GET',

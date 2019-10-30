@@ -91,7 +91,7 @@ class SearchUser extends React.Component {
 
     return $.ajax({
       type: 'GET',
-      url: `/_b/users?email=${searchText}&id=${searchText}`,
+      url: `/api/users?email=${searchText}&id=${searchText}`,
       contentType: "application/json; charset=utf-8"
     }).done((data, textStatus, jqXHR) => {
       window.history.pushState({ search: searchText }, "search", `/users?search=${searchText}`);
@@ -201,7 +201,7 @@ class ShowFullUser extends React.Component {
   getUserData(user_id) {
     $.ajax({
       type: 'GET',
-      url: `/_b/users/${user_id}`,
+      url: `/api/users/${user_id}`,
       contentType: "application/json; charset=utf-8"
     }).done((data, textStatus, jqXHR) => {
       this.setState({user: data});
@@ -211,7 +211,7 @@ class ShowFullUser extends React.Component {
   deleteGrant(grant) {
     return $.ajax({
       type: 'PATCH',
-      url: `/_b/grants`,
+      url: `/api/grants`,
       data: JSON.stringify(grant)
     }).done((data, textStatus, jqXHR) => {
       var user = this.state.user;
@@ -246,7 +246,7 @@ class ShowFullUser extends React.Component {
   updateGrant(grant) {
     return $.ajax({
       type: 'POST',
-      url: `/_b/grants`,
+      url: `/api/grants`,
       contentType: "application/json; charset=utf-8",
       data: JSON.stringify(grant)
     }).done((data, textStatus, jqXHR) => {
@@ -725,7 +725,7 @@ class DeleteUser extends React.Component {
   deleteUser() {
     return $.ajax({
       type: 'DELETE',
-      url: '/_b/users/'.concat(this.props.user),
+      url: '/api/users/'.concat(this.props.user),
       contentType: "application/json; charset=utf-8"
     }).done((data, textStatus, jqXHR) => {
       location.search = '';

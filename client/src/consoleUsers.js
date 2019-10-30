@@ -24,7 +24,7 @@ module.exports = class extends React.Component {
   getGrantsCount() {
     return $.ajax({
       type: 'GET',
-      url: `/_b/grants/count?app=console`,
+      url: `/api/grants/count?app=console`,
       contentType: "application/json; charset=utf-8"
     }).done((data, textStatus, jqXHR) => {
       this.setState({
@@ -39,7 +39,7 @@ module.exports = class extends React.Component {
   getGrants({ limit = this.pagesizelimit, skip = 0 }) {
     return $.ajax({
       type: 'GET',
-      url: `/_b/grants?app=console&limit=${ limit }&skip=${ skip }`
+      url: `/api/grants?app=console&limit=${ limit }&skip=${ skip }`
     }).done(data => {
       this.setState({ grants: data });
     }).fail((jqXHR) => {
@@ -58,7 +58,7 @@ module.exports = class extends React.Component {
 
     return $.ajax({
       type: 'POST',
-      url: '/_b/grants',
+      url: '/api/grants',
       contentType: "application/json; charset=utf-8",
       data: JSON.stringify(grant)
     }).done((data, textStatus, jqXHR) => {
@@ -79,7 +79,7 @@ module.exports = class extends React.Component {
   deleteGrant(grant) {
     return $.ajax({
       type: 'PATCH',
-      url: '/_b/grants',
+      url: '/api/grants',
       contentType: "application/json; charset=utf-8",
       data: JSON.stringify(grant)
     }).done((data, textStatus, jqXHR) => {
@@ -117,7 +117,7 @@ module.exports = class extends React.Component {
   updateGrant(grant) {
     return $.ajax({
       type: 'POST',
-      url: `/_b/grants`,
+      url: `/api/grants`,
       contentType: "application/json; charset=utf-8",
       data: JSON.stringify(grant)
     }).done((data, textStatus, jqXHR) => {
@@ -138,7 +138,7 @@ module.exports = class extends React.Component {
   makeSuperAdmin(grant) {
     return $.ajax({
       type: 'POST',
-      url: '/_b/superadmins',
+      url: '/api/superadmins',
       contentType: "application/json; charset=utf-8",
       data: JSON.stringify(grant)
     }).done((data, textStatus, jqXHR) => {
@@ -159,7 +159,7 @@ module.exports = class extends React.Component {
   demoteSuperAdmin(grant) {
     return $.ajax({
       type: 'PATCH',
-      url: '/_b/superadmins',
+      url: '/api/superadmins',
       contentType: "application/json; charset=utf-8",
       data: JSON.stringify(grant)
     }).done((data, textStatus, jqXHR) => {
@@ -335,7 +335,7 @@ class Grant extends React.Component {
   searchUser(grant) {
     return $.ajax({
       type: 'GET',
-      url: `/_b/users?provider=google&id=${grant.user}`
+      url: `/api/users?provider=google&id=${grant.user}`
     }).done((data, textStatus, jqXHR) => {
       if (data.length === 1) {
         this.setState({
@@ -457,7 +457,7 @@ class UserSearch extends React.Component {
 
     return $.ajax({
       type: 'GET',
-      url: `/_b/users?provider=google&id=${searchText}&email=${searchText}`
+      url: `/api/users?provider=google&id=${searchText}&email=${searchText}`
     }).done((data, textStatus, jqXHR) => {
 
       if (data.length === 1){
@@ -474,7 +474,7 @@ class UserSearch extends React.Component {
         // We are setting state in this response so the UI doesn't flicker
         $.ajax({
           type: 'GET',
-          url: `/_b/grants?app=console&user=${user._id}`
+          url: `/api/grants?app=console&user=${user._id}`
         })
         .done((data, textStatus, jqXHR) => {
 

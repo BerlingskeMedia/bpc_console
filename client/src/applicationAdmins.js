@@ -22,7 +22,7 @@ module.exports = class extends React.Component {
   getApplicationAdminUsers() {
     return $.ajax({
       type: 'GET',
-      url: `/_b/admins?app=${this.props.app}`
+      url: `/api/admins?app=${this.props.app}`
     }).done((data, textStatus, jqXHR) => {
       this.setState({adminGrants: data});
     }).fail((jqXHR, textStatus, errorThrown) => {
@@ -56,7 +56,7 @@ module.exports = class extends React.Component {
 
     return $.ajax({
       type: 'GET',
-      url: `/_b/users?provider=google&id=${searchText}&email=${searchText}`
+      url: `/api/users?provider=google&id=${searchText}&email=${searchText}`
     }).done((data, textStatus, jqXHR) => {
       if (data.length === 1){
         this.setState({
@@ -81,7 +81,7 @@ module.exports = class extends React.Component {
 
     return $.ajax({
       type: 'PATCH',
-      url: `/_b/admins`,
+      url: `/api/admins`,
       contentType: "application/json; charset=utf-8",
       data: JSON.stringify(payload)
     })
@@ -111,7 +111,7 @@ module.exports = class extends React.Component {
 
     return $.ajax({
       type: 'POST',
-      url: `/_b/admins`,
+      url: `/api/admins`,
       contentType: "application/json; charset=utf-8",
       data: JSON.stringify(payload)
     })
@@ -186,7 +186,7 @@ class ApplicationAdmin extends React.Component {
   getUser(grant) {
     return $.ajax({
       type: 'GET',
-      url: `/_b/users/${grant.user}`
+      url: `/api/users/${grant.user}`
     }).done((data, textStatus, jqXHR) => {
       this.setState({
         foundUser: data
