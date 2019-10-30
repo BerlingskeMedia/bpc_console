@@ -58,23 +58,13 @@ class ConsoleApp extends React.Component {
   }
 
   onGoogleSignIn(googleUser) {
-    // Useful data for your client-side scripts:
-    var basicProfile = googleUser.getBasicProfile();
-    var authResponse = googleUser.getAuthResponse();
 
     this.setState({
       authenticated: true,
       authenticationNeeded: false
     });
 
-    const getUserTicketPayload = {
-      ID: basicProfile.getId(),
-      id_token: authResponse.id_token,
-      access_token: authResponse.access_token
-    };
-
-
-    this.getUserTicket(getUserTicketPayload);
+    this.getUserTicket(googleUser);
   }
 
   onGoogleSignInFailure(err) {
@@ -87,7 +77,17 @@ class ConsoleApp extends React.Component {
     }.bind(this), ticket.exp - Date.now() - 10000);
   }
 
-  getUserTicket(payload){
+  getUserTicket(googleUser){
+
+    var basicProfile = googleUser.getBasicProfile();
+    var authResponse = googleUser.getAuthResponse();
+
+    const payload = {
+      ID: basicProfile.getId(),
+      id_token: authResponse.id_token,
+      access_token: authResponse.access_token
+    };
+
     return $.ajax({
       type: 'POST',
       url: '/authenticate',
@@ -208,8 +208,8 @@ class MainMenu extends React.Component {
     const tabs = [
       { linkTo: '/users', label: 'Users' },
       { linkTo: '/applications', label: 'Applications' },
-      { linkTo: '/admins', label: 'BPC Console users' }
-      // { linkTo: '/companies', label: 'Companies' }
+      { linkTo: '/admins', label: 'BPC Console users' },
+      { linkTo: '/companies', label: 'Companies' }
     ].map((tab, index) => {
 
       const isActive = pathname.indexOf(tab.linkTo) > -1;
