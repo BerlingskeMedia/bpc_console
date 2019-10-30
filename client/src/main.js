@@ -262,6 +262,7 @@ class Main extends React.Component {
   }
 }
 
+
 ReactDOM.render(
   <ConsoleApp />,
   document.getElementById('content')
@@ -278,6 +279,7 @@ function readCookie(name) {
   }
   return null;
 }
+
 
 function readTicket(){
   var ticket = readCookie('console_ticket');
