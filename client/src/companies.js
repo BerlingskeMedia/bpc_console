@@ -11,8 +11,10 @@ module.exports = class extends React.Component {
     this.getCompanies = this.getCompanies.bind(this);
     this.fetchBPP = this.fetchBPP.bind(this);
     this.state = {
+      companies: [],
       authenticated: false,
       bpp_ticket: null,
+      // bpp_url: null,
       // bpp_url: 'https://bpp.berlingskemedia.net',
       // bpp_url: 'https://bpp.berlingskemedia-testing.net',
       bpp_url: 'http://bpp.local:8000'
@@ -74,17 +76,16 @@ module.exports = class extends React.Component {
 
   saveTicket(ticket) {
     window.sessionStorage.setItem('bpp_ticket', JSON.stringify(ticket));
-    this.setState({ bpp_ticket: ticket });
+    this.setState({ bpp_ticket: ticket, authenticated: true });
     return Promise.resolve(ticket);
   }
 
 
   componentDidMount() {
-    // if(window.location.origin.indexOf('localhost') > -1) {
-      // this.setState({
-      //   bpp_url: `https://bpp.berlingskemedia-testing.net`
-      // });
-    // }
+    if(!this.state.bpp_url) {
+      const bpp_url = window.location.origin.replace('console', 'bpp');
+      this.setState({ bpp_url });
+    }
 
     let bpp_ticket;
 
@@ -96,11 +97,9 @@ module.exports = class extends React.Component {
     }
 
     if(bpp_ticket) {
-
       this.refreshTicket(bpp_ticket)
       .then(this.getCompanies)
     } else {
-
       this.getTicket()
       .then(this.getCompanies)
     }
@@ -126,19 +125,179 @@ module.exports = class extends React.Component {
 
 
   getCompanies() {
-    
     return this.fetchBPP(`/api/companies`)
-    .then(data => {
-      console.log('data', data)
-    });
+    .then(companies => this.setState({ companies }));
   }
 
 
   render() {
+    const companies = this.state.companies.map(company => {
+      return <Company key={company._id} data={company} fetchBPP={ this.fetchBPP } />
+    });
+
     return (
-      <div className="companies">
-        {/* <h3>Companies</h3> */}
+      <div className="companies" style={{paddingTop: '30px'}}>
+        { companies }
+        {/* <table className="table table-condensed">
+          <tbody>
+            { companies }
+          </tbody>
+        </table> */}
       </div>
     );
   }
 };
+
+
+class Company extends React.Component {
+  constructor(props){
+    super(props);
+    this.getCompany = this.getCompany.bind(this);
+    this.showCompanyDetails = this.showCompanyDetails.bind(this);
+    this.state = {
+      company: null,
+      showDetails: false
+    };
+  }
+
+  getCompany(id) {
+    return this.props.fetchBPP(`/api/companies/${ id }`)
+    .then(company => this.setState({ company }));
+  }
+
+  showCompanyDetails(id) {
+    this.getCompany(id)
+    .then(() => this.setState({ showDetails: true }));
+  }
+
+  render() {
+    return(
+      <div style={{ paddingButtom: '4px' }}>
+        <div className="row">
+          <div className="col-xs-4">
+            <button type="button" className="btn bt-xs btn-link" onClick={this.showCompanyDetails.bind(this, this.props.data._id)}>{ this.props.data.title }</button>
+          </div>
+          <div className="col-xs-8">
+            { this.state.showDetails
+                ? <CompanyDetails data={ this.state.company } />
+                : <CompanyOverview data={ this.state.company } />
+            }
+          </div>
+        </div>
+        <hr />
+      </div>
+    );
+  }
+}
+
+
+class CompanyOverview extends React.Component {
+  constructor(props){
+    super(props);
+  }
+
+  render() {
+    // TODO: Show user count and order sold quantity
+    return (null);
+  }
+}
+
+
+class CompanyDetails extends React.Component {
+  constructor(props){
+    super(props);
+  }
+
+  render() {
+
+    const users = this.props.data.users || [];
+    const usersE = users.map((user, index) => <CompanyUser key={index} user={user} />);
+
+    const roles = this.props.data.roles || [];
+    const rolesE = roles.map((role, index) => <CompanyRole key={index} role={role} />);
+
+    const emailMasks = this.props.data.emailMasks || [];
+    const emailMasksE = emailMasks.map((emailMask, index) => <CompanyEmailMask key={index} emailMask={emailMask} />);
+
+    return (
+      <div style={{ minHeight: '100px' }}>
+        <div className="row">
+          <div className="col-xs-12">
+            <dl>
+              <dt>cid</dt>
+              <dd>{ this.props.data.cid }</dd>
+              <dt>active</dt>
+              <dd>{ this.props.data.active.toString() }</dd>
+            </dl>
+          </div>
+        </div>
+        <hr />
+        <div className="row">
+          <div className="col-xs-2">
+            <strong>roles</strong>
+          </div>
+          <div className="col-xs-10">
+            { rolesE }
+          </div>
+        </div>
+        <hr />
+        <div className="row">
+          <div className="col-xs-2">
+            <strong>users</strong>
+          </div>
+          <div className="col-xs-10">
+            { usersE }
+          </div>
+        </div>
+        <hr />
+        <div className="row">
+          <div className="col-xs-2">
+            <strong>email masks</strong>
+          </div>
+          <div className="col-xs-10">
+            { emailMasksE }
+          </div>
+        </div>
+      </div>
+    );
+  }
+}
+
+
+class CompanyUser extends React.Component {
+  constructor(props){
+    super(props);
+  }
+
+  render() {
+    return (
+      <div>{ this.props.user }</div>
+    );
+  }
+}
+
+
+class CompanyRole extends React.Component {
+  constructor(props){
+    super(props);
+  }
+
+  render() {
+    return (
+      <div>{ this.props.role }</div>
+    );
+  }
+}
+
+
+class CompanyEmailMask extends React.Component {
+  constructor(props){
+    super(props);
+  }
+
+  render() {
+    return (
+      <div>{ this.props.emailMask }</div>
+    );
+  }
+}
