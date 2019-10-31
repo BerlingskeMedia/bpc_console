@@ -227,7 +227,7 @@ class GrantsList extends React.Component {
 
   render() {
     return(
-      <div style={{paddingTop: '30px', paddingBottom: '30px'}}>
+      <div style={{ paddingTop: '10px', paddingBottom: '30px' }}>
         <h4>All console users</h4>
         <GrantsTable
           scope={this.props.scope}
@@ -500,8 +500,7 @@ class UserSearch extends React.Component {
     var inputClasses = 'form-group '.concat(this.state.userFound ? 'has-success' : '');
 
     return (
-      <div style={{paddingTop: '30px', paddingBottom: '30px'}}>
-        <h4>Search user</h4>
+      <div style={{ paddingBottom: '20px' }}>
         <form>
           <div className={inputClasses}>
             <input

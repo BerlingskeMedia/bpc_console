@@ -202,20 +202,16 @@ class ConsoleApp extends React.Component {
 class MainMenu extends React.Component {
 
   render() {
-    
-    const { pathname } = window.location;
 
     const tabs = [
       { linkTo: '/users', label: 'Users' },
       { linkTo: '/applications', label: 'Applications' },
-      { linkTo: '/admins', label: 'BPC Console users' }
+      { linkTo: '/admins', label: 'BPC Console users' },
       // { linkTo: '/companies', label: 'Companies' }
     ].map((tab, index) => {
 
-      const isActive = pathname.indexOf(tab.linkTo) > -1;
-
       return (
-        <li role="presentation" key={index} className={`${ isActive ? 'active' : '' }`}>
+        <li role="presentation" key={index}>
           <Link to={ tab.linkTo }>{ tab.label }</Link>
         </li>
       );
@@ -227,7 +223,6 @@ class MainMenu extends React.Component {
       </ul>
     );
   }
-
 }
 
 
@@ -254,8 +249,8 @@ class Main extends React.Component {
           <Route path="/admins" component={ConsoleUsers}/>
           <Route path={`/applications/:app`} component={Application}/>
           <Route path={`/application/:app`} component={Application}/>
-          <Route path={`/tools`} component={Tools}/>
           <Route path={`/companies`} component={Companies}/>
+          <Route path={`/tools`} component={Tools}/>
         </div>
       </BrowserRouter>
     )

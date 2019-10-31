@@ -136,7 +136,8 @@ module.exports = class extends React.Component {
     });
 
     return (
-      <div className="companies" style={{paddingTop: '30px'}}>
+      <div className="companies" style={{ paddingTop: '30px' }}>
+        <CompanySearch />
         { companies }
         {/* <table className="table table-condensed">
           <tbody>
@@ -149,41 +150,83 @@ module.exports = class extends React.Component {
 };
 
 
+class CompanySearch extends React.Component {
+  constructor(props){
+    super(props);
+    this.state = {
+
+    };
+  }
+
+  render() {
+    return (
+      <div style={{ paddingBottom: '20px' }}>
+        <div className="row">
+          <div className="col-xs-4">
+            <input type="text" name="searchBox" className="form-control" placeholder="Type company name start search"></input>
+          </div>
+          <div className="col-xs-4">
+            <input type="text" name="searchBox" className="form-control" placeholder="Type user email start search"></input>
+          </div>
+        </div>
+      </div>
+    );
+  }
+}
+
+
 class Company extends React.Component {
   constructor(props){
     super(props);
     this.getCompany = this.getCompany.bind(this);
-    this.showCompanyDetails = this.showCompanyDetails.bind(this);
+    this.showHideCompanyDetails = this.showHideCompanyDetails.bind(this);
     this.state = {
       company: null,
-      showDetails: false
+      showDetails: false,
+      showLoader: false
     };
   }
 
-  getCompany(id) {
+  getCompany() {
+    const id = this.props.data._id;
     return this.props.fetchBPP(`/api/companies/${ id }`)
     .then(company => this.setState({ company }));
   }
 
-  showCompanyDetails(id) {
-    this.getCompany(id)
-    .then(() => this.setState({ showDetails: true }));
+  showHideCompanyDetails() {
+    if(this.state.showDetails) {
+      this.setState({ showDetails: false });
+    } else {
+      this.setState({ showLoader: true });
+      this.getCompany()
+      .then(() => this.setState({
+        showDetails: true,
+        showLoader: false
+      }));
+    }
   }
 
   render() {
-    return(
-      <div style={{ paddingButtom: '4px' }}>
+    return (
+      <div  style={{ paddingBottom: '4px' }}>
         <div className="row">
           <div className="col-xs-4">
-            <button type="button" className="btn bt-xs btn-link" onClick={this.showCompanyDetails.bind(this, this.props.data._id)}>{ this.props.data.title }</button>
+            <button type="button" className="btn bt-xs btn-link" onClick={this.showHideCompanyDetails}>{ this.props.data.title }</button>
+            {/* { this.state.showLoader
+              ? (<div className="loadSpinner">
+                  <img src="/assets/load_spinner.gif" />
+                </div>)
+              : null
+            } */}
           </div>
           <div className="col-xs-8">
-            { this.state.showDetails
-                ? <CompanyDetails data={ this.state.company } />
-                : <CompanyOverview data={ this.state.company } />
-            }
+            <CompanyOverview data={ this.state.company } />
           </div>
         </div>
+        { this.state.showDetails
+          ? <CompanyDetails data={ this.state.company } />
+          : null
+        }
         <hr />
       </div>
     );
@@ -206,57 +249,83 @@ class CompanyOverview extends React.Component {
 class CompanyDetails extends React.Component {
   constructor(props){
     super(props);
+    this.deleteRole = this.deleteRole.bind(this);
+  }
+
+
+  deleteRole(role) {
+    console.log('deleteRole')
+    console.log(role)
+  }
+
+
+  deleteUser(user) {
+    console.log('deleteUser')
+    console.log(user)
+  }
+
+
+  deleteIp(ip) {
+    console.log('deleteIp')
+    console.log(ip)
+  }
+
+
+  deleteEmailmask(emailMasks) {
+    console.log('deleteEmailmask')
+    console.log(emailMasks)
   }
 
   render() {
-
-    const users = this.props.data.users || [];
-    const usersE = users.map((user, index) => <CompanyUser key={index} user={user} />);
-
-    const roles = this.props.data.roles || [];
-    const rolesE = roles.map((role, index) => <CompanyRole key={index} role={role} />);
-
-    const emailMasks = this.props.data.emailMasks || [];
-    const emailMasksE = emailMasks.map((emailMask, index) => <CompanyEmailMask key={index} emailMask={emailMask} />);
-
     return (
-      <div style={{ minHeight: '100px' }}>
+      <div style={{ marginTop: '10px', minHeight: '100px' }}>
         <div className="row">
           <div className="col-xs-12">
-            <dl>
+            <dl className="dl-horizontal">
+              <dt>ARIA Account No</dt>
+              <dd>{ this.props.data.ariaAccountNo }</dd>
+              <dt>ARIA Account ID</dt>
+              <dd>{ this.props.data.ariaAccountID }</dd>
               <dt>cid</dt>
               <dd>{ this.props.data.cid }</dd>
-              <dt>active</dt>
+              <dt>Active</dt>
               <dd>{ this.props.data.active.toString() }</dd>
             </dl>
           </div>
         </div>
-        <hr />
-        <div className="row">
-          <div className="col-xs-2">
-            <strong>roles</strong>
-          </div>
-          <div className="col-xs-10">
-            { rolesE }
-          </div>
-        </div>
-        <hr />
-        <div className="row">
-          <div className="col-xs-2">
-            <strong>users</strong>
-          </div>
-          <div className="col-xs-10">
-            { usersE }
-          </div>
-        </div>
-        <hr />
-        <div className="row">
-          <div className="col-xs-2">
-            <strong>email masks</strong>
-          </div>
-          <div className="col-xs-10">
-            { emailMasksE }
-          </div>
+        <DdItems data={this.props.data.roles} label="Roles" deleteItem={this.deleteRole} />
+        <DdItems data={this.props.data.users} label="Users" deleteItem={this.deleteUser} />
+        <DdItems data={this.props.data.ipFilter} label="IP filter" deleteItem={this.deleteIp} />
+        <DdItems data={this.props.data.emailMasks} label="Email masks" deleteItem={this.deleteEmailmask} />
+      </div>
+    );
+  }
+}
+
+
+class DdItems extends React.Component {
+  constructor(props){
+    super(props);
+  }
+
+  render() {
+
+    const data = this.props.data || [];
+    const items = data.map((d,index) => <DdItem key={index} data={d} deleteItem={this.props.deleteItem.bind(this, d)} />);
+
+    return (
+      <div className="row" style={{ marginTop: '8px', minHeight: '10px' }}>
+        <div className="col-xs-12">
+          <dl className="dl-horizontal">
+            <dt>{ this.props.label }</dt>
+            <dd>
+              <table className="table table-condensed">
+                <tbody>
+                  { items }
+                </tbody>
+              </table>
+            </dd>
+          </dl>
         </div>
       </div>
     );
@@ -264,40 +333,38 @@ class CompanyDetails extends React.Component {
 }
 
 
-class CompanyUser extends React.Component {
+class DdItem extends React.Component {
   constructor(props){
     super(props);
+    this.showConfirmRemove = this.showConfirmRemove.bind(this);
+    this.state = {
+      confirmRemove: false
+    }
   }
 
-  render() {
+  showConfirmRemove() {
+    this.setState((prevState) => {
+      return {
+        confirmRemove: !prevState.confirmRemove
+      };
+    });
+  }
+
+  render() {    
     return (
-      <div>{ this.props.user }</div>
+      <tr>
+        <td>{ this.props.data }</td>
+        <td style={{ textAlign: 'right' }}>
+          <button type="button" className={`btn btn-xs ${ this.state.confirmRemove ? 'btn-success' : 'btn-danger' }`} onClick={this.showConfirmRemove}>
+            <span className={`glyphicon ${ this.state.confirmRemove ? 'glyphicon-minus' : 'glyphicon-trash' }`} aria-hidden="true"></span>
+          </button>
+          <span>&nbsp;</span>
+          <button type="button" className="btn btn-xs btn-danger" onClick={this.props.deleteItem} disabled={!this.state.confirmRemove}>
+            <span className="glyphicon glyphicon-trash" aria-hidden="true"></span> <span>Confirm</span>
+          </button>
+        </td>
+      </tr>
     );
   }
 }
 
-
-class CompanyRole extends React.Component {
-  constructor(props){
-    super(props);
-  }
-
-  render() {
-    return (
-      <div>{ this.props.role }</div>
-    );
-  }
-}
-
-
-class CompanyEmailMask extends React.Component {
-  constructor(props){
-    super(props);
-  }
-
-  render() {
-    return (
-      <div>{ this.props.emailMask }</div>
-    );
-  }
-}
