@@ -179,7 +179,10 @@ class Company extends React.Component {
   constructor(props){
     super(props);
     this.getCompany = this.getCompany.bind(this);
+    this.saveCompany = this.saveCompany.bind(this);
+    this.updateCompanyState = this.updateCompanyState.bind(this);
     this.showHideCompanyDetails = this.showHideCompanyDetails.bind(this);
+    this.showConfirmSave = this.showConfirmSave.bind(this);
     this.state = {
       company: null,
       showDetails: false,
@@ -187,11 +190,44 @@ class Company extends React.Component {
     };
   }
 
+
   getCompany() {
     const id = this.props.data._id;
     return this.props.fetchBPP(`/api/companies/${ id }`)
     .then(company => this.setState({ company }));
   }
+
+
+  saveCompany() {
+    console.log('save', this.state.company)
+    // PUT /companies/{id}
+    // Payload:
+    //  ipFilter
+    //  emailMasks
+    //  accessRules
+  }
+
+
+  
+  
+  addUser() {
+    
+  }
+  
+  
+  removeUser() {
+    
+  }
+
+
+  updateCompanyState(company) {
+    this.setState({ company });
+  }
+  // POST /companies/users
+  // Payload:
+  //  ariaAccountNo
+  //  add=string=UID
+  //  remove=string=UID
 
   showHideCompanyDetails() {
     if(this.state.showDetails) {
@@ -201,14 +237,32 @@ class Company extends React.Component {
       this.getCompany()
       .then(() => this.setState({
         showDetails: true,
-        showLoader: false
+        showLoader: false,
+        confirmSave: false,
+        confirmTimeout: null
       }));
     }
   }
 
+  showConfirmSave() {
+    this.setState((prevState) => {
+      let temp;
+      if(!prevState.confirmSave && !prevState.confirmTimeout) {
+        temp = setTimeout(this.showConfirmSave, 1500);
+      } else {
+        clearTimeout(prevState.confirmTimeout);
+      }
+
+      return {
+        confirmSave: !prevState.confirmSave,
+        confirmTimeout: temp
+      };
+    });
+  }
+
   render() {
     return (
-      <div  style={{ paddingBottom: '4px' }}>
+      <div style={{ paddingBottom: '4px' }}>
         <div className="row">
           <div className="col-xs-4">
             <button type="button" className="btn bt-xs btn-link" onClick={this.showHideCompanyDetails}>{ this.props.data.title }</button>
@@ -219,12 +273,31 @@ class Company extends React.Component {
               : null
             } */}
           </div>
-          <div className="col-xs-8">
+          <div className="col-xs-4">
             <CompanyOverview data={ this.state.company } />
           </div>
+          <div className="col-xs-4" style={{ textAlign: 'right' }}>
+            { this.state.showDetails
+              ? <div>
+                  <button type="button" className="btn btn-sm btn-danger" onClick={this.saveCompany} disabled={!this.state.confirmSave}>
+                    <span className="glyphicon glyphicon-save" aria-hidden="true"></span> <span>Confirm</span>
+                  </button>
+                  <span>&nbsp;</span>
+                  <button type="button" className="btn btn-xs btn-warning" className={`btn btn-sm ${ this.state.confirmSave ? 'btn-success' : 'btn-warning' }`} onClick={this.showConfirmSave}>
+                    <span className={`glyphicon ${ this.state.confirmSave ? 'glyphicon-repeat' : 'glyphicon-save' }`} aria-hidden="true"></span> <span>Save</span>
+                  </button>
+                  <span>&nbsp;</span>
+                  <button type="button" className="btn btn-sm btn-success" onClick={this.getCompany}>
+                    <span className="glyphicon glyphicon-refresh" aria-hidden="true"></span> <span>Reload</span>
+                  </button>
+                </div>
+              : null
+            }
+          </div>
         </div>
+
         { this.state.showDetails
-          ? <CompanyDetails data={ this.state.company } />
+          ? <CompanyDetails data={ this.state.company } updateCompanyState={this.updateCompanyState} />
           : null
         }
         <hr />
@@ -249,61 +322,73 @@ class CompanyOverview extends React.Component {
 class CompanyDetails extends React.Component {
   constructor(props){
     super(props);
-    this.deleteRole = this.deleteRole.bind(this);
+    this.removeAccessRules = this.removeAccessRules.bind(this);
+    this.removeIp = this.removeIp.bind(this);
+    this.removeEmailmask = this.removeEmailmask.bind(this);
   }
 
 
-  deleteRole(role) {
-    console.log('deleteRole')
-    console.log(role)
+  removeAccessRules(role) {
+    let newCompany = Object.assign({}, this.props.data);
+    // const roleIndex = newCompany.roles.findIndex(r => r === role);
+    // newCompany.roles.splice(roleIndex, 1);
+    this.props.updateCompanyState(newCompany);
   }
 
 
-  deleteUser(user) {
-    console.log('deleteUser')
-    console.log(user)
+  removeIp(item) {
+    let newCompany = Object.assign({}, this.props.data);
+    const index = newCompany.ipFilter.findIndex(i => i === item);
+    newCompany.ipFilter.splice(index, 1);
+    this.props.updateCompanyState(newCompany);
   }
 
 
-  deleteIp(ip) {
-    console.log('deleteIp')
-    console.log(ip)
+  removeEmailmask(item) {
+    let newCompany = Object.assign({}, this.props.data);
+    const index = newCompany.emailMasks.findIndex(i => i === item);
+    newCompany.emailMasks.splice(index, 1);
+    this.props.updateCompanyState(newCompany);
   }
 
-
-  deleteEmailmask(emailMasks) {
-    console.log('deleteEmailmask')
-    console.log(emailMasks)
-  }
 
   render() {
     return (
       <div style={{ marginTop: '10px', minHeight: '100px' }}>
         <div className="row">
-          <div className="col-xs-12">
-            <dl className="dl-horizontal">
-              <dt>ARIA Account No</dt>
-              <dd>{ this.props.data.ariaAccountNo }</dd>
-              <dt>ARIA Account ID</dt>
-              <dd>{ this.props.data.ariaAccountID }</dd>
-              <dt>cid</dt>
-              <dd>{ this.props.data.cid }</dd>
-              <dt>Active</dt>
-              <dd>{ this.props.data.active.toString() }</dd>
-            </dl>
+          <div className="col-xs-10 col-xs-offset-2">
+            <table className="table table-condensed">
+              <thead>
+                <tr>
+                  <th>ARIA Account No</th>
+                  <th>ARIA Account ID</th>
+                  <th>cid</th>
+                  <th>Active</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>{ this.props.data.ariaAccountNo || '-' }</td>
+                  <td>{ this.props.data.ariaAccountID || '-' }</td>
+                  <td>{ this.props.data.cid }</td>
+                  <td>{ this.props.data.active.toString() }</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
-        <DdItems data={this.props.data.roles} label="Roles" deleteItem={this.deleteRole} />
-        <DdItems data={this.props.data.users} label="Users" deleteItem={this.deleteUser} />
-        <DdItems data={this.props.data.ipFilter} label="IP filter" deleteItem={this.deleteIp} />
-        <DdItems data={this.props.data.emailMasks} label="Email masks" deleteItem={this.deleteEmailmask} />
+        <CompanyItems data={this.props.data.roles} label="Access rules" removeItem={this.removeAccessRules} />
+        <CompanyItems data={this.props.data.ipFilter} label="IP filter" removeItem={this.removeIp} />
+        <CompanyItems data={this.props.data.emailMasks} label="Email masks" removeItem={this.removeEmailmask} />
+        <hr />
+        <CompanyUsers />
       </div>
     );
   }
 }
 
 
-class DdItems extends React.Component {
+class CompanyItems extends React.Component {
   constructor(props){
     super(props);
   }
@@ -311,21 +396,22 @@ class DdItems extends React.Component {
   render() {
 
     const data = this.props.data || [];
-    const items = data.map((d,index) => <DdItem key={index} data={d} deleteItem={this.props.deleteItem.bind(this, d)} />);
+    const items = data.map((d) => <CompanyItem key={d} data={d} removeItem={this.props.removeItem.bind(this, d)} />);
 
     return (
       <div className="row" style={{ marginTop: '8px', minHeight: '10px' }}>
-        <div className="col-xs-12">
-          <dl className="dl-horizontal">
-            <dt>{ this.props.label }</dt>
-            <dd>
-              <table className="table table-condensed">
-                <tbody>
-                  { items }
-                </tbody>
-              </table>
-            </dd>
-          </dl>
+        <div className="col-xs-2" style={{ textAlign: 'right' }}>
+          <strong>{ this.props.label }</strong>
+        </div>
+        <div className="col-xs-10">
+          { items.length > 0
+           ? <table className="table table-condensed">
+              <tbody>
+                { items }
+              </tbody>
+            </table>
+            : <div>-</div>
+          }
         </div>
       </div>
     );
@@ -333,21 +419,9 @@ class DdItems extends React.Component {
 }
 
 
-class DdItem extends React.Component {
+class CompanyItem extends React.Component {
   constructor(props){
     super(props);
-    this.showConfirmRemove = this.showConfirmRemove.bind(this);
-    this.state = {
-      confirmRemove: false
-    }
-  }
-
-  showConfirmRemove() {
-    this.setState((prevState) => {
-      return {
-        confirmRemove: !prevState.confirmRemove
-      };
-    });
   }
 
   render() {    
@@ -355,12 +429,8 @@ class DdItem extends React.Component {
       <tr>
         <td>{ this.props.data }</td>
         <td style={{ textAlign: 'right' }}>
-          <button type="button" className={`btn btn-xs ${ this.state.confirmRemove ? 'btn-success' : 'btn-danger' }`} onClick={this.showConfirmRemove}>
-            <span className={`glyphicon ${ this.state.confirmRemove ? 'glyphicon-minus' : 'glyphicon-trash' }`} aria-hidden="true"></span>
-          </button>
-          <span>&nbsp;</span>
-          <button type="button" className="btn btn-xs btn-danger" onClick={this.props.deleteItem} disabled={!this.state.confirmRemove}>
-            <span className="glyphicon glyphicon-trash" aria-hidden="true"></span> <span>Confirm</span>
+          <button type="button" className='btn btn-xs btn-danger' onClick={this.props.removeItem}>
+            <span className='glyphicon glyphicon-trash' aria-hidden="true"></span> <span>Remove</span>
           </button>
         </td>
       </tr>
@@ -368,3 +438,22 @@ class DdItem extends React.Component {
   }
 }
 
+
+class CompanyUsers extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+
+  render() {
+    return (
+      <div className="row" style={{ marginTop: '8px', minHeight: '10px' }}>
+        <div className="col-xs-2" style={{ textAlign: 'right' }}>
+          <div><strong>Users</strong></div>
+        </div>
+        <div className="col-xs-10">
+          <div>TODO</div>
+        </div>
+      </div>
+    );
+  }
+}
