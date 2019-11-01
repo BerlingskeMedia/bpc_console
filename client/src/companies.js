@@ -14,11 +14,7 @@ module.exports = class extends React.Component {
       companies: [],
       authenticated: false,
       bpp_ticket: null,
-      // bpp_url: null,
-      // bpp_url: 'https://bpp.berlingskemedia.net',
-      // bpp_url: 'https://bpp.berlingskemedia-testing.net',
-      bpp_url: 'http://bpp.local:8000'
-      // bpp_url: 'http://localhost:8000'
+      bpp_url: null
     };
   }
 
@@ -26,51 +22,33 @@ module.exports = class extends React.Component {
   getTicket() {
     const auth = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse();
 
-    const request = new Request(`${ this.state.bpp_url }/authenticate`, {
+    return this.fetchBPP('/authenticate', {
       method: 'POST',
       body: JSON.stringify({
         id_token: auth.id_token,
         access_token: auth.access_token
       })
-    });
-
-    return fetch(request)
-    .then(response => {
-      if(response.status === 200) {
-        return response.json()
-        .then(this.saveTicket);
-      } else if(response.status === 401) {
-        return Promise.reject(response);
-      }
+    })
+    .then(this.saveTicket)
+    .then(ticket => {
+      // TODO: Set a timeout when to reissue the ticket -
+      // - it must refresh it after reload if it's old
+      // and it must keep reissueing it going forward
     });
   }
 
 
   refreshTicket(credentials) {
-
-    const request = new Request(`${ this.state.bpp_url }/authenticate`, {
+    return this.fetchBPP('/authenticate', {
       method: 'POST',
       body: JSON.stringify(credentials)
-    });
-
-    const result = hawk.client.header(request.method, request.url, { credentials, app: credentials.app });
-    
-    request.headers.set('Authorization', result.header);
-
-    return fetch(request)
-    .then(response => {
-      if(response.status === 200) {
-        return response.json()
-        .then(this.saveTicket)
-        .then(ticket => {
-          // TODO: Set a timeout when to reissue the ticket -
-          // - it must refresh it after reload if it's old
-          // and it must keep reissueing it going forward
-        });
-      } else if(response.status === 401) {
-        return Promise.reject(response);
-      }
-    });
+    })
+    .then(this.saveTicket)
+    .then(ticket => {
+      // TODO: Set a timeout when to reissue the ticket -
+      // - it must refresh it after reload if it's old
+      // and it must keep reissueing it going forward
+    });    
   }
 
 
@@ -82,35 +60,54 @@ module.exports = class extends React.Component {
 
 
   componentDidMount() {
-    if(!this.state.bpp_url) {
-      const bpp_url = window.location.origin.replace('console', 'bpp');
-      this.setState({ bpp_url });
+    let bpp_url = window.location.origin.replace('console', 'bpp');
+    const local_bpp_url = window.localStorage.getItem('bpp_url');
+
+    if(typeof local_bpp_url === 'string' && local_bpp_url.length > 0) {
+      bpp_url = local_bpp_url;
     }
 
-    let bpp_ticket;
+    console.log(`Using BPP URL ${ bpp_url }`);
 
-    try {
-      bpp_ticket = window.sessionStorage.getItem('bpp_ticket');
-      bpp_ticket = JSON.parse(bpp_ticket);
-    } catch(ex) {
-      bpp_ticket = null;
-    }
+    this.setState({ bpp_url }, () => {
 
-    if(bpp_ticket) {
-      this.refreshTicket(bpp_ticket)
-      .then(this.getCompanies)
-    } else {
-      this.getTicket()
-      .then(this.getCompanies)
-    }
+
+      let bpp_ticket;
+  
+      try {
+        bpp_ticket = window.sessionStorage.getItem('bpp_ticket');
+        bpp_ticket = JSON.parse(bpp_ticket);
+      } catch(ex) {
+        bpp_ticket = null;
+      }
+  
+      if(bpp_ticket) {
+        this.refreshTicket(bpp_ticket)
+        .then(this.getCompanies)
+      } else {
+        this.getTicket()
+        .then(this.getCompanies)
+      }
+    });
+
   }
 
 
   fetchBPP(path, options) {
+
+    if(!this.state.bpp_url) {
+      console.error('BPP URL missing');
+      return;
+    }
+
     const request = new Request(`${ this.state.bpp_url }${ path }`, options);
+
     const credentials = this.state.bpp_ticket;
-    const result = hawk.client.header(request.method, request.url, { credentials, app: credentials.app });
-    request.headers.set('Authorization', result.header);
+    if(credentials) {
+      const result = hawk.client.header(request.method, request.url, { credentials, app: credentials.app });
+      request.headers.set('Authorization', result.header);
+    }
+
     return fetch(request)
     .then(response => {
       if(response.status === 200) {
