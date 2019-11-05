@@ -5,18 +5,81 @@ module.exports = class extends React.Component {
 
   constructor(props) {
     super(props);
+    this.loadTicket = this.loadTicket.bind(this);
     this.getTicket = this.getTicket.bind(this);
     this.refreshTicket = this.refreshTicket.bind(this);
     this.saveTicket = this.saveTicket.bind(this);
     this.getCompanies = this.getCompanies.bind(this);
+    this.getAccessRules = this.getAccessRules.bind(this);
     this.fetchBPP = this.fetchBPP.bind(this);
+    this.fetchBPC = this.fetchBPC.bind(this);
     this.state = {
       companies: [],
-      authenticated: false,
-      bpp_ticket: null,
-      bpp_url: null
+      accessrules: [],
+      authenticated: false
     };
   }
+
+
+  loadTicket() {
+    let credentials = null;
+    try {
+      credentials =  JSON.parse(window.sessionStorage.getItem('bpp_ticket'));
+    } catch(ex) { }
+    return credentials;
+  }
+
+
+  fetchBPP(path, options) {
+
+    let bpp_url = window.location.origin.replace('console', 'bpp');
+    const local_bpp_url = window.localStorage.getItem('bpp_url');
+
+    if(typeof local_bpp_url === 'string' && local_bpp_url.length > 0) {
+      bpp_url = local_bpp_url;
+    }
+
+    if(!bpp_url) {
+      console.error('BPP URL missing');
+      return;
+    }
+
+    const request = new Request(`${ bpp_url }${ path }`, options);
+
+    const credentials = this.loadTicket();
+    if(credentials) {
+      const result = hawk.client.header(request.method, request.url, { credentials, app: credentials.app });
+      request.headers.set('Authorization', result.header);
+    }
+
+    return fetch(request)
+    .then(response => {
+      if(response.status === 200) {
+        return response.json().then(data => data);
+      } else if(response.status === 401) {
+        return Promise.reject(response);
+      } else {
+        console.log(`Unhandled statusCode ${ response.status } for request ${ request.method } ${ request.url }`)
+      }
+    });
+  }
+
+
+  fetchBPC(path, options) {
+    const request = new Request(`${ path }`, options);
+
+    return fetch(request)
+    .then(response => {
+      if(response.status === 200) {
+        return response.json().then(data => data);
+      } else if(response.status === 401) {
+        return Promise.reject(response);
+      } else {
+        console.log(`Unhandled statusCode ${ response.status } for request ${ request.method } ${ request.url }`)
+      }
+    });
+  }
+
 
 
   getTicket() {
@@ -59,82 +122,41 @@ module.exports = class extends React.Component {
   }
 
 
-  componentDidMount() {
-    let bpp_url = window.location.origin.replace('console', 'bpp');
-    const local_bpp_url = window.localStorage.getItem('bpp_url');
-
-    if(typeof local_bpp_url === 'string' && local_bpp_url.length > 0) {
-      bpp_url = local_bpp_url;
-    }
-
-    console.log(`Using BPP URL ${ bpp_url }`);
-
-    this.setState({ bpp_url }, () => {
-
-
-      let bpp_ticket;
-  
-      try {
-        bpp_ticket = window.sessionStorage.getItem('bpp_ticket');
-        bpp_ticket = JSON.parse(bpp_ticket);
-      } catch(ex) {
-        bpp_ticket = null;
-      }
-  
-      if(bpp_ticket) {
-        this.refreshTicket(bpp_ticket)
-        .then(this.getCompanies)
-      } else {
-        this.getTicket()
-        .then(this.getCompanies)
-      }
-    });
-
-  }
-
-
-  fetchBPP(path, options) {
-
-    if(!this.state.bpp_url) {
-      console.error('BPP URL missing');
-      return;
-    }
-
-    const request = new Request(`${ this.state.bpp_url }${ path }`, options);
-
-    const credentials = this.state.bpp_ticket;
-    if(credentials) {
-      const result = hawk.client.header(request.method, request.url, { credentials, app: credentials.app });
-      request.headers.set('Authorization', result.header);
-    }
-
-    return fetch(request)
-    .then(response => {
-      if(response.status === 200) {
-        return response.json().then(data => data);
-      } else if(response.status === 401) {
-        return Promise.reject(response);
-      } else {
-        console.log(`Unhandled statusCode ${ response.status } for request ${ request.method } ${ request.url }`)
-      }
-    });
-  }
-
-
-  getCompanies() {
-    return this.fetchBPP(`/api/companies`)
+  getCompanies(query) {
+    return this.fetchBPP(`/api/companies${ query || '' }`)
     .then(companies => this.setState({ companies }));
+  }
+
+
+  getAccessRules() {
+    return this.fetchBPP(`/api/accessrules`)
+    .then(accessrules => this.setState({ accessrules }));
+  }
+
+
+  componentDidMount() {
+    const bpp_ticket = this.loadTicket();
+    
+    if(bpp_ticket) {
+      this.refreshTicket(bpp_ticket)
+      .then(this.getCompanies)
+      .then(this.getAccessRules)
+    } else {
+      this.getTicket()
+      .then(this.getCompanies)
+      .then(this.getAccessRules)
+    }
   }
 
 
   render() {
     const companies = this.state.companies.map(company => {
-      return <Company key={company._id} data={company} fetchBPP={ this.fetchBPP } />
+      return <Company key={company._id} data={company} accessrules={this.state.accessrules} fetchBPP={this.fetchBPP} />
     });
 
     return (
       <div className="companies" style={{ paddingTop: '30px' }}>
-        <CompanySearch />
+        <CompanySearch getCompanies={this.getCompanies} fetchBPP={this.fetchBPP} fetchBPC={this.fetchBPC} />
         { companies }
         {/* <table className="table table-condensed">
           <tbody>
@@ -150,20 +172,102 @@ module.exports = class extends React.Component {
 class CompanySearch extends React.Component {
   constructor(props){
     super(props);
+    this.onSearchChange = this.onSearchChange.bind(this);
+    this.onUserSearchChange = this.onUserSearchChange.bind(this);
+    this.searchUser = this.searchUser.bind(this);
+    this.search = this.search.bind(this);
     this.state = {
-
+      searchInProgress: false,
+      searchTimer: null,
+      searchUserInProgress: false,
+      searchUserTimer: null,
+      foundUser: null
     };
   }
+
+  
+  searchUser() {
+    const searchText = this.userSearchBox.value;
+    if(searchText.length > 0) {
+      const query = `?email=${ encodeURIComponent(searchText) }&id=${searchText}`;
+
+      return this.props.fetchBPC(`/api/users${ query }`)
+      .then(users => {
+        console.log(users)
+        if(users.length === 1) {
+          this.setState({ foundUser: users[0] }, this.search);
+        }
+      });
+
+    }
+  }
+
+
+  onUserSearchChange() {
+    clearTimeout(this.state.searchUserTimer);
+    this.setState({searchUserTimer: setTimeout(this.searchUser, 1000)});
+  }
+
+
+  onSearchChange(e) {
+    clearTimeout(this.state.searchTimer);
+    this.setState({searchTimer: setTimeout(this.search, 1000)});
+  }
+
+
+  search() {
+    if(this.state.searchInProgress){
+      return false;
+    }
+
+    const searchParams = [];
+
+    if(this.titleSearchBox.value.length > 0) {
+      searchParams.push(`title=${ encodeURIComponent(this.titleSearchBox.value) }`);
+    }
+
+    if(this.state.foundUser) {
+      searchParams.push(`user=${ encodeURIComponent(this.state.foundUser._id) }`);
+    }
+    
+    const query = `?${ searchParams.join('&') }`;
+
+    this.props.getCompanies(query);
+  }
+
 
   render() {
     return (
       <div style={{ paddingBottom: '20px' }}>
         <div className="row">
           <div className="col-xs-4">
-            <input type="text" name="searchBox" className="form-control" placeholder="Type company name start search"></input>
+            <input
+              type="text"
+              name="titleSearchBox"
+              onChange={this.onSearchChange}
+              className="form-control"
+              placeholder="Type company name start search"
+              ref={(titleSearchBox) => this.titleSearchBox = titleSearchBox} />
+            <div style={{ paddingLeft: '4px', color: 'darkgrey' }}><small><em>Use ^ for the start, $ for the end.</em></small></div>
           </div>
           <div className="col-xs-4">
-            <input type="text" name="searchBox" className="form-control" placeholder="Type user email start search"></input>
+            <input
+              type="text"
+              name="userSearchBox"
+              onChange={this.onUserSearchChange}
+              className="form-control"
+              placeholder="Type user email or ID start search"
+              ref={(userSearchBox) => this.userSearchBox = userSearchBox} />
+          </div>
+          <div className="col-xs-2">
+            <select className="form-control">
+              <option disabled="" value="N/A">accessFeature</option>
+            </select>
+          </div>
+          <div className="col-xs-2">
+            <select className="form-control">
+              <option disabled="" value="N/A">titleDomain</option>
+            </select>
           </div>
         </div>
       </div>
@@ -180,6 +284,9 @@ class Company extends React.Component {
     this.updateCompanyState = this.updateCompanyState.bind(this);
     this.showHideCompanyDetails = this.showHideCompanyDetails.bind(this);
     this.showConfirmSave = this.showConfirmSave.bind(this);
+    this.removeAccessRules = this.removeAccessRules.bind(this);
+    this.removeIp = this.removeIp.bind(this);
+    this.removeEmailmask = this.removeEmailmask.bind(this);
     this.state = {
       company: null,
       showDetails: false,
@@ -187,9 +294,8 @@ class Company extends React.Component {
     };
   }
 
-
-  getCompany() {
-    const id = this.props.data._id;
+  
+  getCompany(id) {
     return this.props.fetchBPP(`/api/companies/${ id }`)
     .then(company => this.setState({ company }));
   }
@@ -217,6 +323,35 @@ class Company extends React.Component {
   }
 
 
+  removeAccessRules(role) {
+    let newCompany = Object.assign({}, this.state.company);
+    // const roleIndex = newCompany.roles.findIndex(r => r === role);
+    // newCompany.roles.splice(roleIndex, 1);
+    this.updateCompanyState(newCompany);
+  }
+
+
+  removeIp(item) {
+    let newCompany = Object.assign({}, this.state.company);
+    const index = newCompany.ipFilter.findIndex(i => i === item);
+    newCompany.ipFilter.splice(index, 1);
+    this.updateCompanyState(newCompany); // TODO
+    // this.setState((prevState) => {
+    //   return {
+    //     company: prevState.company.ipFilter.splice(index, 1);
+    //   }
+    // });
+  }
+
+
+  removeEmailmask(item) {
+    let newCompany = Object.assign({}, this.state.company);
+    const index = newCompany.emailMasks.findIndex(i => i === item);
+    newCompany.emailMasks.splice(index, 1);
+    this.updateCompanyState(newCompany);
+  }
+
+
   updateCompanyState(company) {
     this.setState({ company });
   }
@@ -231,7 +366,7 @@ class Company extends React.Component {
       this.setState({ showDetails: false });
     } else {
       this.setState({ showLoader: true });
-      this.getCompany()
+      this.getCompany(this.props.data._id)
       .then(() => this.setState({
         showDetails: true,
         showLoader: false,
@@ -293,8 +428,46 @@ class Company extends React.Component {
           </div>
         </div>
 
-        { this.state.showDetails
+        {/* { this.state.showDetails
           ? <CompanyDetails data={ this.state.company } updateCompanyState={this.updateCompanyState} />
+          : null
+        } */}
+
+        { this.state.showDetails
+          ?  <div style={{ marginTop: '10px', minHeight: '100px' }}>
+              <div className="row">
+                <div className="col-xs-10 col-xs-offset-2">
+                  <table className="table table-condensed">
+                    <thead>
+                      <tr>
+                        <th>ARIA Account No</th>
+                        <th>ARIA Account ID</th>
+                        <th>cid</th>
+                        <th>Active</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>{ this.state.company.ariaAccountNo || '-' }</td>
+                        <td>{ this.state.company.ariaAccountID || '-' }</td>
+                        <td>{ this.state.company.cid }</td>
+                        <td>{ this.state.company.active || '-' }</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <AccessRules data={this.state.company.accessRules} accessrules={this.props.accessrules} removeItem={this.removeAccessRules} />
+              {/* <AddAccessRules accessrules={this.props.accessrules} addAccessRule={this.addAccessRule} /> */}
+              <CompanyItems data={this.state.company.ipFilter} label="IP filter" removeItem={this.removeIp} />
+              <CompanyItems data={this.state.company.emailMasks} label="Email masks" removeItem={this.removeEmailmask} />
+              <hr />
+              <div className="panel panel-default">
+                <div className="panel-body">
+                  <CompanyUsers />
+                </div>
+              </div>
+            </div>  
           : null
         }
         <hr />
@@ -316,69 +489,187 @@ class CompanyOverview extends React.Component {
 }
 
 
-class CompanyDetails extends React.Component {
+// class CompanyDetails extends React.Component {
+//   constructor(props){
+//     super(props);
+//     this.removeAccessRules = this.removeAccessRules.bind(this);
+//     this.removeIp = this.removeIp.bind(this);
+//     this.removeEmailmask = this.removeEmailmask.bind(this);
+//   }
+
+
+//   removeAccessRules(role) {
+//     let newCompany = Object.assign({}, this.props.data);
+//     // const roleIndex = newCompany.roles.findIndex(r => r === role);
+//     // newCompany.roles.splice(roleIndex, 1);
+//     this.props.updateCompanyState(newCompany);
+//   }
+
+
+//   removeIp(item) {
+//     let newCompany = Object.assign({}, this.props.data);
+//     const index = newCompany.ipFilter.findIndex(i => i === item);
+//     newCompany.ipFilter.splice(index, 1);
+//     this.props.updateCompanyState(newCompany);
+//   }
+
+
+//   removeEmailmask(item) {
+//     let newCompany = Object.assign({}, this.props.data);
+//     const index = newCompany.emailMasks.findIndex(i => i === item);
+//     newCompany.emailMasks.splice(index, 1);
+//     this.props.updateCompanyState(newCompany);
+//   }
+
+
+//   render() {
+//     return (
+//       <div style={{ marginTop: '10px', minHeight: '100px' }}>
+//         <div className="row">
+//           <div className="col-xs-10 col-xs-offset-2">
+//             <table className="table table-condensed">
+//               <thead>
+//                 <tr>
+//                   <th>ARIA Account No</th>
+//                   <th>ARIA Account ID</th>
+//                   <th>cid</th>
+//                   <th>Active</th>
+//                 </tr>
+//               </thead>
+//               <tbody>
+//                 <tr>
+//                   <td>{ this.props.data.ariaAccountNo || '-' }</td>
+//                   <td>{ this.props.data.ariaAccountID || '-' }</td>
+//                   <td>{ this.props.data.cid }</td>
+//                   <td>{ this.props.data.active.toString() }</td>
+//                 </tr>
+//               </tbody>
+//             </table>
+//           </div>
+//         </div>
+//         <AccessRules data={this.props.data.accessRules} removeItem={this.removeAccessRules} />
+//         <CompanyItems data={this.props.data.ipFilter} label="IP filter" removeItem={this.removeIp} />
+//         <CompanyItems data={this.props.data.emailMasks} label="Email masks" removeItem={this.removeEmailmask} />
+//         <hr />
+//         <CompanyUsers />
+//       </div>
+//     );
+//   }
+// }
+
+
+class AccessRules extends React.Component {
   constructor(props){
     super(props);
-    this.removeAccessRules = this.removeAccessRules.bind(this);
-    this.removeIp = this.removeIp.bind(this);
-    this.removeEmailmask = this.removeEmailmask.bind(this);
   }
-
-
-  removeAccessRules(role) {
-    let newCompany = Object.assign({}, this.props.data);
-    // const roleIndex = newCompany.roles.findIndex(r => r === role);
-    // newCompany.roles.splice(roleIndex, 1);
-    this.props.updateCompanyState(newCompany);
-  }
-
-
-  removeIp(item) {
-    let newCompany = Object.assign({}, this.props.data);
-    const index = newCompany.ipFilter.findIndex(i => i === item);
-    newCompany.ipFilter.splice(index, 1);
-    this.props.updateCompanyState(newCompany);
-  }
-
-
-  removeEmailmask(item) {
-    let newCompany = Object.assign({}, this.props.data);
-    const index = newCompany.emailMasks.findIndex(i => i === item);
-    newCompany.emailMasks.splice(index, 1);
-    this.props.updateCompanyState(newCompany);
-  }
-
 
   render() {
+
+    const items = this.props.data.map(accessRule => {
+
+      console.log('this.props.accessrules')
+      console.log(this.props.accessrules)
+      const access = this.props.accessrules.find((a) => {
+        return a.accessFeature === accessRule.accessFeature && a.titleDomain === accessRule.titleDomain
+      });
+
+      const accessRoles = Object.keys(access.access).map((k) => {
+        return (<div>
+          <span>{k}:</span> <span>{access.access[k].join(', ')}</span>
+        </div>);
+      });
+
+
+      return (
+        <tr key={accessRule.accessFeature + accessRule.titleDomain }>
+          <td>{accessRule.accessFeature}</td>
+          <td>{accessRule.titleDomain}</td>
+          <td>{ accessRoles }</td>
+          <td style={{ textAlign: 'right' }}>
+            <button type="button" className='btn btn-xs btn-danger' onClick={this.props.removeItem}>
+              <span className='glyphicon glyphicon-trash' aria-hidden="true"></span> <span>Remove</span>
+            </button>
+          </td>
+        </tr>
+      );
+    });
+
     return (
-      <div style={{ marginTop: '10px', minHeight: '100px' }}>
-        <div className="row">
-          <div className="col-xs-10 col-xs-offset-2">
-            <table className="table table-condensed">
-              <thead>
-                <tr>
-                  <th>ARIA Account No</th>
-                  <th>ARIA Account ID</th>
-                  <th>cid</th>
-                  <th>Active</th>
-                </tr>
-              </thead>
+      <div className="row" style={{ marginTop: '40px', minHeight: '10px' }}>
+        <div className="col-xs-2" style={{ textAlign: 'right' }}>
+          <strong>Access rules</strong>
+        </div>
+        <div className="col-xs-10">
+          { items.length > 0
+          ? <table className="table table-condensed">
+            <thead>
+              <tr>
+                <th>accessFeature</th>
+                <th>titleDomain</th>
+                <th>Access ( -> BPC)</th>
+                <th></th>
+              </tr>
+            </thead>
               <tbody>
-                <tr>
-                  <td>{ this.props.data.ariaAccountNo || '-' }</td>
-                  <td>{ this.props.data.ariaAccountID || '-' }</td>
-                  <td>{ this.props.data.cid }</td>
-                  <td>{ this.props.data.active.toString() }</td>
-                </tr>
+                { items }
               </tbody>
             </table>
-          </div>
+            : <div>-</div>
+          }
         </div>
-        <CompanyItems data={this.props.data.roles} label="Access rules" removeItem={this.removeAccessRules} />
-        <CompanyItems data={this.props.data.ipFilter} label="IP filter" removeItem={this.removeIp} />
-        <CompanyItems data={this.props.data.emailMasks} label="Email masks" removeItem={this.removeEmailmask} />
-        <hr />
-        <CompanyUsers />
+      </div>
+    );
+  }
+}
+
+
+class AddAccessRules extends React.Component {
+  constructor(props){
+    super(props);
+  }
+
+  render() {
+
+    const accessFeaturesOptions = this.props.accessrules.map((a, index) => {
+      return (
+        <option key={index} value={a.accessFeature}>{a.accessFeature}</option>
+      );
+    });
+
+
+    const titleDomainOptions = this.props.accessrules.map((a, index) => {
+      return (
+        <option key={index} value={a.titleDomain}>{a.titleDomain}</option>
+      );
+    });
+
+
+    // const titleDomainOptions = this.props.accessrules.map((a, index) => {
+    //   return (
+    //     <option key={index} value={index}>{a.accessFeature + '/' + a.titleDomain}</option>
+    //   );
+    // });
+
+    return(
+      <div className="row" style={{ marginTop: '5px', minHeight: '10px' }}>
+        <div className="col-xs-2" style={{ textAlign: 'right' }}>
+          <strong>Add Access rules</strong>
+        </div>
+        <div className="col-xs-3">
+          <select className="form-control input-sm">
+            <option key={-1} disabled value='N/A'>Select accessFeature</option>
+            { accessFeaturesOptions }
+          </select>
+        </div>
+        <div className="col-xs-3">
+          <select className="form-control input-sm">
+            <option key={-1} disabled value='N/A'>Select titleDomain</option>
+            { titleDomainOptions }
+          </select>
+        </div>
+        <div className="col-xs-2">
+
+        </div>
       </div>
     );
   }
@@ -396,7 +687,7 @@ class CompanyItems extends React.Component {
     const items = data.map((d) => <CompanyItem key={d} data={d} removeItem={this.props.removeItem.bind(this, d)} />);
 
     return (
-      <div className="row" style={{ marginTop: '8px', minHeight: '10px' }}>
+      <div className="row" style={{ marginTop: '40px', minHeight: '10px' }}>
         <div className="col-xs-2" style={{ textAlign: 'right' }}>
           <strong>{ this.props.label }</strong>
         </div>
@@ -443,7 +734,7 @@ class CompanyUsers extends React.Component {
 
   render() {
     return (
-      <div className="row" style={{ marginTop: '8px', minHeight: '10px' }}>
+      <div className="row" style={{ marginTop: '40px', minHeight: '10px' }}>
         <div className="col-xs-2" style={{ textAlign: 'right' }}>
           <div><strong>Users</strong></div>
         </div>
