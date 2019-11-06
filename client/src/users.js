@@ -10,14 +10,17 @@ module.exports = class extends React.Component {
     this.state = { users: null };
   }
 
+  
   setUsers(users) {
     // We clear state so that it triggers a re-render in the SearchResult component
     this.setState({users: []});
     this.setState({users: users});
   }
 
+
   componentDidMount() {
   }
+
 
   render() {
 
@@ -52,6 +55,7 @@ class SearchUser extends React.Component {
     };
   }
 
+
   componentDidMount() {
     const searchText = getUrlParameter("search");
     if(searchText.length > 0) {
@@ -59,6 +63,7 @@ class SearchUser extends React.Component {
       this.searchUser();
     }
   }
+
 
   onSearchChange(e) {
     // // We're clearing the old timer
@@ -70,11 +75,13 @@ class SearchUser extends React.Component {
     }
   }
 
+
   onClickReload(e) {
     if (this.searchBox.value.length > 0) {
       this.searchUser();
     }
   }
+
 
   searchUser() {
     if(this.state.searchInProgress){
@@ -103,10 +110,12 @@ class SearchUser extends React.Component {
     });
   }
 
+
   clearSearch() {
     window.history.pushState({ search: "" }, "search", `/users`);
     this.props.setUsers(null);
   }
+
 
   render() {
     return (

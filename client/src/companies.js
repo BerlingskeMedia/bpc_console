@@ -172,7 +172,7 @@ module.exports = class extends React.Component {
 class CompanySearch extends React.Component {
   constructor(props){
     super(props);
-    this.onSearchChange = this.onSearchChange.bind(this);
+    this.onTitleSearchChange = this.onTitleSearchChange.bind(this);
     this.onUserSearchChange = this.onUserSearchChange.bind(this);
     this.searchUser = this.searchUser.bind(this);
     this.search = this.search.bind(this);
@@ -181,35 +181,35 @@ class CompanySearch extends React.Component {
       searchTimer: null,
       searchUserInProgress: false,
       searchUserTimer: null,
-      foundUser: null
+      foundUser: null,
+      userSearchBoxHasInput: false
     };
   }
 
   
-  searchUser() {
-    const searchText = this.userSearchBox.value;
-    if(searchText.length > 0) {
-      const query = `?email=${ encodeURIComponent(searchText) }&id=${searchText}`;
-
-      return this.props.fetchBPC(`/api/users${ query }`)
-      .then(users => {
-        console.log(users)
-        if(users.length === 1) {
-          this.setState({ foundUser: users[0] }, this.search);
-        }
-      });
-
-    }
-  }
-
-
   onUserSearchChange() {
     clearTimeout(this.state.searchUserTimer);
     this.setState({searchUserTimer: setTimeout(this.searchUser, 1000)});
   }
+  
+
+  searchUser() {
+    const searchText = this.userSearchBox.value;
+    if(searchText.length > 0) {
+      const query = `?provider=gigya&email=${ encodeURIComponent(searchText) }&id=${searchText}`;
+
+      return this.props.fetchBPC(`/api/users${ query }`)
+      .then(users => {
+        const foundUser = users.length === 1 ? users[0] : null;
+        this.setState({ foundUser, userSearchBoxHasInput: true }, this.search);
+      });
+    } else {
+      this.setState({ foundUser: null, userSearchBoxHasInput: false }, this.search);
+    }
+  }
 
 
-  onSearchChange(e) {
+  onTitleSearchChange(e) {
     clearTimeout(this.state.searchTimer);
     this.setState({searchTimer: setTimeout(this.search, 1000)});
   }
@@ -227,16 +227,32 @@ class CompanySearch extends React.Component {
     }
 
     if(this.state.foundUser) {
-      searchParams.push(`user=${ encodeURIComponent(this.state.foundUser._id) }`);
+      searchParams.push(`user=${ encodeURIComponent(this.state.foundUser.id) }`);
     }
     
     const query = `?${ searchParams.join('&') }`;
 
-    this.props.getCompanies(query);
+    this.setState({ searchInProgress: true }, () => {
+      this.props.getCompanies(query)
+      .then(() => this.setState({ searchInProgress: false }));
+    })
   }
 
 
   render() {
+
+    let userSearchFeedback = null;
+    let userSearchBoxClass = 'form-group has-feedback';
+    if(this.state.userSearchBoxHasInput) {
+      if (this.state.foundUser) {
+        userSearchFeedback = <span className="glyphicon glyphicon-ok form-control-feedback" aria-hidden="true"></span>;
+        userSearchBoxClass += ' has-success'
+      } else {
+        userSearchFeedback = <span className="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>;
+        userSearchBoxClass += ' has-error'
+      }
+    }
+
     return (
       <div style={{ paddingBottom: '20px' }}>
         <div className="row">
@@ -244,20 +260,26 @@ class CompanySearch extends React.Component {
             <input
               type="text"
               name="titleSearchBox"
-              onChange={this.onSearchChange}
+              onChange={this.onTitleSearchChange}
               className="form-control"
               placeholder="Type company name start search"
               ref={(titleSearchBox) => this.titleSearchBox = titleSearchBox} />
             <div style={{ paddingLeft: '4px', color: 'darkgrey' }}><small><em>Use ^ for the start, $ for the end.</em></small></div>
           </div>
           <div className="col-xs-4">
-            <input
-              type="text"
-              name="userSearchBox"
-              onChange={this.onUserSearchChange}
-              className="form-control"
-              placeholder="Type user email or ID start search"
-              ref={(userSearchBox) => this.userSearchBox = userSearchBox} />
+            <div className={ userSearchBoxClass }>
+              <input
+                type="text"
+                name="userSearchBox"
+                id="userSearchBox"
+                aria-describedby="inputSuccess2Status"
+                onChange={this.onUserSearchChange}
+                className="form-control"
+                placeholder="Type user email or ID start search"
+                ref={(userSearchBox) => this.userSearchBox = userSearchBox} />
+                { userSearchFeedback }
+              <div style={{ paddingLeft: '4px', color: 'darkgrey' }}><small><em>User not found will be ignored.</em></small></div>
+            </div>
           </div>
           <div className="col-xs-2">
             <select className="form-control">
