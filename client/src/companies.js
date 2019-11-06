@@ -278,9 +278,9 @@ class CompanySearch extends React.Component {
                 type="text"
                 name="userSearchBox"
                 id="userSearchBox"
+                className="form-control"
                 aria-describedby="inputSuccess2Status"
                 onChange={this.onUserSearchChange}
-                className="form-control"
                 placeholder="Type user email or ID start search"
                 ref={(userSearchBox) => this.userSearchBox = userSearchBox} />
                 { userSearchFeedback }
@@ -359,6 +359,12 @@ class Company extends React.Component {
   }
 
 
+  addIp(item) {
+    console.log('addIp', item);
+    return Promise.resolve();
+  }
+
+
   removeIp(item) {
     let newCompany = Object.assign({}, this.state.company);
     const index = newCompany.ipFilter.findIndex(i => i === item);
@@ -371,6 +377,10 @@ class Company extends React.Component {
     // });
   }
 
+  addEmailmask(item) {
+    console.log('addEmailmask', item);
+    return Promise.resolve();
+  }
 
   removeEmailmask(item) {
     let newCompany = Object.assign({}, this.state.company);
@@ -456,13 +466,8 @@ class Company extends React.Component {
           </div>
         </div>
 
-        {/* { this.state.showDetails
-          ? <CompanyDetails data={ this.state.company } updateCompanyState={this.updateCompanyState} />
-          : null
-        } */}
-
         { this.state.showDetails
-          ?  <div style={{ marginTop: '10px', minHeight: '100px' }}>
+          ?  <div style={{ marginTop: '10px', marginBottom: '100px', minHeight: '100px' }}>
               <div className="row">
                 <div className="col-xs-10 col-xs-offset-2">
                   <table className="table table-condensed">
@@ -487,8 +492,8 @@ class Company extends React.Component {
               </div>
               <AccessRules data={this.state.company.accessRules} accessrules={this.props.accessrules} removeItem={this.removeAccessRules} />
               {/* <AddAccessRules accessrules={this.props.accessrules} addAccessRule={this.addAccessRule} /> */}
-              <CompanyItems data={this.state.company.ipFilter} label="IP filter" removeItem={this.removeIp} />
-              <CompanyItems data={this.state.company.emailMasks} label="Email masks" removeItem={this.removeEmailmask} />
+              <ArrayItems data={this.state.company.ipFilter} label="IP filter" removeItem={this.removeIp} addItem={this.addIp} />
+              <ArrayItems data={this.state.company.emailMasks} label="Email masks" removeItem={this.removeEmailmask} addItem={this.addEmailmask} />
               <hr />
               <div className="panel panel-default">
                 <div className="panel-body">
@@ -517,75 +522,6 @@ class CompanyOverview extends React.Component {
 }
 
 
-// class CompanyDetails extends React.Component {
-//   constructor(props){
-//     super(props);
-//     this.removeAccessRules = this.removeAccessRules.bind(this);
-//     this.removeIp = this.removeIp.bind(this);
-//     this.removeEmailmask = this.removeEmailmask.bind(this);
-//   }
-
-
-//   removeAccessRules(role) {
-//     let newCompany = Object.assign({}, this.props.data);
-//     // const roleIndex = newCompany.roles.findIndex(r => r === role);
-//     // newCompany.roles.splice(roleIndex, 1);
-//     this.props.updateCompanyState(newCompany);
-//   }
-
-
-//   removeIp(item) {
-//     let newCompany = Object.assign({}, this.props.data);
-//     const index = newCompany.ipFilter.findIndex(i => i === item);
-//     newCompany.ipFilter.splice(index, 1);
-//     this.props.updateCompanyState(newCompany);
-//   }
-
-
-//   removeEmailmask(item) {
-//     let newCompany = Object.assign({}, this.props.data);
-//     const index = newCompany.emailMasks.findIndex(i => i === item);
-//     newCompany.emailMasks.splice(index, 1);
-//     this.props.updateCompanyState(newCompany);
-//   }
-
-
-//   render() {
-//     return (
-//       <div style={{ marginTop: '10px', minHeight: '100px' }}>
-//         <div className="row">
-//           <div className="col-xs-10 col-xs-offset-2">
-//             <table className="table table-condensed">
-//               <thead>
-//                 <tr>
-//                   <th>ARIA Account No</th>
-//                   <th>ARIA Account ID</th>
-//                   <th>cid</th>
-//                   <th>Active</th>
-//                 </tr>
-//               </thead>
-//               <tbody>
-//                 <tr>
-//                   <td>{ this.props.data.ariaAccountNo || '-' }</td>
-//                   <td>{ this.props.data.ariaAccountID || '-' }</td>
-//                   <td>{ this.props.data.cid }</td>
-//                   <td>{ this.props.data.active.toString() }</td>
-//                 </tr>
-//               </tbody>
-//             </table>
-//           </div>
-//         </div>
-//         <AccessRules data={this.props.data.accessRules} removeItem={this.removeAccessRules} />
-//         <CompanyItems data={this.props.data.ipFilter} label="IP filter" removeItem={this.removeIp} />
-//         <CompanyItems data={this.props.data.emailMasks} label="Email masks" removeItem={this.removeEmailmask} />
-//         <hr />
-//         <CompanyUsers />
-//       </div>
-//     );
-//   }
-// }
-
-
 class AccessRules extends React.Component {
   constructor(props){
     super(props);
@@ -595,14 +531,12 @@ class AccessRules extends React.Component {
 
     const items = this.props.data.map(accessRule => {
 
-      console.log('this.props.accessrules')
-      console.log(this.props.accessrules)
       const access = this.props.accessrules.find((a) => {
         return a.accessFeature === accessRule.accessFeature && a.titleDomain === accessRule.titleDomain
       });
 
-      const accessRoles = Object.keys(access.access).map((k) => {
-        return (<div>
+      const accessRoles = Object.keys(access.access).map((k, index) => {
+        return (<div key={index}>
           <span>{k}:</span> <span>{access.access[k].join(', ')}</span>
         </div>);
       });
@@ -614,7 +548,7 @@ class AccessRules extends React.Component {
           <td>{accessRule.titleDomain}</td>
           <td>{ accessRoles }</td>
           <td style={{ textAlign: 'right' }}>
-            <button type="button" className='btn btn-xs btn-danger' onClick={this.props.removeItem}>
+            <button type="button" className='btn btn-xs btn-danger' onClick={this.props.removeItem} style={{ minWidth: '90px'}}>
               <span className='glyphicon glyphicon-trash' aria-hidden="true"></span> <span>Remove</span>
             </button>
           </td>
@@ -704,52 +638,74 @@ class AddAccessRules extends React.Component {
 }
 
 
-class CompanyItems extends React.Component {
+class ArrayItems extends React.Component {
   constructor(props){
     super(props);
+    this.addItem = this.addItem.bind(this);
   }
+
+
+  addItem() {
+    const value = this.addItemInput.value;
+    if(value.length > 0) {
+      this.props.addItem(value)
+      .then(() => {
+        this.addItemInput.value = '';
+      });
+    }
+  }
+
 
   render() {
 
+    // In case of undefined
     const data = this.props.data || [];
-    const items = data.map((d) => <CompanyItem key={d} data={d} removeItem={this.props.removeItem.bind(this, d)} />);
+
+    let items = data.map((d) => {
+      return (
+        <tr key={d}>
+          <td>{ d }</td>
+          <td style={{ textAlign: 'right'}}>
+            <button type="button" className='btn btn-xs btn-danger' onClick={this.props.removeItem} style={{ minWidth: '90px' }}>
+              <span className='glyphicon glyphicon-trash' aria-hidden="true"></span> <span>Remove</span>
+            </button>
+          </td>
+        </tr>
+      );
+    })
+
+    items.push(
+      <tr key={-1}>
+        <td>
+          <input
+            type="text"
+            name="addItemInput"
+            className="form-control input-sm"
+            ref={(addItemInput) => this.addItemInput = addItemInput} />
+        </td>
+        <td style={{ textAlign: 'right'}}>
+          <button type="button" className='btn btn-xs btn-success' onClick={this.addItem} style={{ minWidth: '90px' }}>
+            <span className='glyphicon glyphicon-plus' aria-hidden="true"></span> <span>Add</span>
+          </button>
+        </td>
+      </tr>
+    );
 
     return (
-      <div className="row" style={{ marginTop: '40px', minHeight: '10px' }}>
-        <div className="col-xs-2" style={{ textAlign: 'right' }}>
-          <strong>{ this.props.label }</strong>
-        </div>
-        <div className="col-xs-10">
-          { items.length > 0
-           ? <table className="table table-condensed">
+      <div style={{ marginTop: '40px', minHeight: '10px' }}>
+        <div className="row">
+          <div className="col-xs-2" style={{ textAlign: 'right' }}>
+            <strong>{ this.props.label }</strong>
+          </div>
+          <div className="col-xs-10">
+            <table className="table table-condensed">
               <tbody>
                 { items }
               </tbody>
             </table>
-            : <div>-</div>
-          }
+          </div>
         </div>
       </div>
-    );
-  }
-}
-
-
-class CompanyItem extends React.Component {
-  constructor(props){
-    super(props);
-  }
-
-  render() {    
-    return (
-      <tr>
-        <td>{ this.props.data }</td>
-        <td style={{ textAlign: 'right' }}>
-          <button type="button" className='btn btn-xs btn-danger' onClick={this.props.removeItem}>
-            <span className='glyphicon glyphicon-trash' aria-hidden="true"></span> <span>Remove</span>
-          </button>
-        </td>
-      </tr>
     );
   }
 }
