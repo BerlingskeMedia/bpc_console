@@ -158,6 +158,10 @@ module.exports = class extends React.Component {
       <div className="companies" style={{ paddingTop: '30px' }}>
         <CompanySearch getCompanies={this.getCompanies} fetchBPP={this.fetchBPP} fetchBPC={this.fetchBPC} />
         { companies }
+        { companies.length === 0
+          ? <div style={{textAlign: 'center'}}><em>(none)</em></div>
+          : null
+        }
         {/* <table className="table table-condensed">
           <tbody>
             { companies }
@@ -228,6 +232,8 @@ class CompanySearch extends React.Component {
 
     if(this.state.foundUser) {
       searchParams.push(`user=${ encodeURIComponent(this.state.foundUser.id) }`);
+    } else if (this.userSearchBox.value.length > 0) {
+      searchParams.push(`emailmask=${ encodeURIComponent(this.userSearchBox.value) }`);
     }
     
     const query = `?${ searchParams.join('&') }`;
@@ -247,9 +253,9 @@ class CompanySearch extends React.Component {
       if (this.state.foundUser) {
         userSearchFeedback = <span className="glyphicon glyphicon-ok form-control-feedback" aria-hidden="true"></span>;
         userSearchBoxClass += ' has-success'
-      } else {
-        userSearchFeedback = <span className="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>;
-        userSearchBoxClass += ' has-error'
+      // } else {
+        // userSearchFeedback = <span className="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>;
+        // userSearchBoxClass += ' has-error'
       }
     }
 
@@ -278,7 +284,7 @@ class CompanySearch extends React.Component {
                 placeholder="Type user email or ID start search"
                 ref={(userSearchBox) => this.userSearchBox = userSearchBox} />
                 { userSearchFeedback }
-              <div style={{ paddingLeft: '4px', color: 'darkgrey' }}><small><em>User not found will be ignored.</em></small></div>
+              <div style={{ paddingLeft: '4px', color: 'darkgrey' }}><small><em></em></small></div>
             </div>
           </div>
           <div className="col-xs-2">
