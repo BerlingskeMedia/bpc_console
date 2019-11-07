@@ -56,10 +56,8 @@ module.exports = class extends React.Component {
     .then(response => {
       if(response.status === 200) {
         return response.json().then(data => data);
-      } else if(response.status === 401) {
-        return Promise.reject(response);
       } else {
-        console.log(`Unhandled statusCode ${ response.status } for request ${ request.method } ${ request.url }`)
+        return Promise.reject(response);
       }
     });
   }
@@ -72,10 +70,8 @@ module.exports = class extends React.Component {
     .then(response => {
       if(response.status === 200) {
         return response.json().then(data => data);
-      } else if(response.status === 401) {
-        return Promise.reject(response);
       } else {
-        console.log(`Unhandled statusCode ${ response.status } for request ${ request.method } ${ request.url }`)
+        return Promise.reject(response);
       }
     });
   }
@@ -313,36 +309,25 @@ class Company extends React.Component {
     this.showHideCompanyDetails = this.showHideCompanyDetails.bind(this);
     this.showConfirmSave = this.showConfirmSave.bind(this);
     this.removeAccessRules = this.removeAccessRules.bind(this);
+    this.addIp = this.addIp.bind(this);
     this.removeIp = this.removeIp.bind(this);
+    this.addEmailmask = this.addEmailmask.bind(this);
     this.removeEmailmask = this.removeEmailmask.bind(this);
     this.state = {
       company: null,
+      hasAnyChanges: false,
       showDetails: false,
       showLoader: false
     };
   }
-
-  
-  getCompany(id) {
-    return this.props.fetchBPP(`/api/companies/${ id }`)
-    .then(company => this.setState({ company }));
-  }
-
-
-  saveCompany() {
-    console.log('save', this.state.company)
-    // PUT /companies/{id}
-    // Payload:
-    //  ipFilter
-    //  emailMasks
-    //  accessRules
-  }
-
-
   
   
   addUser() {
-    
+  // POST /companies/users
+  // Payload:
+  //  ariaAccountNo
+  //  add=string=UID
+  //  remove=string=UID
   }
   
   
@@ -359,9 +344,20 @@ class Company extends React.Component {
   }
 
 
-  addIp(item) {
-    console.log('addIp', item);
-    return Promise.resolve();
+  ipValidation(value) {
+    // Regex for IP incl. CIDR validation
+    // var regex = /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))?$/g;
+    // var found = value.match(regex);
+    // return found != null;
+    var regex = RegExp('^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))?$');
+    return regex.test(value);
+  }
+
+
+  addIp(value) {
+    let newCompany = Object.assign({}, this.state.company);
+    newCompany.ipFilter.push(value);
+    return this.updateCompanyState(newCompany);
   }
 
 
@@ -369,42 +365,73 @@ class Company extends React.Component {
     let newCompany = Object.assign({}, this.state.company);
     const index = newCompany.ipFilter.findIndex(i => i === item);
     newCompany.ipFilter.splice(index, 1);
-    this.updateCompanyState(newCompany); // TODO
-    // this.setState((prevState) => {
-    //   return {
-    //     company: prevState.company.ipFilter.splice(index, 1);
-    //   }
-    // });
+    return this.updateCompanyState(newCompany);
   }
 
-  addEmailmask(item) {
-    console.log('addEmailmask', item);
-    return Promise.resolve();
+
+  emailValidation(value) {
+    // var regex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    // return regex.test(String(value).toLowerCase());
+    const atIndex = value.indexOf('@');
+    const dotIndex = value.indexOf('.');
+    return value.length > 0 &&      // There is a value
+      (atIndex + 1) < dotIndex &&   // There is a domain
+      value.length - dotIndex > 1;  // There is a top-level domain
   }
+
+
+  addEmailmask(value) {
+    let newCompany = Object.assign({}, this.state.company);
+    newCompany.emailMasks.push(value);
+    return this.updateCompanyState(newCompany);
+  }
+
 
   removeEmailmask(item) {
     let newCompany = Object.assign({}, this.state.company);
     const index = newCompany.emailMasks.findIndex(i => i === item);
     newCompany.emailMasks.splice(index, 1);
-    this.updateCompanyState(newCompany);
+    return this.updateCompanyState(newCompany);
+  }
+
+
+  getCompany() {
+    const id = this.props.data._id;
+    return this.props.fetchBPP(`/api/companies/${ id }`)
+    .then(company => this.setState({ company, hasAnyChanges: false }));
+  }
+
+
+  saveCompany() {
+    const id = this.props.data._id;
+    return this.props.fetchBPP(`/api/companies/${ id }`, {
+      method: 'PUT',
+      body: JSON.stringify(this.state.company)
+    })
+    .then((response) => this.setState({ company: response, hasAnyChanges: false }))
+    .catch((err) => {
+      alert('Error when saving!');
+      this.getCompany();
+    });
   }
 
 
   updateCompanyState(company) {
-    this.setState({ company });
+    return new Promise((resolve) => {
+      return this.setState({
+        company,
+        hasAnyChanges: true
+      }, resolve);
+    });
   }
-  // POST /companies/users
-  // Payload:
-  //  ariaAccountNo
-  //  add=string=UID
-  //  remove=string=UID
+
 
   showHideCompanyDetails() {
     if(this.state.showDetails) {
       this.setState({ showDetails: false });
     } else {
       this.setState({ showLoader: true });
-      this.getCompany(this.props.data._id)
+      this.getCompany()
       .then(() => this.setState({
         showDetails: true,
         showLoader: false,
@@ -413,6 +440,7 @@ class Company extends React.Component {
       }));
     }
   }
+
 
   showConfirmSave() {
     this.setState((prevState) => {
@@ -430,6 +458,7 @@ class Company extends React.Component {
     });
   }
 
+
   render() {
     return (
       <div style={{ paddingBottom: '4px' }}>
@@ -443,25 +472,33 @@ class Company extends React.Component {
               : null
             } */}
           </div>
-          <div className="col-xs-4">
+          <div className="col-xs-1">
             <CompanyOverview data={ this.state.company } />
           </div>
-          <div className="col-xs-4" style={{ textAlign: 'right' }}>
+          <div className="col-xs-7" style={{ textAlign: 'right' }}>
             { this.state.showDetails
               ? <div>
                   <button type="button" className="btn btn-sm btn-danger" onClick={this.saveCompany} disabled={!this.state.confirmSave}>
                     <span className="glyphicon glyphicon-save" aria-hidden="true"></span> <span>Confirm</span>
                   </button>
                   <span>&nbsp;</span>
-                  <button type="button" className="btn btn-xs btn-warning" className={`btn btn-sm ${ this.state.confirmSave ? 'btn-success' : 'btn-warning' }`} onClick={this.showConfirmSave}>
+                  <button type="button" className="btn btn-xs btn-warning" className={`btn btn-sm ${ this.state.confirmSave ? 'btn-success' : 'btn-warning' }`} onClick={this.showConfirmSave} disabled={!this.state.hasAnyChanges}>
                     <span className={`glyphicon ${ this.state.confirmSave ? 'glyphicon-repeat' : 'glyphicon-save' }`} aria-hidden="true"></span> <span>Save</span>
                   </button>
                   <span>&nbsp;</span>
                   <button type="button" className="btn btn-sm btn-success" onClick={this.getCompany}>
                     <span className="glyphicon glyphicon-refresh" aria-hidden="true"></span> <span>Reload</span>
                   </button>
+                  <span>&nbsp;</span>
+                  <button type="button" className="btn btn-sm btn-default" onClick={this.showHideCompanyDetails}>
+                    <span className="glyphicon glyphicon-resize-small" aria-hidden="true"></span> <span>Close</span>
+                  </button>
                 </div>
-              : null
+              : <div>
+                  <button type="button" className="btn btn-sm btn-default" onClick={this.showHideCompanyDetails}>
+                    <span className="glyphicon glyphicon-resize-full" aria-hidden="true"></span> <span>Open</span>
+                  </button>
+                </div>
             }
           </div>
         </div>
@@ -490,10 +527,28 @@ class Company extends React.Component {
                   </table>
                 </div>
               </div>
-              <AccessRules data={this.state.company.accessRules} accessrules={this.props.accessrules} removeItem={this.removeAccessRules} />
+              
+              <AccessRules
+                data={this.state.company.accessRules}
+                accessrules={this.props.accessrules}
+                removeItem={this.removeAccessRules} />
+
               {/* <AddAccessRules accessrules={this.props.accessrules} addAccessRule={this.addAccessRule} /> */}
-              <ArrayItems data={this.state.company.ipFilter} label="IP filter" removeItem={this.removeIp} addItem={this.addIp} />
-              <ArrayItems data={this.state.company.emailMasks} label="Email masks" removeItem={this.removeEmailmask} addItem={this.addEmailmask} />
+              
+              <ArrayItems
+                data={this.state.company.ipFilter}
+                label="IP filter"
+                removeItem={this.removeIp}
+                addItem={this.addIp}
+                validation={this.ipValidation} />
+              
+              <ArrayItems
+                data={this.state.company.emailMasks}
+                label="Email masks"
+                removeItem={this.removeEmailmask}
+                addItem={this.addEmailmask}
+                validation={this.emailValidation} />
+
               <hr />
               <div className="panel panel-default">
                 <div className="panel-body">
@@ -642,6 +697,21 @@ class ArrayItems extends React.Component {
   constructor(props){
     super(props);
     this.addItem = this.addItem.bind(this);
+    this.onChangeAddItem = this.onChangeAddItem.bind(this);
+    this.state = {
+      inputValid: false
+    };
+  }
+
+
+  onChangeAddItem() {
+    const value = this.addItemInput.value;
+    let inputValid = false;
+    if(value.length > 0) {
+      inputValid = this.props.validation(value);
+    }
+    console.log('inputValid', value, inputValid)
+    this.setState({ inputValid });
   }
 
 
@@ -650,6 +720,7 @@ class ArrayItems extends React.Component {
     if(value.length > 0) {
       this.props.addItem(value)
       .then(() => {
+        this.setState({ inputValid: false });
         this.addItemInput.value = '';
       });
     }
@@ -661,18 +732,18 @@ class ArrayItems extends React.Component {
     // In case of undefined
     const data = this.props.data || [];
 
-    let items = data.map((d) => {
+    let items = data.map((item) => {
       return (
-        <tr key={d}>
-          <td>{ d }</td>
+        <tr key={item}>
+          <td>{ item }</td>
           <td style={{ textAlign: 'right'}}>
-            <button type="button" className='btn btn-xs btn-danger' onClick={this.props.removeItem} style={{ minWidth: '90px' }}>
+            <button type="button" className='btn btn-xs btn-danger' onClick={this.props.removeItem.bind(this, item)} style={{ minWidth: '90px' }}>
               <span className='glyphicon glyphicon-trash' aria-hidden="true"></span> <span>Remove</span>
             </button>
           </td>
         </tr>
       );
-    })
+    });
 
     items.push(
       <tr key={-1}>
@@ -681,10 +752,11 @@ class ArrayItems extends React.Component {
             type="text"
             name="addItemInput"
             className="form-control input-sm"
+            onChange={this.onChangeAddItem}
             ref={(addItemInput) => this.addItemInput = addItemInput} />
         </td>
         <td style={{ textAlign: 'right'}}>
-          <button type="button" className='btn btn-xs btn-success' onClick={this.addItem} style={{ minWidth: '90px' }}>
+          <button type="button" className='btn btn-xs btn-success' onClick={this.addItem} disabled={!this.state.inputValid} style={{ minWidth: '90px' }}>
             <span className='glyphicon glyphicon-plus' aria-hidden="true"></span> <span>Add</span>
           </button>
         </td>
