@@ -13,6 +13,7 @@ module.exports = class extends React.Component {
     this.getAccessRules = this.getAccessRules.bind(this);
     this.fetchBPP = this.fetchBPP.bind(this);
     this.fetchBPC = this.fetchBPC.bind(this);
+    this.searchUser = this.searchUser.bind(this);
     this.state = {
       companies: [],
       accessrules: [],
@@ -130,6 +131,22 @@ module.exports = class extends React.Component {
   }
 
 
+  searchUser(input) {
+    if(input.length > 0) {
+      const encoded_input = encodeURIComponent(input);
+      const query = `?provider=gigya&email=${ encoded_input }&id=${ encoded_input }`;
+
+      return this.fetchBPC(`/api/users${ query }`)
+      .then(users => {
+        const foundUser = users.length === 1 ? users[0] : null;
+        return Promise.resolve(foundUser);
+      });
+    } else {
+      return Promise.resolve(null);
+    }
+  }
+
+
   componentDidMount() {
     const bpp_ticket = this.loadTicket();
     
@@ -147,12 +164,12 @@ module.exports = class extends React.Component {
 
   render() {
     const companies = this.state.companies.map(company => {
-      return <Company key={company._id} data={company} accessrules={this.state.accessrules} fetchBPP={this.fetchBPP} />
+      return <Company key={company._id} data={company} accessrules={this.state.accessrules} fetchBPP={this.fetchBPP} searchUser={this.searchUser} />
     });
 
     return (
       <div className="companies" style={{ paddingTop: '30px' }}>
-        <CompanySearch getCompanies={this.getCompanies} fetchBPP={this.fetchBPP} fetchBPC={this.fetchBPC} />
+        <CompanySearch getCompanies={this.getCompanies} fetchBPP={this.fetchBPP} searchUser={this.searchUser} />
         { companies }
         { companies.length === 0
           ? <div style={{textAlign: 'center'}}><em>(none)</em></div>
@@ -196,13 +213,10 @@ class CompanySearch extends React.Component {
   searchUser() {
     const searchText = this.userSearchBox.value;
     if(searchText.length > 0) {
-      const query = `?provider=gigya&email=${ encodeURIComponent(searchText) }&id=${searchText}`;
-
-      return this.props.fetchBPC(`/api/users${ query }`)
-      .then(users => {
-        const foundUser = users.length === 1 ? users[0] : null;
+      this.props.searchUser(searchText)
+      .then(foundUser => {
         this.setState({ foundUser, userSearchBoxHasInput: true }, this.search);
-      });
+      });      
     } else {
       this.setState({ foundUser: null, userSearchBoxHasInput: false }, this.search);
     }
@@ -309,6 +323,9 @@ class Company extends React.Component {
     this.showHideCompanyDetails = this.showHideCompanyDetails.bind(this);
     this.showConfirmSave = this.showConfirmSave.bind(this);
     this.removeAccessRules = this.removeAccessRules.bind(this);
+    this.validateUser = this.validateUser.bind(this);
+    this.addUser = this.addUser.bind(this);
+    this.removeUser = this.removeUser.bind(this);
     this.addIp = this.addIp.bind(this);
     this.removeIp = this.removeIp.bind(this);
     this.addEmailmask = this.addEmailmask.bind(this);
@@ -317,24 +334,13 @@ class Company extends React.Component {
       company: null,
       hasAnyChanges: false,
       showDetails: false,
-      showLoader: false
+      showLoader: false,
+      searchUserInProgress: false,
+      searchUserTimer: null,
+      foundUser: null
     };
   }
   
-  
-  addUser() {
-  // POST /companies/users
-  // Payload:
-  //  ariaAccountNo
-  //  add=string=UID
-  //  remove=string=UID
-  }
-  
-  
-  removeUser() {
-    
-  }
-
 
   removeAccessRules(role) {
     let newCompany = Object.assign({}, this.state.company);
@@ -344,13 +350,59 @@ class Company extends React.Component {
   }
 
 
-  ipValidation(value) {
+  validateUser(value) {
+    clearTimeout(this.state.searchUserTimer);
+    return new Promise((resolve) => {
+      this.setState({searchUserTimer: setTimeout(() => {
+        this.props.searchUser(value)
+        .then(foundUser => {
+          return resolve(foundUser !== null);
+        });
+      }, 1000)});
+    });
+  }
+  
+
+  addUser(value) {
+    const id = this.props.data._id;
+    return this.props.searchUser(value)
+    .then(foundUser => {
+
+      const payload = {
+        add: foundUser.id
+      };
+
+      return this.props.fetchBPP(`/api/companies/${ id }/users`, {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      })
+      .then((company) => this.setState({ company }));
+    });
+  }
+
+  
+  removeUser(value) {
+    const id = this.props.data._id;
+    const payload = {
+      remove: value
+    };
+
+    return this.props.fetchBPP(`/api/companies/${ id }/users`, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    })
+    .then((company) => this.setState({ company }));
+  }
+
+
+  validateIp(value) {
     // Regex for IP incl. CIDR validation
     // var regex = /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))?$/g;
     // var found = value.match(regex);
     // return found != null;
     var regex = RegExp('^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))?$');
-    return regex.test(value);
+    const valid = regex.test(value);
+    return Promise.resolve(valid);
   }
 
 
@@ -369,14 +421,16 @@ class Company extends React.Component {
   }
 
 
-  emailValidation(value) {
+  validateEmailmask(value) {
     // var regex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     // return regex.test(String(value).toLowerCase());
     const atIndex = value.indexOf('@');
     const dotIndex = value.indexOf('.');
-    return value.length > 0 &&      // There is a value
-      (atIndex + 1) < dotIndex &&   // There is a domain
-      value.length - dotIndex > 1;  // There is a top-level domain
+    const valid = value.length > 0 &&     // There is a value
+      atIndex > -1 &&                     // There is an @
+      (atIndex + 1) < dotIndex &&         // There is a domain
+      value.length - dotIndex > 1;        // There is a top-level domain
+    return Promise.resolve(valid);
   }
 
 
@@ -540,21 +594,33 @@ class Company extends React.Component {
                 label="IP filter"
                 removeItem={this.removeIp}
                 addItem={this.addIp}
-                validation={this.ipValidation} />
+                validateItem={this.validateIp} />
               
               <ArrayItems
                 data={this.state.company.emailMasks}
                 label="Email masks"
                 removeItem={this.removeEmailmask}
                 addItem={this.addEmailmask}
-                validation={this.emailValidation} />
+                validateItem={this.validateEmailmask} />
 
               <hr />
-              <div className="panel panel-default">
+
+              <ArrayItems
+                data={this.state.company.users}
+                label="Users"
+                removeItem={this.removeUser}
+                addItem={this.addUser}
+                validateItem={this.validateUser} />
+
+              {/* <div className="panel panel-default">
                 <div className="panel-body">
-                  <CompanyUsers />
+                  <CompanyUsers
+                    data={this.state.company.users}
+                    removeUser={this.removeUser}
+                    addUser={this.addUser}
+                    searchUser={this.props.searchUser} />
                 </div>
-              </div>
+              </div> */}
             </div>  
           : null
         }
@@ -706,12 +772,16 @@ class ArrayItems extends React.Component {
 
   onChangeAddItem() {
     const value = this.addItemInput.value;
-    let inputValid = false;
     if(value.length > 0) {
-      inputValid = this.props.validation(value);
+      // Setting the invalid flag now, because there is one second delay
+      //  before se start searching for users in BPC
+      this.setState({ inputValid: false }, () => {
+        this.props.validateItem(value)
+        .then(inputValid => this.setState({ inputValid }))
+      })
+    } else {
+      this.setState({ inputValid: false });
     }
-    console.log('inputValid', value, inputValid)
-    this.setState({ inputValid });
   }
 
 
@@ -789,6 +859,9 @@ class CompanyUsers extends React.Component {
   }
 
   render() {
+
+    const users = this.props.data || [];
+
     return (
       <div className="row" style={{ marginTop: '40px', minHeight: '10px' }}>
         <div className="col-xs-2" style={{ textAlign: 'right' }}>
