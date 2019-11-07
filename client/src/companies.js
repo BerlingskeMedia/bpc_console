@@ -383,6 +383,7 @@ class Company extends React.Component {
   
   removeUser(value) {
     const id = this.props.data._id;
+
     const payload = {
       remove: value
     };
@@ -604,6 +605,11 @@ class Company extends React.Component {
                 validateItem={this.validateEmailmask} />
 
               <hr />
+              <div className="row">
+                <div className="col-xs-10 col-xs-offset-2">
+                  <div><em><small>Adding and removing users has immediate effect. No need to press "Save".</small></em></div>
+                </div>
+              </div>
 
               <ArrayItems
                 data={this.state.company.users}
@@ -669,9 +675,9 @@ class AccessRules extends React.Component {
           <td>{accessRule.titleDomain}</td>
           <td>{ accessRoles }</td>
           <td style={{ textAlign: 'right' }}>
-            <button type="button" className='btn btn-xs btn-danger' onClick={this.props.removeItem} style={{ minWidth: '90px'}}>
+            {/* <button type="button" className='btn btn-xs btn-danger' onClick={this.props.removeItem} style={{ minWidth: '90px'}}>
               <span className='glyphicon glyphicon-trash' aria-hidden="true"></span> <span>Remove</span>
-            </button>
+            </button> */}
           </td>
         </tr>
       );
