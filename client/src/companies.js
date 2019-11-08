@@ -326,6 +326,7 @@ class Company extends React.Component {
     this.validateUser = this.validateUser.bind(this);
     this.addUser = this.addUser.bind(this);
     this.removeUser = this.removeUser.bind(this);
+    this.translateUser = this.translateUser.bind(this);
     this.addIp = this.addIp.bind(this);
     this.removeIp = this.removeIp.bind(this);
     this.addEmailmask = this.addEmailmask.bind(this);
@@ -393,6 +394,18 @@ class Company extends React.Component {
       body: JSON.stringify(payload)
     })
     .then((company) => this.setState({ company }));
+  }
+
+
+  translateUser(value) {
+    return this.props.searchUser(value)
+    .then(foundUser => {
+      if(foundUser) {
+        return Promise.resolve(foundUser.email);
+      } else {
+        return Promise.resolve(`Invalid ID: ${ value }`);
+      }
+    });
   }
 
 
@@ -593,6 +606,7 @@ class Company extends React.Component {
               <ArrayItems
                 data={this.state.company.ipFilter}
                 label="IP filter"
+                note="Accepts single IPs and CIDR."
                 removeItem={this.removeIp}
                 addItem={this.addIp}
                 validateItem={this.validateIp} />
@@ -605,18 +619,15 @@ class Company extends React.Component {
                 validateItem={this.validateEmailmask} />
 
               <hr />
-              <div className="row">
-                <div className="col-xs-10 col-xs-offset-2">
-                  <div><em><small>Adding and removing users has immediate effect. No need to press "Save".</small></em></div>
-                </div>
-              </div>
 
               <ArrayItems
                 data={this.state.company.users}
                 label="Users"
+                note="Adding and removing users has immediate effect. No need to press 'Save'."
                 removeItem={this.removeUser}
                 addItem={this.addUser}
-                validateItem={this.validateUser} />
+                validateItem={this.validateUser}
+                translateItem={this.translateUser} />
 
               {/* <div className="panel panel-default">
                 <div className="panel-body">
@@ -683,10 +694,12 @@ class AccessRules extends React.Component {
       );
     });
 
+
     return (
       <div className="row" style={{ marginTop: '40px', minHeight: '10px' }}>
         <div className="col-xs-2" style={{ textAlign: 'right' }}>
           <strong>Access rules</strong>
+          <div><em><small>Access rules are managed in Aria.</small></em></div>
         </div>
         <div className="col-xs-10">
           { items.length > 0
@@ -808,18 +821,7 @@ class ArrayItems extends React.Component {
     // In case of undefined
     const data = this.props.data || [];
 
-    let items = data.map((item) => {
-      return (
-        <tr key={item}>
-          <td>{ item }</td>
-          <td style={{ textAlign: 'right'}}>
-            <button type="button" className='btn btn-xs btn-danger' onClick={this.props.removeItem.bind(this, item)} style={{ minWidth: '90px' }}>
-              <span className='glyphicon glyphicon-trash' aria-hidden="true"></span> <span>Remove</span>
-            </button>
-          </td>
-        </tr>
-      );
-    });
+    let items = data.map((item) => <ArrayItem key={item} data={item} removeItem={this.props.removeItem} translateItem={this.props.translateItem} />)
 
     items.push(
       <tr key={-1}>
@@ -844,6 +846,7 @@ class ArrayItems extends React.Component {
         <div className="row">
           <div className="col-xs-2" style={{ textAlign: 'right' }}>
             <strong>{ this.props.label }</strong>
+            <div><em><small>{this.props.note}</small></em></div>
           </div>
           <div className="col-xs-10">
             <table className="table table-condensed">
@@ -859,24 +862,34 @@ class ArrayItems extends React.Component {
 }
 
 
-class CompanyUsers extends React.Component {
-  constructor(props) {
+class ArrayItem extends React.Component {
+  constructor(props){
     super(props);
+    this.state = {
+      translatedItem: null
+    };
+  }
+
+  componentDidMount() {
+    if(this.props.translateItem) {
+      this.props.translateItem(this.props.data)
+      .then((translatedItem) => this.setState({ translatedItem }));
+    }
   }
 
   render() {
 
-    const users = this.props.data || [];
+    const item = this.state.translatedItem || this.props.data;
 
     return (
-      <div className="row" style={{ marginTop: '40px', minHeight: '10px' }}>
-        <div className="col-xs-2" style={{ textAlign: 'right' }}>
-          <div><strong>Users</strong></div>
-        </div>
-        <div className="col-xs-10">
-          <div>TODO</div>
-        </div>
-      </div>
+      <tr key={item}>
+        <td>{ item }</td>
+        <td style={{ textAlign: 'right'}}>
+          <button type="button" className='btn btn-xs btn-danger' onClick={this.props.removeItem.bind(this, this.props.data)} style={{ minWidth: '90px' }}>
+            <span className='glyphicon glyphicon-trash' aria-hidden="true"></span> <span>Remove</span>
+          </button>
+        </td>
+      </tr>
     );
   }
 }
