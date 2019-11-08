@@ -401,7 +401,8 @@ class Company extends React.Component {
     return this.props.searchUser(value)
     .then(foundUser => {
       if(foundUser) {
-        return Promise.resolve(foundUser.email);
+        const link = <Link to={`/users?search=${ value }`}>{ foundUser.email }</Link>
+        return Promise.resolve(link);
       } else {
         return Promise.resolve(`Invalid ID: ${ value }`);
       }
