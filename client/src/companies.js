@@ -169,7 +169,7 @@ module.exports = class extends React.Component {
 
     return (
       <div className="companies" style={{ paddingTop: '30px' }}>
-        <CompanySearch getCompanies={this.getCompanies} fetchBPP={this.fetchBPP} searchUser={this.searchUser} />
+        <CompanySearch getCompanies={this.getCompanies} searchUser={this.searchUser} accessrules={this.state.accessrules} />
         { companies }
         { companies.length === 0
           ? <div style={{textAlign: 'center'}}><em>(none)</em></div>
@@ -189,8 +189,8 @@ module.exports = class extends React.Component {
 class CompanySearch extends React.Component {
   constructor(props){
     super(props);
-    this.onTitleSearchChange = this.onTitleSearchChange.bind(this);
     this.onUserSearchChange = this.onUserSearchChange.bind(this);
+    this.onTitleSearchChange = this.onTitleSearchChange.bind(this);
     this.searchUser = this.searchUser.bind(this);
     this.search = this.search.bind(this);
     this.state = {
@@ -245,12 +245,22 @@ class CompanySearch extends React.Component {
     } else if (this.userSearchBox.value.length > 0) {
       searchParams.push(`emailmask=${ encodeURIComponent(this.userSearchBox.value) }`);
     }
+
+
+    if(this.accessFeatureSelect.value.length > 0) {
+      searchParams.push(`accessFeature=${ encodeURIComponent(this.accessFeatureSelect.value) }`)
+    }
+
+
+    if(this.titleDomainSelect.value.length > 0) {
+      searchParams.push(`titleDomain=${ encodeURIComponent(this.titleDomainSelect.value) }`)
+    }
     
     const query = `?${ searchParams.join('&') }`;
 
     this.setState({ searchInProgress: true }, () => {
       this.props.getCompanies(query)
-      .then(() => this.setState({ searchInProgress: false }));
+      .finally(() => this.setState({ searchInProgress: false }));
     })
   }
 
@@ -268,6 +278,18 @@ class CompanySearch extends React.Component {
         // userSearchBoxClass += ' has-error'
       }
     }
+
+    const accessrules = this.props.accessrules || [];
+
+    const accessFeatures = [...new Set(accessrules.map((a) => a.accessFeature))];
+    const accessFeaturesOptions = accessFeatures.map((accessFeature) => {
+      return <option key={accessFeature} value={accessFeature}>{accessFeature}</option>;
+    });
+
+    const titleDomains = [...new Set( accessrules.map((a) => a.titleDomain) )];
+    const titleDomainsOptions = titleDomains.map((titleDomain) => {
+      return <option key={titleDomain} value={titleDomain}>{titleDomain}</option>;
+    });
 
     return (
       <div style={{ paddingBottom: '20px' }}>
@@ -298,13 +320,21 @@ class CompanySearch extends React.Component {
             </div>
           </div>
           <div className="col-xs-2">
-            <select className="form-control">
-              <option disabled="" value="N/A">accessFeature</option>
+            <select
+              className="form-control"
+              onChange={this.search}
+              ref={(accessFeatureSelect) => this.accessFeatureSelect = accessFeatureSelect}>
+              <option value=""></option>
+              { accessFeaturesOptions }
             </select>
           </div>
           <div className="col-xs-2">
-            <select className="form-control">
-              <option disabled="" value="N/A">titleDomain</option>
+            <select
+              className="form-control"
+              onChange={this.search}
+              ref={(titleDomainSelect) => this.titleDomainSelect = titleDomainSelect}>
+              <option value=""></option>
+              { titleDomainsOptions }
             </select>
           </div>
         </div>
@@ -785,6 +815,7 @@ class ArrayItems extends React.Component {
     this.addItem = this.addItem.bind(this);
     this.onChangeAddItem = this.onChangeAddItem.bind(this);
     this.state = {
+      hasInput: false,
       inputValid: false
     };
   }
@@ -795,12 +826,12 @@ class ArrayItems extends React.Component {
     if(value.length > 0) {
       // Setting the invalid flag now, because there is one second delay
       //  before se start searching for users in BPC
-      this.setState({ inputValid: false }, () => {
+      this.setState({ hasInput: true, inputValid: false }, () => {
         this.props.validateItem(value)
         .then(inputValid => this.setState({ inputValid }))
       })
     } else {
-      this.setState({ inputValid: false });
+      this.setState({ hasInput: false, inputValid: false });
     }
   }
 
@@ -824,15 +855,20 @@ class ArrayItems extends React.Component {
 
     let items = data.map((item) => <ArrayItem key={item} data={item} removeItem={this.props.removeItem} translateItem={this.props.translateItem} />)
 
+    const inputClassName = this.state.hasInput && !this.state.inputValid ? 'form-group has-error' : 'form-group';
+
     items.push(
       <tr key={-1}>
         <td>
-          <input
-            type="text"
-            name="addItemInput"
-            className="form-control input-sm"
-            onChange={this.onChangeAddItem}
-            ref={(addItemInput) => this.addItemInput = addItemInput} />
+          {/* <div className="form-group has-feedback"> */}
+          <div className={inputClassName}>
+            <input
+              type="text"
+              name="addItemInput"
+              className="form-control input-sm"
+              onChange={this.onChangeAddItem}
+              ref={(addItemInput) => this.addItemInput = addItemInput} />
+          </div>
         </td>
         <td style={{ textAlign: 'right'}}>
           <button type="button" className='btn btn-xs btn-success' onClick={this.addItem} disabled={!this.state.inputValid} style={{ minWidth: '90px' }}>
