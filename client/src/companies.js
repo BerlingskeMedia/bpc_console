@@ -140,10 +140,6 @@ module.exports = class extends React.Component {
     return this.fetchBPC('/api/gigya/register', {
       method: 'POST',
       body: JSON.stringify({ email })
-    })
-    .then(response => {
-      console.log('register response')
-      console.log(response);
     });
   }
 
@@ -542,7 +538,12 @@ class Company extends React.Component {
   getCompany() {
     const id = this.props.data._id;
     return this.props.fetchBPP(`/api/companies/${ id }`)
-    .then(company => this.setState({ company, hasAnyChanges: false }));
+    .then(company => this.setState({
+      company,
+      usersToAdd: [],
+      usersToRemove: [],
+      hasAnyChanges: false
+    }));
   }
 
 
@@ -901,9 +902,19 @@ class ArrayItems extends React.Component {
   createItem() {
     const value = this.addItemInput.value;
     if(value.length > 0) {
-      this.props.createItem(value)
-      .then(() => {
-        this.setState({ inputValid: true });
+      this.setState({ creatingItem: true }, () => {
+        this.props.createItem(value)
+        .then((response) => {
+          // We'll wait three seconds before activating the button
+          // This is to make sure any webhooks fra Gigya to BPC have been made
+          return new Promise((resolve, reject) => {
+            setTimeout(() => {
+              this.onChangeAddItem();
+              this.setState({ creatingItem: false });
+            }, 3000);
+          });
+
+        });
       });
     }
   }
@@ -919,10 +930,13 @@ class ArrayItems extends React.Component {
         .then(() => {
           this.addItemInput.value = '';
           this.setState({
-            inputValid: false,
             addingItem: false,
+            inputValid: false,
             hasInput: false
           });
+        })
+        .catch(() => {
+          this.setState({ addingItem: false });
         });
       });
     }
@@ -945,9 +959,8 @@ class ArrayItems extends React.Component {
 
     const inputClassName = this.state.hasInput && !this.state.inputValid ? 'form-group has-error' : 'form-group';
 
-    // The "!inputValid" means the user was not already found.
-    const createButtonDisabled = !this.state.hasInput || this.state.inputValid; 
-    // const createButtonClassName = this.state.showCreateButton && this.state.hasInput && ;
+    // The "inputValid" means the user was already found.
+    const createButtonDisabled = this.state.creatingItem || !this.state.hasInput || this.state.inputValid; 
 
     items.push(
       <tr key={-1}>
