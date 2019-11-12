@@ -570,6 +570,8 @@ class Company extends React.Component {
     const usersToRemovePayloads = this.state.usersToRemove.map((uid) => { return { remove: uid }});
     const usersToRemoveRequests = usersToRemovePayloads.map((payload) => fetchBPPUsers(payload));
 
+    this.setState({ confirmSave: false });
+    clearTimeout(this.state.confirmTimeout);
 
     Promise.all(usersToAddRequests.concat(usersToRemoveRequests))
     .then(() => {
@@ -584,6 +586,13 @@ class Company extends React.Component {
       usersToRemove: [],
       hasAnyChanges: false
     }))
+    .then(() => {
+      this.setState({ showSaveSuccesful: true}, () => {
+        setTimeout(function() {
+          this.setState({ showSaveSuccesful: false });
+        }.bind(this), 2000);
+      });
+    })
     .catch((err) => {
       alert('Error when saving!');
       this.getCompany();
@@ -653,11 +662,13 @@ class Company extends React.Component {
           <div className="col-xs-7" style={{ textAlign: 'right' }}>
             { this.state.showDetails
               ? <div>
+                  { this.state.showSaveSuccesful ? <span style={{ color: 'green' }}><span className="glyphicon glyphicon-ok" aria-hidden="true"></span> <span>Save successful  </span></span> : null }
+                  <span>&nbsp;</span>
                   <button type="button" className="btn btn-sm btn-danger" onClick={this.saveCompany} disabled={!this.state.confirmSave}>
                     <span className="glyphicon glyphicon-save" aria-hidden="true"></span> <span>Confirm</span>
                   </button>
                   <span>&nbsp;</span>
-                  <button type="button" className="btn btn-xs btn-warning" className={`btn btn-sm ${ this.state.confirmSave ? 'btn-success' : 'btn-warning' }`} onClick={this.showConfirmSave} disabled={!this.state.hasAnyChanges}>
+                  <button type="button" className="btn btn-sm btn-warning" onClick={this.showConfirmSave} disabled={!this.state.hasAnyChanges}>
                     <span className={`glyphicon ${ this.state.confirmSave ? 'glyphicon-repeat' : 'glyphicon-floppy-disk' }`} aria-hidden="true"></span> <span>Save</span>
                   </button>
                   <span>&nbsp;</span>
