@@ -198,11 +198,6 @@ module.exports = class extends React.Component {
           ? <div style={{textAlign: 'center'}}><em>(none)</em></div>
           : null
         }
-        {/* <table className="table table-condensed">
-          <tbody>
-            { companies }
-          </tbody>
-        </table> */}
       </div>
     );
   }
@@ -727,11 +722,10 @@ class Company extends React.Component {
               <ArrayItems
                 data={this.state.company.emailMasks}
                 label="Email masks"
+                note="Users with matching email will automatically be included under Users."
                 removeItem={this.removeEmailmask}
                 addItem={this.addEmailmask}
                 validateItem={this.validateEmailmask} />
-
-              <hr />
 
               <ArrayItems
                 data={this.state.company.users}

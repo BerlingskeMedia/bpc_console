@@ -206,8 +206,8 @@ class MainMenu extends React.Component {
     const tabs = [
       { linkTo: '/users', label: 'Users' },
       { linkTo: '/applications', label: 'Applications' },
-      { linkTo: '/admins', label: 'BPC Console users' }
-      // { linkTo: '/companies', label: 'Companies' }
+      { linkTo: '/companies', label: 'Companies' },
+      { linkTo: '/admins', label: 'Admins' }
     ].map((tab, index) => {
 
       return (
