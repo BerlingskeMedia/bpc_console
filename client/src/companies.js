@@ -723,7 +723,7 @@ class Company extends React.Component {
               <ArrayItems
                 data={this.state.company.users}
                 label="Users"
-                note="Users that receive access according to account."
+                note="Users that receive access according to Access rules."
                 removeItem={this.removeUser}
                 createItem={this.props.createUser}
                 addItem={this.addUser}
