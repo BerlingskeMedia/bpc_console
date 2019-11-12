@@ -167,10 +167,12 @@ module.exports = class extends React.Component {
       this.refreshTicket(bpp_ticket)
       .then(this.getCompanies)
       .then(this.getAccessRules)
+      .catch((err) => this.setState({ showForbidden: true }))
     } else {
       this.getTicket()
       .then(this.getCompanies)
       .then(this.getAccessRules)
+      .catch((err) => this.setState({ showForbidden: true }))
     }
   }
 
@@ -179,6 +181,14 @@ module.exports = class extends React.Component {
     const companies = this.state.companies.map(company => {
       return <Company key={company._id} data={company} accessrules={this.state.accessrules} fetchBPP={this.fetchBPP} createUser={this.createUser} searchUser={this.searchUser} />
     });
+
+    if(this.state.showForbidden) {
+      return (
+        <div className="companies" style={{ paddingTop: '50px' }}>
+          <div style={{textAlign: 'center'}}><em>(forbidden)</em></div>
+        </div>
+      );
+    }
 
     return (
       <div className="companies" style={{ paddingTop: '30px' }}>
