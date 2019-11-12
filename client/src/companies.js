@@ -14,6 +14,7 @@ module.exports = class extends React.Component {
     this.fetchBPP = this.fetchBPP.bind(this);
     this.fetchBPC = this.fetchBPC.bind(this);
     this.searchUser = this.searchUser.bind(this);
+    this.createUser = this.createUser.bind(this);
     this.state = {
       companies: [],
       accessrules: [],
@@ -131,6 +132,22 @@ module.exports = class extends React.Component {
   }
 
 
+  createUser(email) {
+    if(email.length === 0) {
+      return Promise.reject();
+    }
+
+    return this.fetchBPC('/api/gigya/register', {
+      method: 'POST',
+      body: JSON.stringify({ email })
+    })
+    .then(response => {
+      console.log('register response')
+      console.log(response);
+    });
+  }
+
+
   searchUser(input) {
     if(input.length > 0) {
       const encoded_input = encodeURIComponent(input);
@@ -164,7 +181,7 @@ module.exports = class extends React.Component {
 
   render() {
     const companies = this.state.companies.map(company => {
-      return <Company key={company._id} data={company} accessrules={this.state.accessrules} fetchBPP={this.fetchBPP} searchUser={this.searchUser} />
+      return <Company key={company._id} data={company} accessrules={this.state.accessrules} fetchBPP={this.fetchBPP} createUser={this.createUser} searchUser={this.searchUser} />
     });
 
     return (
@@ -363,6 +380,8 @@ class Company extends React.Component {
     this.removeEmailmask = this.removeEmailmask.bind(this);
     this.state = {
       company: null,
+      usersToAdd: [],
+      usersToRemove: [],
       hasAnyChanges: false,
       showDetails: false,
       showLoader: false,
@@ -395,35 +414,61 @@ class Company extends React.Component {
   
 
   addUser(value) {
-    const id = this.props.data._id;
+    
     return this.props.searchUser(value)
     .then(foundUser => {
 
-      const payload = {
-        add: foundUser.id
-      };
+      let newCompany = Object.assign({}, this.state.company);
+      const existingUsersIndex = newCompany.users.indexOf(foundUser.id);
+      if(existingUsersIndex === -1) {
+        newCompany.users.push(foundUser.id);
+        this.setState({
+          company: newCompany,
+          hasAnyChanges: true
+        });
 
-      return this.props.fetchBPP(`/api/companies/${ id }/users`, {
-        method: 'POST',
-        body: JSON.stringify(payload)
-      })
-      .then((company) => this.setState({ company }));
+
+        // If the user was removed but not saved
+        const removedUsersIndex = this.state.usersToRemove.indexOf(foundUser.id);
+        if(removedUsersIndex > -1) {
+          this.setState((prevState) => {
+            usersToRemove: prevState.usersToRemove.splice(removedUsersIndex, 1)
+          });
+        } else {
+          this.setState((prevState) => {
+            usersToAdd: prevState.usersToAdd.push(foundUser.id)
+          });
+        }
+      }
     });
   }
 
   
   removeUser(value) {
-    const id = this.props.data._id;
 
-    const payload = {
-      remove: value
-    };
+    let newCompany = Object.assign({}, this.state.company);
+    const existingUsersIndex = newCompany.users.indexOf(value);
+    if(existingUsersIndex > -1) {
 
-    return this.props.fetchBPP(`/api/companies/${ id }/users`, {
-      method: 'POST',
-      body: JSON.stringify(payload)
-    })
-    .then((company) => this.setState({ company }));
+      newCompany.users.splice(existingUsersIndex, 1);
+      this.setState({
+        company: newCompany,
+        hasAnyChanges: true
+      });
+
+
+      // If the user was added but not saved
+      const addedUsersIndex = this.state.usersToAdd.indexOf(value);
+      if(addedUsersIndex > -1) {
+        this.setState((prevState) => {
+          usersToAdd: prevState.usersToAdd.splice(addedUsersIndex, 1)
+        });
+      } else {
+        this.setState((prevState) => {
+          usersToRemove: prevState.usersToRemove.push(value)
+        });
+      }
+    }
   }
 
 
@@ -503,11 +548,34 @@ class Company extends React.Component {
 
   saveCompany() {
     const id = this.props.data._id;
-    return this.props.fetchBPP(`/api/companies/${ id }`, {
-      method: 'PUT',
-      body: JSON.stringify(this.state.company)
+
+    const fetchBPPUsers = (payload) => {
+      return this.props.fetchBPP(`/api/companies/${ id }/users`, {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      });
+    };
+
+    const usersToAddPayloads = this.state.usersToAdd.map((uid) => { return { add: uid }});
+    const usersToAddRequests = usersToAddPayloads.map((payload) => fetchBPPUsers(payload));
+    
+    const usersToRemovePayloads = this.state.usersToRemove.map((uid) => { return { remove: uid }});
+    const usersToRemoveRequests = usersToRemovePayloads.map((payload) => fetchBPPUsers(payload));
+
+
+    Promise.all(usersToAddRequests.concat(usersToRemoveRequests))
+    .then(() => {
+      return this.props.fetchBPP(`/api/companies/${ id }`, {
+        method: 'PUT',
+        body: JSON.stringify(this.state.company)
+      })
     })
-    .then((response) => this.setState({ company: response, hasAnyChanges: false }))
+    .then((response) => this.setState({
+      company: response,
+      usersToAdd: [],
+      usersToRemove: [],
+      hasAnyChanges: false
+    }))
     .catch((err) => {
       alert('Error when saving!');
       this.getCompany();
@@ -539,8 +607,8 @@ class Company extends React.Component {
       }));
     }
   }
-
-
+  
+  
   showConfirmSave() {
     this.setState((prevState) => {
       let temp;
@@ -582,7 +650,7 @@ class Company extends React.Component {
                   </button>
                   <span>&nbsp;</span>
                   <button type="button" className="btn btn-xs btn-warning" className={`btn btn-sm ${ this.state.confirmSave ? 'btn-success' : 'btn-warning' }`} onClick={this.showConfirmSave} disabled={!this.state.hasAnyChanges}>
-                    <span className={`glyphicon ${ this.state.confirmSave ? 'glyphicon-repeat' : 'glyphicon-save' }`} aria-hidden="true"></span> <span>Save</span>
+                    <span className={`glyphicon ${ this.state.confirmSave ? 'glyphicon-repeat' : 'glyphicon-floppy-disk' }`} aria-hidden="true"></span> <span>Save</span>
                   </button>
                   <span>&nbsp;</span>
                   <button type="button" className="btn btn-sm btn-success" onClick={this.getCompany}>
@@ -654,21 +722,13 @@ class Company extends React.Component {
               <ArrayItems
                 data={this.state.company.users}
                 label="Users"
-                note="Adding and removing users has immediate effect. No need to press 'Save'."
+                note="Users that receive access according to account."
                 removeItem={this.removeUser}
+                createItem={this.props.createUser}
                 addItem={this.addUser}
                 validateItem={this.validateUser}
                 translateItem={this.translateUser} />
 
-              {/* <div className="panel panel-default">
-                <div className="panel-body">
-                  <CompanyUsers
-                    data={this.state.company.users}
-                    removeUser={this.removeUser}
-                    addUser={this.addUser}
-                    searchUser={this.props.searchUser} />
-                </div>
-              </div> */}
             </div>  
           : null
         }
@@ -730,7 +790,7 @@ class AccessRules extends React.Component {
       <div className="row" style={{ marginTop: '40px', minHeight: '10px' }}>
         <div className="col-xs-2" style={{ textAlign: 'right' }}>
           <strong>Access rules</strong>
-          <div><em><small>Access rules are managed in Aria.</small></em></div>
+          <div><em><small>Access rules for this account are managed in Aria.</small></em></div>
         </div>
         <div className="col-xs-10">
           { items.length > 0
@@ -812,11 +872,13 @@ class AddAccessRules extends React.Component {
 class ArrayItems extends React.Component {
   constructor(props){
     super(props);
+    this.createItem = this.createItem.bind(this);
     this.addItem = this.addItem.bind(this);
     this.onChangeAddItem = this.onChangeAddItem.bind(this);
     this.state = {
       hasInput: false,
-      inputValid: false
+      inputValid: false,
+      showCreateButton: false
     };
   }
 
@@ -836,14 +898,40 @@ class ArrayItems extends React.Component {
   }
 
 
+  createItem() {
+    const value = this.addItemInput.value;
+    if(value.length > 0) {
+      this.props.createItem(value)
+      .then(() => {
+        this.setState({ inputValid: true });
+      });
+    }
+  }
+
+
   addItem() {
     const value = this.addItemInput.value;
     if(value.length > 0) {
-      this.props.addItem(value)
-      .then(() => {
-        this.setState({ inputValid: false });
-        this.addItemInput.value = '';
+
+      // Setting inputValid to false to disable the button
+      this.setState({ addingItem: true }, () => {
+        this.props.addItem(value)
+        .then(() => {
+          this.addItemInput.value = '';
+          this.setState({
+            inputValid: false,
+            addingItem: false,
+            hasInput: false
+          });
+        });
       });
+    }
+  }
+
+
+  componentDidMount(){
+    if(this.props.createItem) {
+      this.setState({ showCreateButton: true });
     }
   }
 
@@ -856,6 +944,10 @@ class ArrayItems extends React.Component {
     let items = data.map((item) => <ArrayItem key={item} data={item} removeItem={this.props.removeItem} translateItem={this.props.translateItem} />)
 
     const inputClassName = this.state.hasInput && !this.state.inputValid ? 'form-group has-error' : 'form-group';
+
+    // The "!inputValid" means the user was not already found.
+    const createButtonDisabled = !this.state.hasInput || this.state.inputValid; 
+    // const createButtonClassName = this.state.showCreateButton && this.state.hasInput && ;
 
     items.push(
       <tr key={-1}>
@@ -871,7 +963,18 @@ class ArrayItems extends React.Component {
           </div>
         </td>
         <td style={{ textAlign: 'right'}}>
-          <button type="button" className='btn btn-xs btn-success' onClick={this.addItem} disabled={!this.state.inputValid} style={{ minWidth: '90px' }}>
+
+          { this.props.createItem
+            ? <span>
+              <button type="button" className='btn btn-xs btn-default' onClick={this.createItem} disabled={createButtonDisabled} style={{ minWidth: '90px' }}>
+                <span className='glyphicon glyphicon-cloud-upload' aria-hidden="true"></span> <span>Create</span>
+              </button>
+              <span>&nbsp;</span>
+            </span>
+            : null
+          }
+
+          <button type="button" className='btn btn-xs btn-success' onClick={this.addItem} disabled={!this.state.inputValid || this.state.addingItem} style={{ minWidth: '90px' }}>
             <span className='glyphicon glyphicon-plus' aria-hidden="true"></span> <span>Add</span>
           </button>
         </td>
