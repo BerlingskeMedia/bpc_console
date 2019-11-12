@@ -425,6 +425,7 @@ class Company extends React.Component {
     .then(foundUser => {
 
       let newCompany = Object.assign({}, this.state.company);
+      newCompany.users = newCompany.users || [];
       const existingUsersIndex = newCompany.users.indexOf(foundUser.id);
       if(existingUsersIndex === -1) {
         newCompany.users.push(foundUser.id);
@@ -504,6 +505,7 @@ class Company extends React.Component {
 
   addIp(value) {
     let newCompany = Object.assign({}, this.state.company);
+    newCompany.ipFilter = newCompany.ipFilter || [];
     newCompany.ipFilter.push(value);
     return this.updateCompanyState(newCompany);
   }
@@ -532,6 +534,7 @@ class Company extends React.Component {
 
   addEmailmask(value) {
     let newCompany = Object.assign({}, this.state.company);
+    newCompany.emailMasks = newCompany.emailMasks || [];
     newCompany.emailMasks.push(value);
     return this.updateCompanyState(newCompany);
   }
