@@ -79,7 +79,6 @@ module.exports = class extends React.Component {
   }
 
 
-
   getTicket() {
     const auth = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse();
 
@@ -92,9 +91,9 @@ module.exports = class extends React.Component {
     })
     .then(this.saveTicket)
     .then(ticket => {
-      // TODO: Set a timeout when to reissue the ticket -
-      // - it must refresh it after reload if it's old
-      // and it must keep reissueing it going forward
+      setTimeout(function () {
+        this.refreshTicket(ticket);
+      }.bind(this), ticket.exp - Date.now() - (60 * 1000)); // One minutte
     });
   }
 
@@ -106,9 +105,9 @@ module.exports = class extends React.Component {
     })
     .then(this.saveTicket)
     .then(ticket => {
-      // TODO: Set a timeout when to reissue the ticket -
-      // - it must refresh it after reload if it's old
-      // and it must keep reissueing it going forward
+      setTimeout(function () {
+        this.refreshTicket(ticket);
+      }.bind(this), ticket.exp - Date.now() - (60 * 1000)); // One minutte
     });    
   }
 
