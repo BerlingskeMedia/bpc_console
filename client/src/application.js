@@ -14,7 +14,6 @@ module.exports = class extends React.Component {
     this.addScope = this.addScope.bind(this);
     this.removeScope = this.removeScope.bind(this);
     this.onChangeState = this.onChangeState.bind(this);
-    this.onChangeApplication = this.onChangeApplication.bind(this);
     this.onChangeApplicationSettings = this.onChangeApplicationSettings.bind(this);
     this.updateApplication = this.updateApplication.bind(this);
     this.state = {
@@ -25,7 +24,7 @@ module.exports = class extends React.Component {
         scope: [],
         settings: {
           includeScopeInPrivatExt: false,
-          ticketDuration: ''
+          ticketDuration: null
         }
       },
       savedSuccessMessageFadeOutTimeout: null
@@ -54,7 +53,7 @@ module.exports = class extends React.Component {
 
   updateApplication(application) {
     return $.ajax({
-      type: 'PUT',
+      type: 'POST',
       url: '/api/applications/'.concat(application.id),
       contentType: "application/json; charset=utf-8",
       data: JSON.stringify(application)
@@ -123,18 +122,12 @@ module.exports = class extends React.Component {
     this.setState(temp);
   }
 
-  onChangeApplication(e) {
-    var application = this.state.application;
-    const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
-    application[e.target.name] = value;
-    this.updateApplication(application);
-  }
-
   onChangeApplicationSettings(e) {
     var application = this.state.application;
-    const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+    const value = e.target.type === 'checkbox' ? e.target.checked :
+      e.target.type === 'number' ? parseInt(e.target.value) || null : e.target.value;
     application.settings[e.target.name] = value;
-    this.updateApplication(application);
+    this.setState({ application });
   }
 
   componentDidMount() {
@@ -237,12 +230,6 @@ module.exports = class extends React.Component {
             <div className="col-sm-10">
               <div className="checkbox">
                 <label>
-                  <input type="checkbox" defaultChecked={this.state.application.delegate} name="delegate" onClick={this.onChangeApplication}></input>
-                  Allow the application to delegate tickets to other applications.
-                </label>
-              </div>
-              <div className="checkbox">
-                <label>
                   <input type="checkbox" defaultChecked={this.state.application.settings.includeScopeInPrivatExt} name="includeScopeInPrivatExt" onClick={this.onChangeApplicationSettings}></input>
                   Store scope data in the encryptet private part of the ticket.
                 </label>
@@ -253,7 +240,7 @@ module.exports = class extends React.Component {
             <label className="col-sm-2 control-label">Ticket duration</label>
             <div className="col-sm-10">
               <p>Minutes until the <em>user</em> ticket expires and needs to be reissued (does not apply to app tickets):</p>
-              <input type="number" className="form-control" name="ticketDuration" value={this.state.application.settings.ticketDuration} min="1" placeholder="Default: 60 minutes" onChange={this.onChangeApplicationSettings}></input>
+              <input type="number" className="form-control" name="ticketDuration" defaultValue={this.state.application.settings.ticketDuration} min="1" placeholder="Default: 60 minutes" onChange={this.onChangeApplicationSettings}></input>
             </div>
           </div>
           <div className="form-group">
