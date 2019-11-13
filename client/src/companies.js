@@ -672,7 +672,7 @@ class Company extends React.Component {
                     <span className={`glyphicon ${ this.state.confirmSave ? 'glyphicon-repeat' : 'glyphicon-floppy-disk' }`} aria-hidden="true"></span> <span>Save</span>
                   </button>
                   <span>&nbsp;</span>
-                  <button type="button" className="btn btn-sm btn-success" onClick={this.getCompany}>
+                  <button type="button" className="btn btn-sm btn-success" onClick={this.getCompany} disabled={!this.state.hasAnyChanges}>
                     <span className="glyphicon glyphicon-refresh" aria-hidden="true"></span> <span>Reload</span>
                   </button>
                   <span>&nbsp;</span>
