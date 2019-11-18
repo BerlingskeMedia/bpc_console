@@ -258,7 +258,7 @@ class CompanySearch extends React.Component {
     }
 
     if(this.state.foundUser) {
-      searchParams.push(`user=${ encodeURIComponent(this.state.foundUser.id) }`);
+      searchParams.push(`uid=${ encodeURIComponent(this.state.foundUser.id) }`);
     } else if (this.userSearchBox.value.length > 0) {
       searchParams.push(`emailmask=${ encodeURIComponent(this.userSearchBox.value) }`);
     }
@@ -370,10 +370,8 @@ class Company extends React.Component {
     this.showHideCompanyDetails = this.showHideCompanyDetails.bind(this);
     this.showConfirmSave = this.showConfirmSave.bind(this);
     this.removeAccessRules = this.removeAccessRules.bind(this);
-    this.validateUser = this.validateUser.bind(this);
     this.addUser = this.addUser.bind(this);
     this.removeUser = this.removeUser.bind(this);
-    this.translateUser = this.translateUser.bind(this);
     this.addIp = this.addIp.bind(this);
     this.removeIp = this.removeIp.bind(this);
     this.addEmailmask = this.addEmailmask.bind(this);
@@ -384,10 +382,7 @@ class Company extends React.Component {
       usersToRemove: [],
       hasAnyChanges: false,
       showDetails: false,
-      showLoader: false,
-      searchUserInProgress: false,
-      searchUserTimer: null,
-      foundUser: null
+      showLoader: false
     };
   }
   
@@ -398,59 +393,54 @@ class Company extends React.Component {
     // newCompany.roles.splice(roleIndex, 1);
     this.updateCompanyState(newCompany);
   }
-
-
-  validateUser(value) {
-    clearTimeout(this.state.searchUserTimer);
-    return new Promise((resolve) => {
-      this.setState({searchUserTimer: setTimeout(() => {
-        this.props.searchUser(value)
-        .then(foundUser => {
-          return resolve(foundUser !== null);
-        });
-      }, 1000)});
-    });
-  }
   
 
-  addUser(value) {
-    
-    return this.props.searchUser(value)
-    .then(foundUser => {
+  addUser(foundUser) {
+    let newCompany = Object.assign({}, this.state.company);
 
-      let newCompany = Object.assign({}, this.state.company);
-      newCompany.users = newCompany.users || [];
-      const existingUsersIndex = newCompany.users.indexOf(foundUser.id);
-      if(existingUsersIndex === -1) {
-        newCompany.users.push(foundUser.id);
-        this.setState({
-          company: newCompany,
-          hasAnyChanges: true
+    newCompany.users = newCompany.users || [];
+    // const existingUsersIndex = newCompany.users.indexOf(foundUser.id);
+    const existingUsersIndex = newCompany.users.findIndex((u) => u.uid === foundUser.id);
+    if(existingUsersIndex === -1) {
+      
+      // For the visual 
+      newCompany.users.push({
+        uid: foundUser.id
+      });
+
+      this.setState({
+        company: newCompany,
+        hasAnyChanges: true
+      });
+
+
+      // If the user was removed but not saved
+      // const removedUsersIndex = this.state.usersToRemove.indexOf(foundUser.id);
+      const removedUsersIndex = this.state.usersToRemove.findIndex((u) => u.uid === foundUser.id);
+      if(removedUsersIndex > -1) {
+        this.setState((prevState) => {
+          usersToRemove: prevState.usersToRemove.splice(removedUsersIndex, 1)
         });
-
-
-        // If the user was removed but not saved
-        const removedUsersIndex = this.state.usersToRemove.indexOf(foundUser.id);
-        if(removedUsersIndex > -1) {
-          this.setState((prevState) => {
-            usersToRemove: prevState.usersToRemove.splice(removedUsersIndex, 1)
-          });
-        } else {
-          this.setState((prevState) => {
-            usersToAdd: prevState.usersToAdd.push(foundUser.id)
-          });
-        }
+      } else {
+        this.setState((prevState) => {
+          usersToAdd: prevState.usersToAdd.push({ uid: foundUser.id })
+        });
       }
-    });
+    }
+
+    return Promise.resolve();
   }
 
   
-  removeUser(value) {
+  removeUser(user) {
 
     let newCompany = Object.assign({}, this.state.company);
-    const existingUsersIndex = newCompany.users.indexOf(value);
+
+    // const existingUsersIndex = newCompany.users.indexOf(value);
+    const existingUsersIndex = newCompany.users.findIndex((u) => u.uid === user.uid);
     if(existingUsersIndex > -1) {
 
+      // For the visual
       newCompany.users.splice(existingUsersIndex, 1);
       this.setState({
         company: newCompany,
@@ -459,30 +449,20 @@ class Company extends React.Component {
 
 
       // If the user was added but not saved
-      const addedUsersIndex = this.state.usersToAdd.indexOf(value);
+      // const addedUsersIndex = this.state.usersToAdd.indexOf(value);
+      const addedUsersIndex = this.state.usersToAdd.findIndex((u) => u.uid === user.uid);
       if(addedUsersIndex > -1) {
         this.setState((prevState) => {
           usersToAdd: prevState.usersToAdd.splice(addedUsersIndex, 1)
         });
       } else {
         this.setState((prevState) => {
-          usersToRemove: prevState.usersToRemove.push(value)
+          usersToRemove: prevState.usersToRemove.push(user)
         });
       }
     }
-  }
 
-
-  translateUser(value) {
-    return this.props.searchUser(value)
-    .then(foundUser => {
-      if(foundUser) {
-        const link = <Link to={`/users?search=${ value }`}>{ foundUser.email }</Link>
-        return Promise.resolve(link);
-      } else {
-        return Promise.resolve(`Invalid ID: ${ value }`);
-      }
-    });
+    return Promise.resolve();
   }
 
 
@@ -557,18 +537,18 @@ class Company extends React.Component {
   saveCompany() {
     const id = this.props.data._id;
 
-    const fetchBPPUsers = (payload) => {
+    const updateCompanyUsers = (payload) => {
       return this.props.fetchBPP(`/api/companies/${ id }/users`, {
         method: 'POST',
         body: JSON.stringify(payload)
       });
     };
 
-    const usersToAddPayloads = this.state.usersToAdd.map((uid) => { return { add: uid }});
-    const usersToAddRequests = usersToAddPayloads.map((payload) => fetchBPPUsers(payload));
+    const usersToAddPayloads = this.state.usersToAdd.map((user) => { return { add: user }});
+    const usersToAddRequests = usersToAddPayloads.map((payload) => updateCompanyUsers(payload));
     
-    const usersToRemovePayloads = this.state.usersToRemove.map((uid) => { return { remove: uid }});
-    const usersToRemoveRequests = usersToRemovePayloads.map((payload) => fetchBPPUsers(payload));
+    const usersToRemovePayloads = this.state.usersToRemove.map((user) => { return { remove: user }});
+    const usersToRemoveRequests = usersToRemovePayloads.map((payload) => updateCompanyUsers(payload));
 
     this.setState({ confirmSave: false });
     clearTimeout(this.state.confirmTimeout);
@@ -737,15 +717,14 @@ class Company extends React.Component {
                 addItem={this.addEmailmask}
                 validateItem={this.validateEmailmask} />
 
-              <ArrayItems
-                data={this.state.company.users}
+              <Users
+                users={this.state.company.users}
                 label="Users"
                 note="Users that receive access according to Access rules."
-                removeItem={this.removeUser}
-                createItem={this.props.createUser}
-                addItem={this.addUser}
-                validateItem={this.validateUser}
-                translateItem={this.translateUser} />
+                searchUser={this.props.searchUser}
+                createUser={this.props.createUser}
+                removeUser={this.removeUser}
+                addUser={this.addUser} />
 
             </div>  
           : null
@@ -904,10 +883,8 @@ class ArrayItems extends React.Component {
     if(value.length > 0) {
       // Setting the invalid flag now, because there is one second delay
       //  before se start searching for users in BPC
-      this.setState({ hasInput: true, inputValid: false }, () => {
-        this.props.validateItem(value)
-        .then(inputValid => this.setState({ inputValid }))
-      })
+      this.props.validateItem(value)
+      .then(inputValid => this.setState({ hasInput: true, inputValid }));
     } else {
       this.setState({ hasInput: false, inputValid: false });
     }
@@ -1007,76 +984,81 @@ class ArrayItem extends React.Component {
   }
 }
 
+
+class Users extends React.Component {
+  constructor(props){
+    super(props);
+    this.createUser = this.createUser.bind(this);
+    this.addUser = this.addUser.bind(this);
+    this.onChangeAddUser = this.onChangeAddUser.bind(this);
     this.state = {
       hasInput: false,
       inputValid: false,
-      showCreateButton: false
+      searchUserInProgress: false,
+      searchUserTimer: null,
+      foundUser: null
     };
   }
 
 
-  onChangeAddItem() {
-    const value = this.addItemInput.value;
+  onChangeAddUser() {
+    const value = this.addUserInput.value;
     if(value.length > 0) {
-      // Setting the invalid flag now, because there is one second delay
+      // Setting the inputValid flag now, because there is one second delay
       //  before se start searching for users in BPC
       this.setState({ hasInput: true, inputValid: false }, () => {
-        this.props.validateItem(value)
-        .then(inputValid => this.setState({ inputValid }))
-      })
+
+        clearTimeout(this.state.searchUserTimer);
+
+        this.setState({ searchUserInProgress: true, searchUserTimer: setTimeout(() => {
+          this.props.searchUser(value)
+          .then(foundUser => this.setState({ inputValid: foundUser !== null, foundUser, searchUserInProgress: false }));
+        }, 1000)});
+
+      });
     } else {
       this.setState({ hasInput: false, inputValid: false });
     }
   }
 
 
-  createItem() {
-    const value = this.addItemInput.value;
+  createUser() {
+    const value = this.addUserInput.value;
     if(value.length > 0) {
-      this.setState({ creatingItem: true }, () => {
-        this.props.createItem(value)
+      return this.setState({ creatingUser: true }, () => {
+        return this.props.createUser(value)
         .then((response) => {
-          // We'll wait three seconds before activating the button
-          // This is to make sure any webhooks fra Gigya to BPC have been made
-          return new Promise((resolve, reject) => {
-            setTimeout(() => {
-              this.onChangeAddItem();
-              this.setState({ creatingItem: false });
-            }, 3000);
-          });
 
-        });
-      });
-    }
-  }
-
-
-  addItem() {
-    const value = this.addItemInput.value;
-    if(value.length > 0) {
-
-      // Setting inputValid to false to disable the button
-      this.setState({ addingItem: true }, () => {
-        this.props.addItem(value)
-        .then(() => {
-          this.addItemInput.value = '';
           this.setState({
-            addingItem: false,
-            inputValid: false,
-            hasInput: false
+            creatingUser: false,
+            inputValid: true,
+            hasInput: true,
+            foundUser: {
+              id: response.UID,
+              email: response.profile.email || value
+            }
           });
         })
-        .catch(() => {
-          this.setState({ addingItem: false });
+        .catch((err) => {
+          this.setState({ creatingUser: false });
         });
       });
     }
   }
 
 
-  componentDidMount(){
-    if(this.props.createItem) {
-      this.setState({ showCreateButton: true });
+  addUser() {
+    const foundUser = this.state.foundUser;
+    if(foundUser) {
+      this.setState({ addingUser: true }, () => {
+        this.props.addUser(foundUser);
+          this.addUserInput.value = '';
+          this.setState({
+            addingUser: false,
+            inputValid: false, // Setting inputValid to false to disable the button
+            hasInput: false
+          });
+      });
     }
   }
 
@@ -1084,14 +1066,15 @@ class ArrayItem extends React.Component {
   render() {
 
     // In case of undefined
-    const data = this.props.data || [];
+    const users = this.props.users || [];
 
-    let items = data.map((item) => <ArrayItem key={item} data={item} removeItem={this.props.removeItem} translateItem={this.props.translateItem} />)
+    let items = users.map((user) => <User key={user.uid} user={user} removeUser={this.props.removeUser} searchUser={this.props.searchUser} />)
 
     const inputClassName = this.state.hasInput && !this.state.inputValid ? 'form-group has-error' : 'form-group';
 
     // The "inputValid" means the user was already found.
-    const createButtonDisabled = this.state.creatingItem || !this.state.hasInput || this.state.inputValid; 
+    const createButtonDisabled = this.state.creatingUser || !this.state.hasInput || this.state.inputValid || this.state.searchUserInProgress;
+    const addButtonDisabled = !this.state.inputValid || this.state.addingUser || this.state.searchUserInProgress;
 
     items.push(
       <tr key={-1}>
@@ -1100,25 +1083,18 @@ class ArrayItem extends React.Component {
           <div className={inputClassName}>
             <input
               type="text"
-              name="addItemInput"
+              name="addUserInput"
               className="form-control input-sm"
-              onChange={this.onChangeAddItem}
-              ref={(addItemInput) => this.addItemInput = addItemInput} />
+              onChange={this.onChangeAddUser}
+              ref={(addUserInput) => this.addUserInput = addUserInput} />
           </div>
         </td>
         <td style={{ textAlign: 'right'}}>
-
-          { this.props.createItem
-            ? <span>
-              <button type="button" className='btn btn-xs btn-default' onClick={this.createItem} disabled={createButtonDisabled} style={{ minWidth: '90px' }}>
-                <span className='glyphicon glyphicon-cloud-upload' aria-hidden="true"></span> <span>Create</span>
-              </button>
-              <span>&nbsp;</span>
-            </span>
-            : null
-          }
-
-          <button type="button" className='btn btn-xs btn-success' onClick={this.addItem} disabled={!this.state.inputValid || this.state.addingItem} style={{ minWidth: '90px' }}>
+          <button type="button" className='btn btn-xs btn-default' onClick={this.createUser} disabled={createButtonDisabled} style={{ minWidth: '90px' }}>
+            <span className='glyphicon glyphicon-cloud-upload' aria-hidden="true"></span> <span>Create</span>
+          </button>
+          <span>&nbsp;</span>
+          <button type="button" className='btn btn-xs btn-success' onClick={this.addUser} disabled={addButtonDisabled} style={{ minWidth: '90px' }}>
             <span className='glyphicon glyphicon-plus' aria-hidden="true"></span> <span>Add</span>
           </button>
         </td>
@@ -1146,30 +1122,47 @@ class ArrayItem extends React.Component {
 }
 
 
-class ArrayItem extends React.Component {
+class User extends React.Component {
   constructor(props){
     super(props);
     this.state = {
-      translatedItem: null
+      foundUser: null
     };
   }
 
+  getUserDetails() {
+    this.props.searchUser(this.props.user.uid)
+    .then((foundUser) => {
+      if(foundUser) {
+        this.setState({ foundUser });
+      } else {
+        setTimeout(() => this.getUserDetails(), 3000);
+      }
+    });
+  }
+
   componentDidMount() {
-    if(this.props.translateItem) {
-      this.props.translateItem(this.props.data)
-      .then((translatedItem) => this.setState({ translatedItem }));
-    }
+    this.getUserDetails();
   }
 
   render() {
 
-    const item = this.state.translatedItem || this.props.data;
+    let item = <span>{ this.props.user.uid }</span>
+    const foundUser = this.state.foundUser;
+
+    if(foundUser) {
+      item = <Link to={`/users?search=${ foundUser.id }`}>{ foundUser.email }</Link>
+    }
 
     return (
-      <tr key={item}>
-        <td>{ item }</td>
+      <tr key={this.props.user.uid}>
+        <td>
+          { item }
+          <div><small>Added: {this.props.user.addedAt || ''}</small></div>
+          <div><small>Added by: {this.props.user.addedBy || ''}</small></div>
+        </td>
         <td style={{ textAlign: 'right'}}>
-          <button type="button" className='btn btn-xs btn-danger' onClick={this.props.removeItem.bind(this, this.props.data)} style={{ minWidth: '90px' }}>
+          <button type="button" className='btn btn-xs btn-danger' onClick={this.props.removeUser.bind(this, this.props.user)} style={{ minWidth: '90px' }}>
             <span className='glyphicon glyphicon-trash' aria-hidden="true"></span> <span>Remove</span>
           </button>
         </td>
