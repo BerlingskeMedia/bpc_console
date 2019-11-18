@@ -178,7 +178,15 @@ module.exports = class extends React.Component {
 
   render() {
     const companies = this.state.companies.map(company => {
-      return <Company key={company._id} data={company} accessrules={this.state.accessrules} fetchBPP={this.fetchBPP} createUser={this.createUser} searchUser={this.searchUser} />
+
+      return <Company
+              key={company._id}
+              data={company}
+              accessrules={this.state.accessrules}
+              fetchBPP={this.fetchBPP}
+              fetchBPC={this.fetchBPC}
+              createUser={this.createUser}
+              searchUser={this.searchUser} />
     });
 
     if(this.state.showForbidden) {
@@ -724,7 +732,8 @@ class Company extends React.Component {
                 searchUser={this.props.searchUser}
                 createUser={this.props.createUser}
                 removeUser={this.removeUser}
-                addUser={this.addUser} />
+                addUser={this.addUser}
+                fetchBPC={this.props.fetchBPC} />
 
             </div>  
           : null
@@ -1068,7 +1077,7 @@ class Users extends React.Component {
     // In case of undefined
     const users = this.props.users || [];
 
-    let items = users.map((user) => <User key={user.uid} user={user} removeUser={this.props.removeUser} searchUser={this.props.searchUser} />)
+    let items = users.map((user) => <User key={user.uid} user={user} removeUser={this.props.removeUser} searchUser={this.props.searchUser} fetchBPC={this.props.fetchBPC} />)
 
     const inputClassName = this.state.hasInput && !this.state.inputValid ? 'form-group has-error' : 'form-group';
 
@@ -1126,7 +1135,8 @@ class User extends React.Component {
   constructor(props){
     super(props);
     this.state = {
-      foundUser: null
+      foundUser: null,
+      addedByUser: null
     };
   }
 
@@ -1136,13 +1146,20 @@ class User extends React.Component {
       if(foundUser) {
         this.setState({ foundUser });
       } else {
+        // Waiting on the Gigya webhook
         setTimeout(() => this.getUserDetails(), 3000);
       }
     });
   }
 
   componentDidMount() {
-    this.getUserDetails();
+    this.getUserDetails(this.props.user.uid);
+
+    if(this.props.user.addedBy && this.props.user.addedBy.user) {
+      this.props.fetchBPC(`/api/users/${ encodeURIComponent(this.props.user.addedBy.user) }`)
+      .then(addedByUser => {console.log(addedByUser); return Promise.resolve(addedByUser)})
+      .then(addedByUser => this.setState({ addedByUser }));
+    }
   }
 
   render() {
@@ -1157,9 +1174,11 @@ class User extends React.Component {
     return (
       <tr key={this.props.user.uid}>
         <td>
-          { item }
-          <div><small>Added: {this.props.user.addedAt || ''}</small></div>
-          <div><small>Added by: {this.props.user.addedBy || ''}</small></div>
+          <div style={{ marginTop: '3px', marginBottom: '3px' }}>
+            { item }
+            <div><em><small>Added: {this.props.user.addedAt || ''}</small></em></div>
+            <div><em><small>Added by: {(this.state.addedByUser ? this.state.addedByUser.email : null ) || (this.props.user.addedBy ? this.props.user.addedBy.user : '')}</small></em></div>
+          </div>
         </td>
         <td style={{ textAlign: 'right'}}>
           <button type="button" className='btn btn-xs btn-danger' onClick={this.props.removeUser.bind(this, this.props.user)} style={{ minWidth: '90px' }}>
