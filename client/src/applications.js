@@ -1,6 +1,7 @@
 const $ = require('jquery');
 const React = require('react');
 const Link = require('react-router-dom').Link;
+const Bpc = require('./components/bpc');
 
 module.exports = class extends React.Component {
 
@@ -14,35 +15,22 @@ module.exports = class extends React.Component {
   }
 
   getApplications() {
-    return $.ajax({
-      type: 'GET',
-      url: '/api/applications',
-      contentType: "application/json; charset=utf-8",
-      success: function(data, status){
+    return Bpc.request('/applications')
+    .then(data => {
         this.setState({applications: data.filter((a) => {return a.id !== 'console';})});
-      }.bind(this),
-      error: function(jqXHR, textStatus, err) {
-        console.error(jqXHR.responseText);
-      }
+    })
+    .catch(err => {
+      console.error(err);
     });
   }
 
   createApplication(application) {
-    return $.ajax({
-      type: 'POST',
-      url: '/api/applications',
-      contentType: "application/json; charset=utf-8",
-      data: JSON.stringify(application),
-      success: function(data, status){
-        document.cookie = 'console_ticket=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-        location.pathname = `/applications/${data.id}`;
-        // this.setState((prevState) => {
-        //   applications: prevState.applications.push(data);
-        // });
-      }.bind(this),
-      error: function(jqXHR, textStatus, err) {
-        console.error(jqXHR.responseText);
-      }
+    return Bpc.request('/applications', {
+      method: 'POST',
+      body: JSON.stringify(application)
+    })
+    .then(data => {
+      location.pathname = `/applications/${data.id}`;
     });
   }
 

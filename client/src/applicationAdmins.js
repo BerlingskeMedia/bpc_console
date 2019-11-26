@@ -1,5 +1,6 @@
 const $ = require('jquery');
 const React = require('react');
+const Bpc = require('./components/bpc');
 
 module.exports = class extends React.Component {
 
@@ -20,13 +21,9 @@ module.exports = class extends React.Component {
   }
 
   getApplicationAdminUsers() {
-    return $.ajax({
-      type: 'GET',
-      url: `/api/admins?app=${this.props.app}`
-    }).done((data, textStatus, jqXHR) => {
-      this.setState({adminGrants: data});
-    }).fail((jqXHR, textStatus, errorThrown) => {
-      console.error(jqXHR.responseText);
+    return Bpc.request(`/admins?app=${ this.props.app }`)
+    .then(data => {
+      this.setState({ adminGrants: data });
     });
   }
 
@@ -54,21 +51,20 @@ module.exports = class extends React.Component {
 
     this.setState({searchInProgress: true});
 
-    return $.ajax({
-      type: 'GET',
-      url: `/api/users?provider=google&id=${searchText}&email=${searchText}`
-    }).done((data, textStatus, jqXHR) => {
+    return Bpc.request(`/users?provider=google&id=${ searchText }&email=${ searchText }`)
+    .then(data => {
       if (data.length === 1){
         this.setState({
           searchSuccess: true,
           foundUser: data[0]
         });
       }
-    }).fail((jqXHR, textStatus, errorThrown) => {
-      console.error(jqXHR.responseText);
-      this.setState({searchSuccess: false})
-    }).always(() => {
-      this.setState({searchInProgress: false})
+    })
+    .catch(err => {
+      this.setState({ searchSuccess: false });
+    })
+    .finally(() => {
+      this.setState({ searchInProgress: false });
     });
   }
 
@@ -79,25 +75,17 @@ module.exports = class extends React.Component {
       user: grant.user
     };
 
-    return $.ajax({
-      type: 'PATCH',
-      url: `/api/admins`,
-      contentType: "application/json; charset=utf-8",
-      data: JSON.stringify(payload)
+    return Bpc.request(`/admins`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload)
     })
-    .done((data, textStatus, jqXHR) => {
+    .then(data => {
       const index = this.state.adminGrants.findIndex(e => {
         return e.id === grant.id;
       });
       this.setState((prevState) => {
         adminGrants: prevState.adminGrants.splice(index, 1);
       });
-    })
-    .fail((jqXHR, textStatus, errorThrown) => {
-      console.error(jqXHR);
-      if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
-        alert(jqXHR.responseJSON.message);
-      }
     });
   }
 
@@ -109,13 +97,11 @@ module.exports = class extends React.Component {
       user: this.state.foundUser._id
     };
 
-    return $.ajax({
-      type: 'POST',
-      url: `/api/admins`,
-      contentType: "application/json; charset=utf-8",
-      data: JSON.stringify(payload)
+    return Bpc.request(`/admins`, {
+      method: 'POST',
+      body: JSON.stringify(payload)
     })
-    .done((data, textStatus, jqXHR) => {
+    .then(data => {
       this.setState((prevState) => {
         adminGrants: prevState.adminGrants.push(data);
       });
@@ -123,9 +109,6 @@ module.exports = class extends React.Component {
         searchText: '',
         searchSuccess: false
       });
-    })
-    .fail((jqXHR, textStatus, errorThrown) => {
-      console.error(jqXHR);
     });
   }
 
@@ -184,15 +167,13 @@ class ApplicationAdmin extends React.Component {
   }
   
   getUser(grant) {
-    return $.ajax({
-      type: 'GET',
-      url: `/api/users/${grant.user}`
-    }).done((data, textStatus, jqXHR) => {
+    return Bpc.request(`/users/${ grant.user }`)
+    .then(data => {
       this.setState({
         foundUser: data
       });
-    }).fail((jqXHR, textStatus, errorThrown) => {
-      console.error(jqXHR.responseText);
+    })
+    .catch(err => {
       this.setState({
         foundUser: null
       });

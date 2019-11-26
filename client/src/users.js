@@ -1,6 +1,7 @@
 const $ = require('jquery');
 const React = require('react');
 const Link = require('react-router-dom').Link;
+const Bpc = require('./components/bpc');
 
 module.exports = class extends React.Component {
 
@@ -96,16 +97,12 @@ class SearchUser extends React.Component {
 
     this.setState({searchInProgress: true});
 
-    return $.ajax({
-      type: 'GET',
-      url: `/api/users?email=${searchText}&id=${searchText}`,
-      contentType: "application/json; charset=utf-8"
-    }).done((data, textStatus, jqXHR) => {
+    return Bpc.request(`/users?email=${ searchText }&id=${ searchText }`)
+    .then(data => {
       window.history.pushState({ search: searchText }, "search", `/users?search=${searchText}`);
       this.props.setUsers(data);
-    }).fail((jqXHR, textStatus, errorThrown) => {
-      console.error(jqXHR.responseText);
-    }).always(() => {
+    })
+    .finally(() => {
       this.setState({searchInProgress: false});
     });
   }
@@ -208,21 +205,18 @@ class ShowFullUser extends React.Component {
   }
 
   getUserData(user_id) {
-    $.ajax({
-      type: 'GET',
-      url: `/api/users/${user_id}`,
-      contentType: "application/json; charset=utf-8"
-    }).done((data, textStatus, jqXHR) => {
+    return Bpc.request(`/users/${ user_id }`)
+    .then(data => {
       this.setState({user: data});
     });
   }
 
   deleteGrant(grant) {
-    return $.ajax({
-      type: 'PATCH',
-      url: `/api/grants`,
-      data: JSON.stringify(grant)
-    }).done((data, textStatus, jqXHR) => {
+    return Bpc.request('/grants', {
+      method: 'PATCH',
+      body: JSON.stringify(grant)
+    })
+    .then(data => {
       var user = this.state.user;
       const index = user.grants.findIndex(e => {
         return e.id === grant.id;
@@ -233,8 +227,6 @@ class ShowFullUser extends React.Component {
         user.grants = temp;
         this.setState({user: user});
       }
-    }).fail((jqXHR, textStatus, errorThrown) => {
-      console.error(jqXHR.responseText);
     });
   }
 
@@ -253,20 +245,17 @@ class ShowFullUser extends React.Component {
   }
 
   updateGrant(grant) {
-    return $.ajax({
-      type: 'POST',
-      url: `/api/grants`,
-      contentType: "application/json; charset=utf-8",
-      data: JSON.stringify(grant)
-    }).done((data, textStatus, jqXHR) => {
+    return Bpc.request('/grants', {
+      method: 'POST',
+      body: JSON.stringify(grant)
+    })
+    .then(data => {
       var user = this.state.user;
       const index = user.grants.findIndex(e => {
         return e.id === grant.id;
       });
       user.grants[index] = grant;
-      this.setState({user: user});
-    }).fail((jqXHR, textStatus, errorThrown) => {
-      console.error(jqXHR.responseText);
+      this.setState({ user: user });
     });
   }
 
@@ -372,13 +361,12 @@ class RecalcPermissionsButton extends React.Component {
   }
 
   onClick(recalcPermissionsUrl) {
-    return $.ajax({
-      type: 'GET',
-      url: recalcPermissionsUrl
-    }).done((data, textStatus, jqXHR) => {
-      console.log('recalc', data, textStatus);
-    }).fail((jqXHR, textStatus, errorThrown) => {
-      console.error(jqXHR.responseText);
+    return fetch(recalcPermissionsUrl)
+    .then(data => {
+      console.log('recalc', data);
+    })
+    .fail(err => {
+      console.error(err.message);
     });
   }
 
@@ -404,6 +392,10 @@ class RecalcPermissionsButton extends React.Component {
       window.location.hostname === 'localhost' ?
       'https://admin.kundeunivers-testing.dk/tester?name='.concat(nameQueryParam) :
       null;
+
+      if(!recalcPermissionsUrl) {
+        return null;
+      }
 
       return (
         <div style={{paddingTop: '5px'}}>
@@ -732,14 +724,11 @@ class DeleteUser extends React.Component {
   }
 
   deleteUser() {
-    return $.ajax({
-      type: 'DELETE',
-      url: '/api/users/'.concat(this.props.user),
-      contentType: "application/json; charset=utf-8"
-    }).done((data, textStatus, jqXHR) => {
+    return Bpc.request(`/users/${ this.props.user }`, {
+      method: 'DELETE',
+    })
+    .then(data => {
       location.search = '';
-    }).fail((jqXHR, textStatus, errorThrown) => {
-      console.error(jqXHR.responseText);
     });
   }
 

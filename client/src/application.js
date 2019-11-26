@@ -5,6 +5,7 @@ const ApplicationAdmins = require('./applicationAdmins');
 const ApplicationRoles = require('./applicationRoles');
 const Link = require('react-router-dom').Link;
 const Redirect = require('react-router-dom').Redirect;
+const Bpc = require('./components/bpc');
 
 module.exports = class extends React.Component {
 
@@ -32,33 +33,28 @@ module.exports = class extends React.Component {
   }
 
   getApplication() {
-    return $.ajax({
-      type: 'GET',
-      url: '/api/applications/'.concat(this.state.app)
-    }).done((data, textStatus, jqXHR) => {
+    return Bpc.request(`/applications/${ this.state.app }`)
+    .then(data => {
       if(data.settings === undefined || data.settings === null){
         data.settings = {};
       }
       this.setState({application: data});
-    }).fail((jqXHR, textStatus, errorThrown) => {
-      console.error(jqXHR.responseText);
-      if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
-        alert(jqXHR.responseJSON.message);
-      }
-      if (jqXHR.status === 403) {
+    })
+    .catch(err => {
+      console.error(err);
+      if (err.status === 403) {
         window.location = "/applications"; 
       }
     });
   }
 
   updateApplication(application) {
-    return $.ajax({
-      type: 'POST',
-      url: '/api/applications/'.concat(application.id),
-      contentType: "application/json; charset=utf-8",
-      data: JSON.stringify(application)
-    }).done((data, textStatus, jqXHR) => {
 
+    return Bpc.request(`/applications/${ application.id }`, {
+      method: 'POST',
+      body: JSON.stringify(application)
+    })
+    .then(data => {
       $('.savedSuccessMessage').fadeIn(100);
       if(this.state.savedSuccessMessageFadeOutTimeout) {
         clearTimeout(this.state.savedSuccessMessageFadeOutTimeout);
@@ -74,9 +70,6 @@ module.exports = class extends React.Component {
         application: application,
         savedSuccessMessageFadeOutTimeout: newSavedSuccessMessageFadeOutTimeout
       });
-
-    }).fail((jqXHR, textStatus, errorThrown) => {
-      console.error(jqXHR.responseText);
     });
   }
 
@@ -85,14 +78,11 @@ module.exports = class extends React.Component {
   }
 
   deleteApplication() {
-    return $.ajax({
-      type: 'DELETE',
-      url: '/api/applications/'.concat(this.state.app),
-      contentType: "application/json; charset=utf-8"
-    }).done((data, textStatus, jqXHR) => {
+    return Bpc.request(`/applications/${ this.state.app }`, {
+      method: 'DELETE'
+    })
+    .then(() => {
       location.pathname = '/applications';
-    }).fail((jqXHR, textStatus, errorThrown) => {
-      console.error(jqXHR.responseText);
     });
   }
 

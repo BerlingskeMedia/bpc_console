@@ -1,18 +1,19 @@
 const React = require('react');
 const Link = require('react-router-dom').Link;
+const Bpc = require('./components/bpc');
+const Bpp = require('./components/bpp');
 
 module.exports = class extends React.Component {
 
   constructor(props) {
     super(props);
-    this.loadTicket = this.loadTicket.bind(this);
-    this.getTicket = this.getTicket.bind(this);
-    this.refreshTicket = this.refreshTicket.bind(this);
-    this.saveTicket = this.saveTicket.bind(this);
+    // this.loadTicket = this.loadTicket.bind(this);
+    // this.getTicket = this.getTicket.bind(this);
+    // this.refreshTicket = this.refreshTicket.bind(this);
+    // this.saveTicket = this.saveTicket.bind(this);
     this.getCompanies = this.getCompanies.bind(this);
     this.getAccessRules = this.getAccessRules.bind(this);
-    this.fetchBPP = this.fetchBPP.bind(this);
-    this.fetchBPC = this.fetchBPC.bind(this);
+    // this.fetchBPP = this.fetchBPP.bind(this);
     this.searchUser = this.searchUser.bind(this);
     this.createUser = this.createUser.bind(this);
     this.state = {
@@ -23,110 +24,96 @@ module.exports = class extends React.Component {
   }
 
 
-  loadTicket() {
-    let credentials = null;
-    try {
-      credentials =  JSON.parse(window.sessionStorage.getItem('bpp_ticket'));
-    } catch(ex) { }
-    return credentials;
-  }
+  // loadTicket() {
+  //   let credentials = null;
+  //   try {
+  //     credentials =  JSON.parse(window.sessionStorage.getItem('bpp_ticket'));
+  //   } catch(ex) { }
+  //   return credentials;
+  // }
 
 
-  fetchBPP(path, options) {
+  // fetchBPP(path, options) {
 
-    let bpp_url = window.location.origin.replace('console', 'bpp');
-    const local_bpp_url = window.localStorage.getItem('bpp_url');
+  //   let bpp_url = window.location.origin.replace('console', 'bpp');
+  //   const local_bpp_url = window.localStorage.getItem('bpp_url');
 
-    if(typeof local_bpp_url === 'string' && local_bpp_url.length > 0) {
-      bpp_url = local_bpp_url;
-    }
+  //   if(typeof local_bpp_url === 'string' && local_bpp_url.length > 0) {
+  //     bpp_url = local_bpp_url;
+  //   }
 
-    if(!bpp_url) {
-      console.error('BPP URL missing');
-      return;
-    }
+  //   if(!bpp_url) {
+  //     console.error('BPP URL missing');
+  //     return;
+  //   }
 
-    const request = new Request(`${ bpp_url }${ path }`, options);
+  //   const request = new Request(`${ bpp_url }${ path }`, options);
 
-    const credentials = this.loadTicket();
-    if(credentials) {
-      const result = hawk.client.header(request.method, request.url, { credentials, app: credentials.app });
-      request.headers.set('Authorization', result.header);
-    }
+  //   const credentials = this.loadTicket();
+  //   if(credentials) {
+  //     const result = hawk.client.header(request.method, request.url, { credentials, app: credentials.app });
+  //     request.headers.set('Authorization', result.header);
+  //   }
 
-    return fetch(request)
-    .then(response => {
-      if(response.status === 200) {
-        return response.json().then(data => data);
-      } else {
-        return Promise.reject(response);
-      }
-    });
-  }
-
-
-  fetchBPC(path, options) {
-    const request = new Request(`${ path }`, options);
-
-    return fetch(request)
-    .then(response => {
-      if(response.status === 200) {
-        return response.json().then(data => data);
-      } else {
-        return Promise.reject(response);
-      }
-    });
-  }
+  //   return fetch(request)
+  //   .then(response => {
+  //     if(response.status === 200) {
+  //       return response.json().then(data => data);
+  //     } else {
+  //       return Promise.reject(response);
+  //     }
+  //   });
+  // }
 
 
-  getTicket() {
-    const auth = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse();
+  // getTicket() {
+  //   const auth = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse();
 
-    return this.fetchBPP('/authenticate', {
-      method: 'POST',
-      body: JSON.stringify({
-        id_token: auth.id_token,
-        access_token: auth.access_token
-      })
-    })
-    .then(this.saveTicket)
-    .then(ticket => {
-      setTimeout(function () {
-        this.refreshTicket(ticket);
-      }.bind(this), ticket.exp - Date.now() - (60 * 1000)); // One minutte
-    });
-  }
-
-
-  refreshTicket(credentials) {
-    return this.fetchBPP('/authenticate', {
-      method: 'POST',
-      body: JSON.stringify(credentials)
-    })
-    .then(this.saveTicket)
-    .then(ticket => {
-      setTimeout(function () {
-        this.refreshTicket(ticket);
-      }.bind(this), ticket.exp - Date.now() - (60 * 1000)); // One minutte
-    });    
-  }
+  //   return Bpp.request('/authenticate', {
+  //     method: 'POST',
+  //     body: JSON.stringify({
+  //       id_token: auth.id_token,
+  //       access_token: auth.access_token
+  //     })
+  //   })
+  //   .then(data => {
+  //     this.setState({ authenticated: true });
+  //   })
+  //   .catch(err => {
+  //     this.setState({ authenticated: false, showForbidden: true });
+  //   });
+  // }
 
 
-  saveTicket(ticket) {
-    window.sessionStorage.setItem('bpp_ticket', JSON.stringify(ticket));
-    this.setState({ bpp_ticket: ticket, authenticated: true });
-    return Promise.resolve(ticket);
-  }
+  // refreshTicket(credentials) {
+  //   return this.fetchBPP('/authenticate', {
+  //     method: 'POST',
+  //     body: JSON.stringify(credentials)
+  //   })
+  //   .then(this.saveTicket)
+  //   .then(ticket => {
+  //     setTimeout(function () {
+  //       this.refreshTicket(ticket);
+  //     }.bind(this), ticket.exp - Date.now() - (60 * 1000)); // One minutte
+  //   });    
+  // }
+
+
+  // saveTicket(ticket) {
+  //   window.sessionStorage.setItem('bpp_ticket', JSON.stringify(ticket));
+  //   this.setState({ bpp_ticket: ticket, authenticated: true });
+  //   return Promise.resolve(ticket);
+  // }
 
 
   getCompanies(query) {
-    return this.fetchBPP(`/api/companies${ query || '' }`)
+    return Bpp.request(`/api/companies${ query || '' }`)
     .then(companies => this.setState({ companies }));
   }
 
 
   getAccessRules() {
-    return this.fetchBPP(`/api/accessrules`)
+    return Bpp.request(`/api/accessrules`)
     .then(accessrules => this.setState({ accessrules }));
   }
 
@@ -136,7 +123,7 @@ module.exports = class extends React.Component {
       return Promise.reject();
     }
 
-    return this.fetchBPC('/api/gigya/register', {
+    return Bpc.request('/gigya/register', {
       method: 'POST',
       body: JSON.stringify({ email })
     });
@@ -148,7 +135,7 @@ module.exports = class extends React.Component {
       const encoded_input = encodeURIComponent(input);
       const query = `?provider=gigya&email=${ encoded_input }&id=${ encoded_input }`;
 
-      return this.fetchBPC(`/api/users${ query }`)
+      return Bpc.request(`/users${ query }`)
       .then(users => {
         const foundUser = users.length === 1 ? users[0] : null;
         return Promise.resolve(foundUser);
@@ -160,19 +147,20 @@ module.exports = class extends React.Component {
 
 
   componentDidMount() {
-    const bpp_ticket = this.loadTicket();
-    
-    if(bpp_ticket) {
-      this.refreshTicket(bpp_ticket)
-      .then(this.getCompanies)
-      .then(this.getAccessRules)
-      .catch((err) => this.setState({ showForbidden: true }))
-    } else {
-      this.getTicket()
-      .then(this.getCompanies)
-      .then(this.getAccessRules)
-      .catch((err) => this.setState({ showForbidden: true }))
-    }
+    const auth = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse();
+
+    return Bpp.authenticate({
+      id_token: auth.id_token,
+      access_token: auth.access_token
+    })
+    .then(ticket => {
+      this.setState({ authenticated: true });
+    })
+    .then(this.getCompanies)
+    .then(this.getAccessRules)
+    .catch(err => {
+      this.setState({ authenticated: false, showForbidden: true });
+    })
   }
 
 
@@ -183,8 +171,7 @@ module.exports = class extends React.Component {
               key={company._id}
               data={company}
               accessrules={this.state.accessrules}
-              fetchBPP={this.fetchBPP}
-              fetchBPC={this.fetchBPC}
+              // fetchBPP={this.fetchBPP}
               createUser={this.createUser}
               searchUser={this.searchUser} />
     });
@@ -532,7 +519,7 @@ class Company extends React.Component {
 
   getCompany() {
     const id = this.props.data._id;
-    return this.props.fetchBPP(`/api/companies/${ id }`)
+    return Bpp.request(`/api/companies/${ id }`)
     .then(company => this.setState({
       company,
       usersToAdd: [],
@@ -546,7 +533,7 @@ class Company extends React.Component {
     const id = this.props.data._id;
 
     const updateCompanyUsers = (payload) => {
-      return this.props.fetchBPP(`/api/companies/${ id }/users`, {
+      return Bpp.request(`/api/companies/${ id }/users`, {
         method: 'POST',
         body: JSON.stringify(payload)
       });
@@ -563,7 +550,7 @@ class Company extends React.Component {
 
     Promise.all(usersToAddRequests.concat(usersToRemoveRequests))
     .then(() => {
-      return this.props.fetchBPP(`/api/companies/${ id }`, {
+      return Bpp.request(`/api/companies/${ id }`, {
         method: 'PUT',
         body: JSON.stringify(this.state.company)
       })
@@ -644,10 +631,10 @@ class Company extends React.Component {
               : null
             } */}
           </div>
-          <div className="col-xs-1">
-            <CompanyOverview data={ this.state.company } />
+          <div className="col-xs-4">
+            <CompanyOverview data={ this.props.data } />
           </div>
-          <div className="col-xs-7" style={{ textAlign: 'right' }}>
+          <div className="col-xs-4" style={{ textAlign: 'right' }}>
             { this.state.showDetails
               ? <div>
                   { this.state.showSaveSuccesful ? <span style={{ color: 'green' }}><span className="glyphicon glyphicon-ok" aria-hidden="true"></span> <span>Save successful  </span></span> : null }
@@ -732,8 +719,7 @@ class Company extends React.Component {
                 searchUser={this.props.searchUser}
                 createUser={this.props.createUser}
                 removeUser={this.removeUser}
-                addUser={this.addUser}
-                fetchBPC={this.props.fetchBPC} />
+                addUser={this.addUser} />
 
             </div>  
           : null
@@ -750,9 +736,19 @@ class CompanyOverview extends React.Component {
     super(props);
   }
 
+  // componentDidUpdate() {
+
+  //   console.log(this.props)
+  // }
+
   render() {
     // TODO: Show user count and order sold quantity
-    return (null);
+    return (
+      <div>
+        <div><em><small>User count: {this.props.data.userCount || 0}</small></em></div>
+        <div><em><small>User count max: {this.props.data.userCountMax || '-'}</small></em></div>
+      </div>
+    );
   }
 }
 
@@ -1077,7 +1073,7 @@ class Users extends React.Component {
     // In case of undefined
     const users = this.props.users || [];
 
-    let items = users.map((user) => <User key={user.uid} user={user} removeUser={this.props.removeUser} searchUser={this.props.searchUser} fetchBPC={this.props.fetchBPC} />)
+    let items = users.map((user) => <User key={user.uid} user={user} removeUser={this.props.removeUser} searchUser={this.props.searchUser} />)
 
     const inputClassName = this.state.hasInput && !this.state.inputValid ? 'form-group has-error' : 'form-group';
 
@@ -1156,7 +1152,7 @@ class User extends React.Component {
     this.getUserDetails(this.props.user.uid);
 
     if(this.props.user.addedBy && this.props.user.addedBy.user) {
-      this.props.fetchBPC(`/api/users/${ encodeURIComponent(this.props.user.addedBy.user) }`)
+      Bpc.request(`/users/${ encodeURIComponent(this.props.user.addedBy.user) }`)
       .then(addedByUser => {console.log(addedByUser); return Promise.resolve(addedByUser)})
       .then(addedByUser => this.setState({ addedByUser }));
     }

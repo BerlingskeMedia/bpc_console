@@ -1,6 +1,7 @@
 const $ = require('jquery');
 const React = require('react');
 const Link = require('react-router-dom').Link;
+const Bpc = require('./components/bpc');
 
 module.exports = class extends React.Component {
 
@@ -135,11 +136,9 @@ class ParseTicketID extends React.Component {
     const payload = {
       id: ticketId
     };
-    return $.ajax({
-      type: 'POST',
-      url: `/api/parse`,
-      contentType: 'application/json; charset=utf-8',
-      data: JSON.stringify(payload)
+    return Bpc.request('/parse', {
+      method: 'POST',
+      body: JSON.stringify(payload)
     });
   }
 
@@ -319,16 +318,15 @@ class ParseHawkAuthHeader extends React.Component {
     const payload = {
       authorization: header
     };
-    return $.ajax({
-      type: 'POST',
-      url: `/api/parse`,
-      contentType: 'application/json; charset=utf-8',
-      data: JSON.stringify(payload)
-    }).done((data, textStatus, jqXHR) => {
+    return Bpc.request('/parse', {
+      method: 'POST',
+      boby: JSON.stringify(payload)
+    })
+    .then(data => {
       this.setState({result: data, error: null});
-    }).fail((jqXHR, textStatus, errorThrown) => {
-      console.error(jqXHR.responseText);
-      this.setState({result: null, error: JSON.parse(jqXHR.responseText)});
+    })
+    .catch(err => {
+      this.setState({result: null, error: err});
     });
   }
 

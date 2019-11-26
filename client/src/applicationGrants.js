@@ -1,6 +1,7 @@
 const $ = require('jquery');
 const React = require('react');
 const Link = require('react-router-dom').Link;
+const Bpc = require('./components/bpc');
 
 module.exports = class extends React.Component {
 
@@ -26,16 +27,11 @@ module.exports = class extends React.Component {
       return;
     }
 
-    return $.ajax({
-      type: 'GET',
-      url: `/api/grants/count?app=${app}`,
-      contentType: "application/json; charset=utf-8"
-    }).done((data, textStatus, jqXHR) => {
+    return Bpc.request(`/grants/count?app=${ app }`)
+    .then(data => {
       this.setState({
         grantscount: data.count
       });
-    }).fail((jqXHR, textStatus, errorThrown) => {
-      console.error(jqXHR.responseText);
     });
   }
 
@@ -46,26 +42,21 @@ module.exports = class extends React.Component {
       return;
     }
 
-    return $.ajax({
-      type: 'GET',
-      url: `/api/grants?app=${ app }&limit=${ limit }&skip=${ skip }`
-    }).done((data, textStatus, jqXHR) => {
+    return Bpc.request(`/grants?app=${ app }&limit=${ limit }&skip=${ skip }`)
+    .then(data => {
       this.setState({
         grants: data
       });
-    }).fail((jqXHR, textStatus, errorThrown) => {
-      console.error(jqXHR.responseText);
     });
   }
 
 
   createGrant(grant) {
-    return $.ajax({
-      type: 'POST',
-      url: `/api/grants`,
-      contentType: "application/json; charset=utf-8",
-      data: JSON.stringify(grant)
-    }).done((data, textStatus, jqXHR) => {
+    return Bpc.request('/grants', {
+      method: 'POST',
+      body: JSON.stringify(grant)
+    })
+    .then(data => {
       this.setState((prevState) => {
         let temp = prevState.grants.slice();
         temp.splice(0, 0, data);
@@ -74,19 +65,17 @@ module.exports = class extends React.Component {
           grants: temp
         };
       });
-    }).fail((jqXHR, textStatus, errorThrown) => {
-      console.error(jqXHR.responseText);
+      return Promise.resolve(data);
     });
   }
 
 
   deleteGrant(grant) {
-    return $.ajax({
-      type: 'PATCH',
-      url: `/api/grants`,
-      contentType: "application/json; charset=utf-8",
-      data: JSON.stringify(grant)
-    }).done((data, textStatus, jqXHR) => {
+    return Bpc.request('/grants', {
+      method: 'PATCH',
+      body: JSON.stringify(grant)
+    })
+    .then(data => {
       const index = this.state.grants.findIndex(e => {
         return e.id === grant.id;
       });
@@ -100,8 +89,8 @@ module.exports = class extends React.Component {
           };
         });
       }
-    }).fail((jqXHR, textStatus, errorThrown) => {
-      console.error(jqXHR.responseText);
+
+      return Promise.resolve(data);
     });
   }
 
@@ -119,12 +108,11 @@ module.exports = class extends React.Component {
 
 
   updateGrant(grant) {
-    return $.ajax({
-      type: 'POST',
-      url: `/api/grants`,
-      contentType: "application/json; charset=utf-8",
-      data: JSON.stringify(grant)
-    }).done((data, textStatus, jqXHR) => {
+    return Bpc.request('/grants', {
+      method: 'POST',
+      body: JSON.stringify(grant)
+    })
+    .then(data => {
       const index = this.state.grants.findIndex(e => {
         return e.id === grant.id;
       });
@@ -133,8 +121,7 @@ module.exports = class extends React.Component {
           return prevState.grants[index] = grant;
         });
       }
-    }).fail((jqXHR, textStatus, errorThrown) => {
-      console.error(jqXHR.responseText);
+      return Promise.resolve(data);
     });
   }
   
@@ -233,10 +220,8 @@ class UserSearch extends React.Component {
     const application = this.props.application;
     const provider = application.provider || application.settings.provider;
 
-    return $.ajax({
-      type: 'GET',
-      url: `/api/users?provider=${provider}&id=${searchText}&email=${searchText}`
-    }).done((data, textStatus, jqXHR) => {
+    return Bpc.request(`/users?provider=${ provider }&id=${ searchText }&email=${ searchText }`)
+    .then(data => {
 
       if (data.length === 1){
 
@@ -249,12 +234,8 @@ class UserSearch extends React.Component {
 
         // Checking existing grants
         // We are setting state in this response so the UI doesn't flicker
-        $.ajax({
-          type: 'GET',
-          url: `/api/grants?app=${application.id}&user=${user._id}`
-        })
-        .done((data, textStatus, jqXHR) => {
-
+        Bpc.request(`/grants?app=${ application.id }&user=${ user._id }`)
+        .then(data => {
           this.setState({
             userHasGrant: data.length === 1,
             grant: data.length === 1 ? data[0] : null
@@ -270,14 +251,14 @@ class UserSearch extends React.Component {
         });
 
       }
-
-    }).fail((jqXHR, textStatus, errorThrown) => {
-      console.error(jqXHR.responseText);
+    })
+    .catch(err => {
       this.setState({
         userFound: false,
         userNotFound: false
       });
-    }).always(() => {
+    })
+    .finally(() => {
       this.setState({searchInProgress: false});
     });
   }
@@ -293,7 +274,7 @@ class UserSearch extends React.Component {
       };
 
       return this.props.createGrant(newGrant)
-      .done((data, textStatus, jqXHR) => {
+      .then((data) => {
         this.setState({
           userFound: true,
           userNotFound: false,
@@ -301,15 +282,12 @@ class UserSearch extends React.Component {
           grant: data
         });
       })
-      .fail((jqXHR, textStatus, errorThrown) => {
-        this.setState({userFound: false});
-        console.log('jqXHR', jqXHR);
-        if (jqXHR.status === 409) {
+      .catch(err => {
+        this.setState({ userFound: false });
+        if (err.status === 409) {
           alert('User already have access');
           this.searchBox.value = '';
           this.setState({user: {}});
-        } else {
-          console.error(jqXHR.responseText);
         }
       });
     }
@@ -322,13 +300,11 @@ class UserSearch extends React.Component {
       provider: this.props.application.provider || this.props.application.settings.provider
     };
 
-    return $.ajax({
-      type: 'POST',
-      url: `/api/users`,
-      contentType: "application/json; charset=utf-8",
-      data: JSON.stringify(payload)
-    }).done((data, textStatus, jqXHR) => {
-      
+    return Bpc.request('/users', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    })
+    .then(data => {
       this.setState({
         userNotFound: false,
         userAndGrantCanBeCreated: false,
@@ -603,15 +579,13 @@ class ApplicationUser extends React.Component {
   }
   
   getUser(grant) {
-    return $.ajax({
-      type: 'GET',
-      url: `/api/users/${grant.user}`
-    }).done((data, textStatus, jqXHR) => {
+    return Bpc.request(`/users/${grant.user}`)
+    .then(data => {
       this.setState({
         user: data
       });
-    }).fail((jqXHR, textStatus, errorThrown) => {
-      console.error(jqXHR.responseText);
+    })
+    .catch(err => {
       this.setState({
         user: null
       });

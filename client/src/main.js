@@ -13,6 +13,7 @@ const Application = require('./application');
 const Tools = require('./tools');
 const Companies = require('./companies');
 const GoogleLogin = require('react-google-login').default;
+const Bpc = require('./components/bpc');
 
 // Add the event handler
 
@@ -24,12 +25,7 @@ class ConsoleApp extends React.Component {
   constructor(props) {
     super(props);
     this.onGoogleSignIn = this.onGoogleSignIn.bind(this);
-    this.setReissueUserTicketTimeout = this.setReissueUserTicketTimeout.bind(this);
     this.getUserTicket = this.getUserTicket.bind(this);
-    this.reissueUserTicket = this.reissueUserTicket.bind(this);
-    this.getUserTicketDone = this.getUserTicketDone.bind(this);
-    this.getUserTicketFail = this.getUserTicketFail.bind(this);
-    this.deleteUserTicket = this.deleteUserTicket.bind(this);
     this.state = {
       authenticated: false,
       authenticationNeeded: false,
@@ -64,73 +60,38 @@ class ConsoleApp extends React.Component {
       authenticationNeeded: false
     });
 
-    this.getUserTicket(googleUser);
+    return this.getUserTicket(googleUser);
   }
 
   onGoogleSignInFailure(err) {
     console.log('Google Sign in error', err);
   }
 
-  setReissueUserTicketTimeout(ticket) {
-    setTimeout(function () {
-      this.reissueUserTicket();
-    }.bind(this), ticket.exp - Date.now() - 10000);
-  }
-
-  getUserTicket(googleUser){
+  getUserTicket(googleUser) {
 
     var basicProfile = googleUser.getBasicProfile();
     var authResponse = googleUser.getAuthResponse();
 
     const payload = {
-      ID: basicProfile.getId(),
       id_token: authResponse.id_token,
-      access_token: authResponse.access_token
+      access_token: authResponse.access_token,
+      app: 'console'
     };
 
-    return $.ajax({
-      type: 'POST',
-      url: '/authenticate',
-      contentType: 'application/json; charset=utf-8',
-      data: JSON.stringify(payload)
+    return Bpc.request('/rsvp', {
+      method: 'POST',
+      body: JSON.stringify(payload)
     })
-    .done((ticket, textStatus, jqXHR) => this.getUserTicketDone(ticket, textStatus, jqXHR))
-    .fail((jqXHR, textStatus, errorThrown) => this.getUserTicketFail(jqXHR, textStatus, errorThrown));
-  }
-
-  reissueUserTicket() {
-    return $.ajax({
-      type: 'GET',
-      url: '/authenticate',
-      contentType: 'application/json; charset=utf-8'
+    .then(rsvp => Bpc.authenticate(rsvp))
+    .then((ticket) => {
+      this.setState({ authorized: true });
     })
-    .done((ticket, textStatus, jqXHR) => this.getUserTicketDone(ticket, textStatus, jqXHR))
-    .fail((jqXHR, textStatus, errorThrown) => this.getUserTicketFail(jqXHR, textStatus, errorThrown));
-  }
-
-  getUserTicketDone(ticket, textStatus, jqXHR) {
-    this.setState({ authorized: true });
-    this.setReissueUserTicketTimeout(ticket);
-  }
-
-  getUserTicketFail(jqXHR, textStatus, errorThrown) {
-    console.error(jqXHR);
-    console.error(jqXHR.responseText);
-    this.setState({
-      authorized: false,
-      ticketReissueFailed: true
-    });
-  }
-
-  deleteUserTicket(){
-    return $.ajax({
-      type: 'DELETE',
-      url: '/authenticate'
-    }).done((data, textStatus, jqXHR) => {
-      console.log('DELETE signout success', data, status);
-      this.setState({ authenticated: false, authorized: false});
-    }).fail((jqXHR, textStatus, errorThrown) => {
-      console.error(jqXHR.responseText);
+    .catch((err) => {
+      console.error(err);
+      this.setState({
+        authorized: false,
+        ticketReissueFailed: true
+      });
     });
   }
 
