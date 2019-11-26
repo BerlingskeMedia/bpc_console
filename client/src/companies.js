@@ -1065,7 +1065,6 @@ class User extends React.Component {
 
     if(this.props.user.addedBy && this.props.user.addedBy.user) {
       Bpc.request(`/users/${ encodeURIComponent(this.props.user.addedBy.user) }`)
-      .then(addedByUser => {console.log(addedByUser); return Promise.resolve(addedByUser)})
       .then(addedByUser => this.setState({ addedByUser }));
     }
   }
