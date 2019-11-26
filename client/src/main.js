@@ -30,8 +30,6 @@ class ConsoleApp extends React.Component {
       authenticated: false,
       authenticationNeeded: false,
       authorized: false,
-      missingGrant: false,
-      ticketReissueFailed: false,
       accountInfo: {},
       userprofile: {}
     };
@@ -87,11 +85,7 @@ class ConsoleApp extends React.Component {
       this.setState({ authorized: true });
     })
     .catch((err) => {
-      console.error(err);
-      this.setState({
-        authorized: false,
-        ticketReissueFailed: true
-      });
+      this.setState({ authorized: false });
     });
   }
 
@@ -137,8 +131,7 @@ class ConsoleApp extends React.Component {
           {this.state.authenticated
             ? <div>
                 {this.state.authorized === true ? <Main /> : null }
-                {this.state.ticketReissueFailed === true ? <p>Din session kunne ikke forlænges.</p> : null }
-                {this.state.missingGrant === true ? <p>Du har ikke de fornødne rettigheder.</p> : null }
+                {this.state.authorized === false ? <p>Du har ikke de fornødne rettigheder.</p> : null }
               </div>
             : null
           }

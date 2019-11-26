@@ -54,7 +54,10 @@ const authenticate = (credentials) => {
     body: JSON.stringify(credentials)
   })
   .then(saveTicket)
-  .then(setReissueTimeout);
+  .then(setReissueTimeout)
+  .catch(err => {
+    window.sessionStorage.removeItem('bpp_ticket');
+  });
 };
 
 
@@ -65,7 +68,7 @@ const deauthenticate = () => {
 
   return request('/authenticate', options)
   .then(() => {
-    window.sessionStorage.removeItem('bpc_console_ticket');
+    window.sessionStorage.removeItem('bpp_ticket');
   });
 };
 

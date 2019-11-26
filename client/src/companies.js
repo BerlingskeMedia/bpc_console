@@ -7,103 +7,16 @@ module.exports = class extends React.Component {
 
   constructor(props) {
     super(props);
-    // this.loadTicket = this.loadTicket.bind(this);
-    // this.getTicket = this.getTicket.bind(this);
-    // this.refreshTicket = this.refreshTicket.bind(this);
-    // this.saveTicket = this.saveTicket.bind(this);
     this.getCompanies = this.getCompanies.bind(this);
     this.getAccessRules = this.getAccessRules.bind(this);
-    // this.fetchBPP = this.fetchBPP.bind(this);
     this.searchUser = this.searchUser.bind(this);
     this.createUser = this.createUser.bind(this);
     this.state = {
       companies: [],
       accessrules: [],
-      authenticated: false
+      authorized: false
     };
   }
-
-
-  // loadTicket() {
-  //   let credentials = null;
-  //   try {
-  //     credentials =  JSON.parse(window.sessionStorage.getItem('bpp_ticket'));
-  //   } catch(ex) { }
-  //   return credentials;
-  // }
-
-
-  // fetchBPP(path, options) {
-
-  //   let bpp_url = window.location.origin.replace('console', 'bpp');
-  //   const local_bpp_url = window.localStorage.getItem('bpp_url');
-
-  //   if(typeof local_bpp_url === 'string' && local_bpp_url.length > 0) {
-  //     bpp_url = local_bpp_url;
-  //   }
-
-  //   if(!bpp_url) {
-  //     console.error('BPP URL missing');
-  //     return;
-  //   }
-
-  //   const request = new Request(`${ bpp_url }${ path }`, options);
-
-  //   const credentials = this.loadTicket();
-  //   if(credentials) {
-  //     const result = hawk.client.header(request.method, request.url, { credentials, app: credentials.app });
-  //     request.headers.set('Authorization', result.header);
-  //   }
-
-  //   return fetch(request)
-  //   .then(response => {
-  //     if(response.status === 200) {
-  //       return response.json().then(data => data);
-  //     } else {
-  //       return Promise.reject(response);
-  //     }
-  //   });
-  // }
-
-
-  // getTicket() {
-  //   const auth = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse();
-
-  //   return Bpp.request('/authenticate', {
-  //     method: 'POST',
-  //     body: JSON.stringify({
-  //       id_token: auth.id_token,
-  //       access_token: auth.access_token
-  //     })
-  //   })
-  //   .then(data => {
-  //     this.setState({ authenticated: true });
-  //   })
-  //   .catch(err => {
-  //     this.setState({ authenticated: false, showForbidden: true });
-  //   });
-  // }
-
-
-  // refreshTicket(credentials) {
-  //   return this.fetchBPP('/authenticate', {
-  //     method: 'POST',
-  //     body: JSON.stringify(credentials)
-  //   })
-  //   .then(this.saveTicket)
-  //   .then(ticket => {
-  //     setTimeout(function () {
-  //       this.refreshTicket(ticket);
-  //     }.bind(this), ticket.exp - Date.now() - (60 * 1000)); // One minutte
-  //   });    
-  // }
-
-
-  // saveTicket(ticket) {
-  //   window.sessionStorage.setItem('bpp_ticket', JSON.stringify(ticket));
-  //   this.setState({ bpp_ticket: ticket, authenticated: true });
-  //   return Promise.resolve(ticket);
-  // }
 
 
   getCompanies(query) {
@@ -154,12 +67,12 @@ module.exports = class extends React.Component {
       access_token: auth.access_token
     })
     .then(ticket => {
-      this.setState({ authenticated: true });
+      this.setState({ authorized: true });
     })
     .then(this.getCompanies)
     .then(this.getAccessRules)
     .catch(err => {
-      this.setState({ authenticated: false, showForbidden: true });
+      this.setState({ authorized: false });
     })
   }
 
@@ -171,12 +84,11 @@ module.exports = class extends React.Component {
               key={company._id}
               data={company}
               accessrules={this.state.accessrules}
-              // fetchBPP={this.fetchBPP}
               createUser={this.createUser}
               searchUser={this.searchUser} />
     });
 
-    if(this.state.showForbidden) {
+    if(!this.state.authorized) {
       return (
         <div className="companies" style={{ paddingTop: '50px' }}>
           <div style={{textAlign: 'center'}}><em>(forbidden)</em></div>

@@ -66,6 +66,9 @@ const authenticate = (credentials) => {
     } else {
       return Promise.reject(response);
     }
+  })
+  .catch(err => {
+    window.sessionStorage.removeItem('bpc_console_ticket');
   });
 };
 
