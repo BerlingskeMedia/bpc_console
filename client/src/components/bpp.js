@@ -43,12 +43,12 @@ const saveTicket = (credentials) => {
 
 
 const setReissueTimeout = (credentials) => {
-  setTimeout(() => authenticate(credentials), credentials.exp - Date.now() - 10000);
+  setTimeout(() => authorize(credentials), credentials.exp - Date.now() - 10000);
   return Promise.resolve(credentials);
 };
 
 
-const authenticate = (credentials) => {
+const authorize = (credentials) => {
   return request('/authenticate', {
     method: 'POST',
     body: JSON.stringify(credentials)
@@ -61,7 +61,7 @@ const authenticate = (credentials) => {
 };
 
 
-const deauthenticate = () => {
+const unauthorize = () => {
   const options = {
     method: 'DELETE'
   };
@@ -73,4 +73,4 @@ const deauthenticate = () => {
 };
 
 
-module.exports = { request, authenticate, deauthenticate };
+module.exports = { request, authorize, unauthorize };

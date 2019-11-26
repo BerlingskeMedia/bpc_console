@@ -80,7 +80,7 @@ class ConsoleApp extends React.Component {
       method: 'POST',
       body: JSON.stringify(payload)
     })
-    .then(rsvp => Bpc.authenticate(rsvp))
+    .then(rsvp => Bpc.authorize(rsvp))
     .then((ticket) => {
       this.setState({ authorized: true });
     })

@@ -62,7 +62,7 @@ module.exports = class extends React.Component {
   componentDidMount() {
     const auth = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse();
 
-    return Bpp.authenticate({
+    return Bpp.authorize({
       id_token: auth.id_token,
       access_token: auth.access_token
     })

@@ -33,7 +33,7 @@ const request = (path, options = {}) => {
       return response.json().then(data => data);
     } else {
       if(response.status === 401 && response.message === "Expired ticket") {
-        authenticate(credentials);
+        authorize(credentials);
       }
       return Promise.reject(response);
     }
@@ -48,13 +48,13 @@ const saveTicket = (credentials) => {
 
 
 const setReissueTimeout = (credentials) => {
-  setTimeout(() => authenticate(credentials), credentials.exp - Date.now() - 10000);
+  setTimeout(() => authorize(credentials), credentials.exp - Date.now() - 10000);
   return Promise.resolve(credentials);
 };
 
 
-const authenticate = (credentials) => {
-  return fetch('/authenticate', {
+const authorize = (credentials) => {
+  return fetch('/authorize', {
     method: 'POST',
     body: JSON.stringify(credentials)
   })
@@ -73,12 +73,12 @@ const authenticate = (credentials) => {
 };
 
 
-const deauthenticate = () => {
+const unauthorize = () => {
   const options = {
     method: 'DELETE'
   };
 
-  return fetch('/authenticate', options)
+  return fetch('/authorize', options)
   .then(response => {
     if(response.status === 200) {
       window.sessionStorage.removeItem('bpc_console_ticket');
@@ -89,4 +89,4 @@ const deauthenticate = () => {
   });
 };
 
-module.exports = { request, authenticate, deauthenticate };
+module.exports = { request, authorize, unauthorize };
