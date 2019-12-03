@@ -30,6 +30,7 @@ class ConsoleApp extends React.Component {
       authenticated: false,
       authenticationNeeded: false,
       authorized: false,
+      unauthorized: false,
       accountInfo: {},
       userprofile: {}
     };
@@ -82,10 +83,10 @@ class ConsoleApp extends React.Component {
     })
     .then(rsvp => Bpc.authorize(rsvp))
     .then((ticket) => {
-      this.setState({ authorized: true });
+      this.setState({ authorized: true, unauthorized: false });
     })
     .catch((err) => {
-      this.setState({ authorized: false });
+      this.setState({ authorized: false, unauthorized: true });
     });
   }
 
@@ -131,7 +132,7 @@ class ConsoleApp extends React.Component {
           {this.state.authenticated
             ? <div>
                 {this.state.authorized === true ? <Main /> : null }
-                {this.state.authorized === false ? <p>Du har ikke de fornødne rettigheder.</p> : null }
+                {this.state.unauthorized === true ? <p>Du har ikke de fornødne rettigheder.</p> : null }
               </div>
             : null
           }
