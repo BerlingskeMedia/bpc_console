@@ -68,7 +68,6 @@ class ConsoleApp extends React.Component {
 
   getUserTicket(googleUser) {
 
-    var basicProfile = googleUser.getBasicProfile();
     var authResponse = googleUser.getAuthResponse();
 
     const payload = {
@@ -88,41 +87,6 @@ class ConsoleApp extends React.Component {
     .catch((err) => {
       this.setState({ authorized: false, unauthorized: true });
     });
-  }
-
-  getSearchParameter(name, url) {
-    if (!url) url = window.location.href;
-    name = name.replace(/[\[\]]/g, "\\$&");
-    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
-        results = regex.exec(url);
-    if (!results) return null;
-    if (!results[2]) return '';
-    return decodeURIComponent(results[2].replace(/\+/g, " "));
-  }
-
-  setSearchParameter(key, value) {
-    // remove the hash part before operating on the uri
-    var uri = window.location.href;
-    var i = uri.indexOf('#');
-    var hash = i === -1 ? ''  : uri.substr(i);
-         uri = i === -1 ? uri : uri.substr(0, i);
-
-    var re = new RegExp("([?&])" + key + "=.*?(&|$)", "i");
-    var separator = uri.indexOf('?') !== -1 ? "&" : "?";
-    if (value === undefined || value === null) {
-      uri = uri.replace(re, '$1' + '$2').replace('?&', '?');
-      if (uri.endsWith('&')) {
-        uri = uri.slice(0, -1);
-      }
-    } else if (uri.match(re)) {
-      uri = uri.replace(re, '$1' + key + "=" + value + '$2');
-    } else {
-      uri = uri + separator + key + "=" + value;
-    }
-    var href = uri + hash;
-    if (window.history.pushState) {
-      window.history.pushState({path:href},'',href)
-    }
   }
 
   render() {
@@ -217,21 +181,3 @@ ReactDOM.render(
   <ConsoleApp />,
   document.getElementById('content')
 );
-
-
-function readCookie(name) {
-  var nameEQ = name + "=";
-  var ca = document.cookie.split(';');
-  for(var i=0;i < ca.length;i++) {
-    var c = ca[i];
-    while (c.charAt(0)==' ') c = c.substring(1,c.length);
-    if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
-  }
-  return null;
-}
-
-
-function readTicket(){
-  var ticket = readCookie('console_ticket');
-  return ticket !== null ? JSON.parse(window.atob(ticket)): null;
-}
