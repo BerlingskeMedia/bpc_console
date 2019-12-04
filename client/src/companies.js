@@ -514,7 +514,11 @@ class Company extends React.Component {
 
   showHideCompanyDetails() {
     if(this.state.showDetails) {
-      this.setState({ showDetails: false, company: null });
+      if(this.state.hasAnyChanges) {
+        this.setState({ showDetails: false, company: null });
+      } else {
+        this.setState({ showDetails: false });
+      }
     } else {
       this.setState({ showLoader: true });
       this.getCompany()
@@ -564,7 +568,10 @@ class Company extends React.Component {
           <div className="col-xs-4" style={{ textAlign: 'right' }}>
             { this.state.showDetails
               ? <button type="button" className="btn btn-sm btn-default" onClick={this.showHideCompanyDetails}>
-                  <span className="glyphicon glyphicon-resize-small" aria-hidden="true"></span> <span>Close</span>
+                { this.state.hasAnyChanges
+                  ? <span><span className="glyphicon glyphicon-resize-small" aria-hidden="true"></span> <span>Cancel</span></span>
+                  : <span><span className="glyphicon glyphicon-resize-small" aria-hidden="true"></span> <span>Close</span></span>
+                }
               </button>
               : <button type="button" className="btn btn-sm btn-default" onClick={this.showHideCompanyDetails}>
                   <span className="glyphicon glyphicon-resize-full" aria-hidden="true"></span> <span>Open</span>
@@ -576,17 +583,16 @@ class Company extends React.Component {
         { this.state.showDetails
           ?  <div style={{ marginTop: '10px', marginBottom: '100px', minHeight: '100px' }}>
               <div className="row" style={{ marginBottom: '10px' }}>
-                <div className="col-xs-4 col-xs-offset-8" style={{ textAlign: 'right' }}>
+                <div className="col-xs-12" style={{ textAlign: 'right' }}>
+                { this.state.showSaveSuccesful
+                    ? <span style={{ color: 'green' }}><span className="glyphicon glyphicon-ok" aria-hidden="true"></span> <span>Save successful  </span></span>
+                    : <span>&nbsp;</span> }
                   <button type="button" className="btn btn-sm btn-danger" onClick={this.saveCompany} disabled={!this.state.confirmSave}>
                     <span className="glyphicon glyphicon-save" aria-hidden="true"></span> <span>Confirm</span>
                   </button>
                   <span>&nbsp;</span>
                   <button type="button" className="btn btn-sm btn-warning" onClick={this.showConfirmSave} disabled={!this.state.hasAnyChanges}>
                     <span className={`glyphicon ${ this.state.confirmSave ? 'glyphicon-repeat' : 'glyphicon-floppy-disk' }`} aria-hidden="true"></span> <span>Save</span>
-                  </button>
-                  <span>&nbsp;</span>
-                  <button type="button" className="btn btn-sm btn-success" onClick={this.getCompany} disabled={!this.state.hasAnyChanges}>
-                    <span className="glyphicon glyphicon-refresh" aria-hidden="true"></span> <span>Reload</span>
                   </button>
                 </div>
               </div>
@@ -688,10 +694,12 @@ class CompanyOverview extends React.Component {
 
     return (
       <div>
-        <div style={{ backgroundColor: userCountMaxExeeded ? 'red' : 'inherit' }}>
+        <div style={{ paddingLeft: '4px', backgroundColor: userCountMaxExeeded ? 'red' : 'inherit' }}>
           <em><small>User count: {this.props.data.userCount || 0}/{ userCountMax }</small></em>
         </div>
-        <div><em><small>Note: {this.props.data.note || ''}</small></em></div>
+        <div style={{ paddingLeft: '4px' }}>
+          <em><small>Note: {this.props.data.note || ''}</small></em>
+        </div>
       </div>
     );
   }
@@ -973,7 +981,8 @@ class UserMaxCount extends React.Component {
   }
 
   handleChange(e) {
-    const userCountMax = e.target.value;
+    // Blank equals inifite users
+    const userCountMax = e.target.value === '' ? e.target.value : parseInt(e.target.value);
     this.props.addCompanyUserCountMax(userCountMax);
   }
 
