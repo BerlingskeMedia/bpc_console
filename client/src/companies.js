@@ -277,6 +277,7 @@ class Company extends React.Component {
     this.showHideCompanyDetails = this.showHideCompanyDetails.bind(this);
     this.showConfirmSave = this.showConfirmSave.bind(this);
     this.addCompanyNote = this.addCompanyNote.bind(this);
+    this.addCompanyUserCountMax = this.addCompanyUserCountMax.bind(this);
     this.removeAccessRules = this.removeAccessRules.bind(this);
     this.addUser = this.addUser.bind(this);
     this.removeUser = this.removeUser.bind(this);
@@ -298,6 +299,12 @@ class Company extends React.Component {
   addCompanyNote(note) {
     let newCompany = Object.assign({}, this.state.company);
     newCompany.note = note;
+    this.updateCompanyState(newCompany);
+  }
+
+  addCompanyUserCountMax(userCountMax) {
+    let newCompany = Object.assign({}, this.state.company);
+    newCompany.userCountMax = userCountMax;
     this.updateCompanyState(newCompany);
   }
   
@@ -507,7 +514,7 @@ class Company extends React.Component {
 
   showHideCompanyDetails() {
     if(this.state.showDetails) {
-      this.setState({ showDetails: false });
+      this.setState({ showDetails: false, company: null });
     } else {
       this.setState({ showLoader: true });
       this.getCompany()
@@ -640,6 +647,10 @@ class Company extends React.Component {
                 addItem={this.addEmailmask}
                 validateItem={this.validateEmailmask} />
 
+              <UserMaxCount
+                userCountMax={this.state.company.userCountMax}
+                addCompanyUserCountMax={this.addCompanyUserCountMax} />
+
               <Users
                 users={this.state.company.users}
                 label="Users"
@@ -665,10 +676,21 @@ class CompanyOverview extends React.Component {
   }
 
   render() {
+
+    // In case userCountMax=0 we want to display the value "0"
+    const userCountMax = this.props.data.userCountMax === undefined || this.props.data.userCountMax === null || this.props.data.userCountMax === ''
+      ? '-' : this.props.data.userCountMax;
+
+    const userCountMaxExeeded =
+      typeof userCountMax === 'number' &&
+      typeof this.props.data.userCount === 'number' &&
+      userCountMax > this.props.data.userCount;
+
     return (
       <div>
-        <div><em><small>User count: {this.props.data.userCount || 0}</small></em></div>
-        <div><em><small>User count max: {this.props.data.userCountMax || '-'}</small></em></div>
+        <div style={{ backgroundColor: userCountMaxExeeded ? 'red' : 'inherit' }}>
+          <em><small>User count: {this.props.data.userCount || 0}/{ userCountMax }</small></em>
+        </div>
         <div><em><small>Note: {this.props.data.note || ''}</small></em></div>
       </div>
     );
@@ -684,7 +706,6 @@ class CompanyNote extends React.Component {
 
   handleChange(e) {
     const note = e.target.value;
-    console.log('hanl', note)
     this.props.addCompanyNote(note);
   }
 
@@ -696,7 +717,11 @@ class CompanyNote extends React.Component {
           <div><em><small></small></em></div>
         </div>
         <div className="col-xs-10">
-          <textarea className="form-control" defaultValue={this.props.note} rows="2" onChange={this.handleChange}></textarea>
+          <textarea
+            className="form-control"
+            defaultValue={this.props.note}
+            rows="2"
+            onChange={this.handleChange}></textarea>
         </div>
       </div>
     );
@@ -936,6 +961,40 @@ class ArrayItem extends React.Component {
           </button>
         </td>
       </tr>
+    );
+  }
+}
+
+
+class UserMaxCount extends React.Component {
+  constructor(props){
+    super(props);
+    this.handleChange = this.handleChange.bind(this);
+  }
+
+  handleChange(e) {
+    const userCountMax = e.target.value;
+    this.props.addCompanyUserCountMax(userCountMax);
+  }
+
+  render() {
+    return (
+      <div style={{ marginTop: '40px', minHeight: '10px' }}>
+        <div className="row">
+          <div className="col-xs-2" style={{ textAlign: 'right' }}>
+            <strong>User max</strong>
+            <div><em><small>Maximum allowed users. Blank = infinite.</small></em></div>
+          </div>
+          <div className="col-xs-10">
+            <input
+              type="number"
+              className="form-control"
+              min="0"
+              defaultValue={this.props.userCountMax}
+              onChange={this.handleChange} />
+          </div>
+        </div>
+      </div>
     );
   }
 }
