@@ -276,6 +276,7 @@ class Company extends React.Component {
     this.updateCompanyState = this.updateCompanyState.bind(this);
     this.showHideCompanyDetails = this.showHideCompanyDetails.bind(this);
     this.showConfirmSave = this.showConfirmSave.bind(this);
+    this.addCompanyNote = this.addCompanyNote.bind(this);
     this.removeAccessRules = this.removeAccessRules.bind(this);
     this.addUser = this.addUser.bind(this);
     this.removeUser = this.removeUser.bind(this);
@@ -291,6 +292,13 @@ class Company extends React.Component {
       showDetails: false,
       showLoader: false
     };
+  }
+
+
+  addCompanyNote(note) {
+    let newCompany = Object.assign({}, this.state.company);
+    newCompany.note = note;
+    this.updateCompanyState(newCompany);
   }
   
 
@@ -535,7 +543,7 @@ class Company extends React.Component {
       <div style={{ paddingBottom: '4px' }}>
         <div className="row">
           <div className="col-xs-4">
-            <button type="button" className="btn bt-xs btn-link" onClick={this.showHideCompanyDetails}>{ this.props.data.title }</button>
+            <div className="text-wrap">{ this.props.data.title }</div>
             {/* { this.state.showLoader
               ? (<div className="loadSpinner">
                   <img src="/assets/load_spinner.gif" />
@@ -544,13 +552,24 @@ class Company extends React.Component {
             } */}
           </div>
           <div className="col-xs-4">
-            <CompanyOverview data={ this.props.data } />
+            <CompanyOverview data={ this.state.company || this.props.data } />
           </div>
           <div className="col-xs-4" style={{ textAlign: 'right' }}>
             { this.state.showDetails
-              ? <div>
-                  { this.state.showSaveSuccesful ? <span style={{ color: 'green' }}><span className="glyphicon glyphicon-ok" aria-hidden="true"></span> <span>Save successful  </span></span> : null }
-                  <span>&nbsp;</span>
+              ? <button type="button" className="btn btn-sm btn-default" onClick={this.showHideCompanyDetails}>
+                  <span className="glyphicon glyphicon-resize-small" aria-hidden="true"></span> <span>Close</span>
+              </button>
+              : <button type="button" className="btn btn-sm btn-default" onClick={this.showHideCompanyDetails}>
+                  <span className="glyphicon glyphicon-resize-full" aria-hidden="true"></span> <span>Open</span>
+                </button>
+            }
+          </div>
+        </div>
+
+        { this.state.showDetails
+          ?  <div style={{ marginTop: '10px', marginBottom: '100px', minHeight: '100px' }}>
+              <div className="row" style={{ marginBottom: '10px' }}>
+                <div className="col-xs-4 col-xs-offset-8" style={{ textAlign: 'right' }}>
                   <button type="button" className="btn btn-sm btn-danger" onClick={this.saveCompany} disabled={!this.state.confirmSave}>
                     <span className="glyphicon glyphicon-save" aria-hidden="true"></span> <span>Confirm</span>
                   </button>
@@ -562,22 +581,15 @@ class Company extends React.Component {
                   <button type="button" className="btn btn-sm btn-success" onClick={this.getCompany} disabled={!this.state.hasAnyChanges}>
                     <span className="glyphicon glyphicon-refresh" aria-hidden="true"></span> <span>Reload</span>
                   </button>
-                  <span>&nbsp;</span>
-                  <button type="button" className="btn btn-sm btn-default" onClick={this.showHideCompanyDetails}>
-                    <span className="glyphicon glyphicon-resize-small" aria-hidden="true"></span> <span>Close</span>
-                  </button>
                 </div>
-              : <div>
-                  <button type="button" className="btn btn-sm btn-default" onClick={this.showHideCompanyDetails}>
-                    <span className="glyphicon glyphicon-resize-full" aria-hidden="true"></span> <span>Open</span>
-                  </button>
+              </div>
+              <div className="row">
+                <div className="col-xs-12" style={{ textAlign: 'right', marginBottom: '3px' }}>
+                  { this.state.showSaveSuccesful
+                    ? <span style={{ color: 'green' }}><span className="glyphicon glyphicon-ok" aria-hidden="true"></span> <span>Save successful  </span></span>
+                    : <span>&nbsp;</span> }
                 </div>
-            }
-          </div>
-        </div>
-
-        { this.state.showDetails
-          ?  <div style={{ marginTop: '10px', marginBottom: '100px', minHeight: '100px' }}>
+              </div>
               <div className="row">
                 <div className="col-xs-10 col-xs-offset-2">
                   <table className="table table-condensed">
@@ -607,6 +619,10 @@ class Company extends React.Component {
                 removeItem={this.removeAccessRules} />
 
               {/* <AddAccessRules accessrules={this.props.accessrules} addAccessRule={this.addAccessRule} /> */}
+
+              <CompanyNote
+                note={this.state.company.note}
+                addCompanyNote={this.addCompanyNote} />
               
               <ArrayItems
                 data={this.state.company.ipFilter}
@@ -648,17 +664,40 @@ class CompanyOverview extends React.Component {
     super(props);
   }
 
-  // componentDidUpdate() {
-
-  //   console.log(this.props)
-  // }
-
   render() {
-    // TODO: Show user count and order sold quantity
     return (
       <div>
         <div><em><small>User count: {this.props.data.userCount || 0}</small></em></div>
         <div><em><small>User count max: {this.props.data.userCountMax || '-'}</small></em></div>
+        <div><em><small>Note: {this.props.data.note || ''}</small></em></div>
+      </div>
+    );
+  }
+}
+
+
+class CompanyNote extends React.Component {
+  constructor(props){
+    super(props);
+    this.handleChange = this.handleChange.bind(this);
+  }
+
+  handleChange(e) {
+    const note = e.target.value;
+    console.log('hanl', note)
+    this.props.addCompanyNote(note);
+  }
+
+  render() {
+    return (
+      <div className="row" style={{ marginTop: '40px', minHeight: '10px' }}>
+        <div className="col-xs-2" style={{ textAlign: 'right' }}>
+          <strong>Note</strong>
+          <div><em><small></small></em></div>
+        </div>
+        <div className="col-xs-10">
+          <textarea className="form-control" defaultValue={this.props.note} rows="2" onChange={this.handleChange}></textarea>
+        </div>
       </div>
     );
   }
