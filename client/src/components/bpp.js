@@ -36,6 +36,7 @@ const request = (path, options = {}) => {
   });
 };
 
+
 const saveTicket = (credentials) => {
   window.sessionStorage.setItem('bpp_ticket', JSON.stringify(credentials));
   return Promise.resolve(credentials);
@@ -45,6 +46,34 @@ const saveTicket = (credentials) => {
 const setReissueTimeout = (credentials) => {
   setTimeout(() => authorize(credentials), credentials.exp - Date.now() - 10000);
   return Promise.resolve(credentials);
+};
+
+
+const getRoles = () => {
+  try {
+    let credentials =  JSON.parse(window.sessionStorage.getItem('bpp_ticket'));
+    return credentials.scope.filter(s => s.startsWith('role:'));
+  } catch(err) {
+    return [];
+  }
+};
+
+
+const isCompanyAdmin = () => {
+  const roles = getRoles();
+  return roles.some(scope => scope.endsWith('companies:admin'));
+};
+
+
+const isCompanyUser = () => {
+  const roles = getRoles();
+  return roles.some(scope => scope.endsWith('companies:user'));
+};
+
+
+const isAccessAdmin = () => {
+  const roles = getRoles();
+  return roles.some(scope => scope.endsWith('accessrules:admin'));
 };
 
 
@@ -73,4 +102,4 @@ const unauthorize = () => {
 };
 
 
-module.exports = { request, authorize, unauthorize };
+module.exports = { request, getRoles, isCompanyUser, isCompanyAdmin, isAccessAdmin, authorize, unauthorize };

@@ -8,6 +8,7 @@ module.exports = class extends React.Component {
   constructor(props) {
     super(props);
     this.getCompanies = this.getCompanies.bind(this);
+    this.createCompany = this.createCompany.bind(this);
     this.getAccessRules = this.getAccessRules.bind(this);
     this.searchUser = this.searchUser.bind(this);
     this.createUser = this.createUser.bind(this);
@@ -22,6 +23,19 @@ module.exports = class extends React.Component {
   getCompanies(query) {
     return Bpp.request(`/api/companies${ query || '' }`)
     .then(companies => this.setState({ companies }));
+  }
+
+
+  createCompany(company) {
+    return Bpp.request(`/api/companies`, {
+      method: 'POST',
+      body: JSON.stringify(company)
+    })
+    .then(company => {
+      let companies = this.state.companies;
+      companies.push(company)
+      this.setState({ companies });
+    });
   }
 
 
@@ -104,6 +118,7 @@ module.exports = class extends React.Component {
           ? <div style={{textAlign: 'center'}}><em>(none)</em></div>
           : null
         }
+        <CompanyCreate createCompany={this.createCompany}  />
       </div>
     );
   }
@@ -216,7 +231,7 @@ class CompanySearch extends React.Component {
     });
 
     return (
-      <div style={{ paddingBottom: '20px' }}>
+      <div style={{ marginBottom: '20px' }}>
         <div className="row">
           <div className="col-xs-4">
             <input
@@ -554,7 +569,7 @@ class Company extends React.Component {
       <div style={{ paddingBottom: '4px' }}>
         <div className="row">
           <div className="col-xs-4">
-            <div className="text-wrap">{ this.props.data.title }</div>
+            <div className="text-wrap" style={{ textDecorationLine: '' }}><h5>{ this.props.data.title }</h5></div>
             {/* { this.state.showLoader
               ? (<div className="loadSpinner">
                   <img src="/assets/load_spinner.gif" />
@@ -588,19 +603,12 @@ class Company extends React.Component {
                     ? <span style={{ color: 'green' }}><span className="glyphicon glyphicon-ok" aria-hidden="true"></span> <span>Save successful  </span></span>
                     : <span>&nbsp;</span> }
                   <button type="button" className="btn btn-sm btn-danger" onClick={this.saveCompany} disabled={!this.state.confirmSave}>
-                    <span className="glyphicon glyphicon-save" aria-hidden="true"></span> <span>Confirm</span>
+                    <span className="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span> <span>Confirm</span>
                   </button>
                   <span>&nbsp;</span>
                   <button type="button" className="btn btn-sm btn-warning" onClick={this.showConfirmSave} disabled={!this.state.hasAnyChanges}>
-                    <span className={`glyphicon ${ this.state.confirmSave ? 'glyphicon-repeat' : 'glyphicon-floppy-disk' }`} aria-hidden="true"></span> <span>Save</span>
+                    <span className={`glyphicon ${ this.state.confirmSave ? 'glyphicon-repeat' : 'glyphicon-save' }`} aria-hidden="true"></span> <span>Save</span>
                   </button>
-                </div>
-              </div>
-              <div className="row">
-                <div className="col-xs-12" style={{ textAlign: 'right', marginBottom: '3px' }}>
-                  { this.state.showSaveSuccesful
-                    ? <span style={{ color: 'green' }}><span className="glyphicon glyphicon-ok" aria-hidden="true"></span> <span>Save successful  </span></span>
-                    : <span>&nbsp;</span> }
                 </div>
               </div>
               <div className="row">
@@ -744,7 +752,9 @@ class AccessRules extends React.Component {
 
   render() {
 
-    const items = this.props.data.map(accessRule => {
+    const data = this.props.data || [];
+
+    const items = data.map(accessRule => {
 
       const access = this.props.accessrules.find((a) => {
         return a.accessFeature === accessRule.accessFeature && a.titleDomain === accessRule.titleDomain
@@ -960,11 +970,14 @@ class ArrayItem extends React.Component {
   }
 
   render() {
+
+    const data = this.props.data || [];
+
     return (
-      <tr key={ this.props.data }>
-        <td>{ this.props.data }</td>
+      <tr key={ data }>
+        <td>{ data }</td>
         <td style={{ textAlign: 'right'}}>
-          <button type="button" className='btn btn-xs btn-danger' onClick={this.props.removeItem.bind(this, this.props.data)} style={{ minWidth: '90px' }}>
+          <button type="button" className='btn btn-xs btn-danger' onClick={this.props.removeItem.bind(this, data)} style={{ minWidth: '90px' }}>
             <span className='glyphicon glyphicon-trash' aria-hidden="true"></span> <span>Remove</span>
           </button>
         </td>
@@ -1200,6 +1213,58 @@ class User extends React.Component {
           </button>
         </td>
       </tr>
+    );
+  }
+}
+
+
+class CompanyCreate extends React.Component {
+  constructor(props){
+    super(props);
+    this.onClickCreateCompany = this.onClickCreateCompany.bind(this);
+    this.state = {
+      canCreateCompanies: false
+    };
+  }
+
+
+  onClickCreateCompany() {
+    const title = this.companyTitleBox.value;
+    this.props.createCompany({ title });
+  }
+
+  componentDidMount() {
+    const canCreateCompanies = Bpp.isCompanyUser() || Bpp.isCompanyAdmin();
+    this.setState({ canCreateCompanies });
+  }
+
+
+  render() {
+
+    if(!this.state.canCreateCompanies) {
+      return (null);
+    }
+
+    return(
+      <div style={{ marginTop: '20px', marginBottom: '20px' }}>
+        <div className="row">
+          <div className="col-xs-8">
+            <input
+                type="text"
+                name="companyTitleBox"
+                onChange={this.onTitleSearchChange}
+                className="form-control"
+                placeholder="Type company name to create"
+                ref={(companyTitleBox) => this.companyTitleBox = companyTitleBox} />
+            <div style={{ paddingLeft: '4px', color: 'darkgrey' }}><small><em>Min. 3 chars. Max. 100 chars.</em></small></div>
+          </div>
+          <div className="col-xs-4" style={{ textAlign: 'left' }}>
+            <button type="button" className="btn btn-default" onClick={this.onClickCreateCompany}>
+              <span className="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span> <span>Create</span>
+            </button>
+          </div>
+        </div>
+      </div>
     );
   }
 }
