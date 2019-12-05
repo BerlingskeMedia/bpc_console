@@ -690,7 +690,7 @@ class CompanyOverview extends React.Component {
     const userCountMaxExeeded =
       typeof userCountMax === 'number' &&
       typeof this.props.data.userCount === 'number' &&
-      userCountMax > this.props.data.userCount;
+      userCountMax < this.props.data.userCount;
 
     return (
       <div>
