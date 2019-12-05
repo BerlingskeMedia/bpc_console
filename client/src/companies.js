@@ -583,11 +583,11 @@ class Company extends React.Component {
           <div className="col-xs-4" style={{ textAlign: 'right' }}>
             { this.state.showDetails
               ? <button type="button" className="btn btn-sm btn-default" onClick={this.showHideCompanyDetails}>
-                { this.state.hasAnyChanges
-                  ? <span><span className="glyphicon glyphicon-resize-small" aria-hidden="true"></span> <span>Cancel</span></span>
-                  : <span><span className="glyphicon glyphicon-resize-small" aria-hidden="true"></span> <span>Close</span></span>
-                }
-              </button>
+                  { this.state.hasAnyChanges
+                    ? <span><span className="glyphicon glyphicon-resize-small" aria-hidden="true"></span> <span>Cancel</span></span>
+                    : <span><span className="glyphicon glyphicon-resize-small" aria-hidden="true"></span> <span>Close</span></span>
+                  }
+                </button>
               : <button type="button" className="btn btn-sm btn-default" onClick={this.showHideCompanyDetails}>
                   <span className="glyphicon glyphicon-resize-full" aria-hidden="true"></span> <span>Open</span>
                 </button>
