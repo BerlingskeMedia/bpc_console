@@ -611,28 +611,8 @@ class Company extends React.Component {
                   </button>
                 </div>
               </div>
-              <div className="row">
-                <div className="col-xs-10 col-xs-offset-2">
-                  <table className="table table-condensed">
-                    <thead>
-                      <tr>
-                        <th>ARIA Account No</th>
-                        <th>ARIA Account ID</th>
-                        <th>cid</th>
-                        <th>Active</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td>{ this.state.company.ariaAccountNo || '-' }</td>
-                        <td>{ this.state.company.ariaAccountID || '-' }</td>
-                        <td>{ this.state.company.cid }</td>
-                        <td>{ this.state.company.active || '-' }</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
+
+              <CompanyCreatedDetails company={this.state.company} />
               
               <AccessRules
                 data={this.state.company.accessRules}
@@ -710,6 +690,82 @@ class CompanyOverview extends React.Component {
         </div>
       </div>
     );
+  }
+}
+
+
+class CompanyCreatedDetails extends React.Component {
+  constructor(props){
+    super(props);
+    this.state = {
+      createdByUser: null
+    };
+  }
+
+
+  componentDidMount() {
+
+    if(this.props.company.createdBy && this.props.company.createdBy.user) {
+      Bpc.request(`/users/${ encodeURIComponent(this.props.company.createdBy.user) }`)
+      .then(createdByUser => this.setState({ createdByUser }));
+    }
+  }
+
+
+  render() {
+
+    const company = this.props.company;
+
+    let ths = [];
+    let tds = [];
+
+    if(company.createdBy) {
+
+      ths = [
+        <th>Created</th>,
+        <th>Created by</th>
+      ];
+
+      tds = [
+        <td>{this.props.company.createdAt || ''}</td>,
+        <td>{(this.state.createdByUser ? this.state.createdByUser.email : null ) || (company.createdBy ? company.createdBy.user : '')}</td>
+      ];
+
+    } else {
+
+      ths = [
+        <th>ARIA Account No</th>,
+        <th>ARIA Account ID</th>,
+        <th>cid</th>
+      ];
+
+      tds = [
+        <td>{ company.ariaAccountNo || '-' }</td>,
+        <td>{ company.ariaAccountID || '-' }</td>,
+        <td>{ company.cid }</td>,
+        <td>{ company.active || '-' }</td>
+      ];
+    }
+
+    return(
+      <div className="row">
+        <div className="col-xs-10 col-xs-offset-2">
+          <table className="table table-condensed">
+            <thead>
+              <tr>
+                { ths }
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                { tds }
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+
   }
 }
 
