@@ -22,7 +22,15 @@ module.exports = class extends React.Component {
 
   getCompanies(query) {
     return Bpp.request(`/api/companies${ query || '' }`)
-    .then(companies => this.setState({ companies }));
+    .then(companies => {
+      const companyCount = companies.length;
+      const userCount = companies.reduce((acc, cur) => {
+        return acc + cur.userCount;
+      }, 0);
+      console.log(companyCount)
+      console.log(userCount)
+      this.setState({ companies, companyCount, userCount });
+    });
   }
 
 
@@ -113,6 +121,7 @@ module.exports = class extends React.Component {
     return (
       <div className="companies" style={{ paddingTop: '30px' }}>
         <CompanySearch getCompanies={this.getCompanies} searchUser={this.searchUser} accessrules={this.state.accessrules} />
+        <CompanySearchStatistics companyCount={this.state.companyCount} userCount={this.state.userCount} />
         { companies }
         { companies.length === 0
           ? <div style={{textAlign: 'center'}}><em>(none)</em></div>
@@ -275,6 +284,25 @@ class CompanySearch extends React.Component {
               <option value=""></option>
               { titleDomainsOptions }
             </select>
+          </div>
+        </div>
+      </div>
+    );
+  }
+}
+
+class CompanySearchStatistics extends React.Component {
+  constructor(props){
+    super(props);
+  }
+
+  render() {
+    return(
+      <div style={{ marginBottom: '20px' }}>
+        <div className="row">
+          <div className="col-xs-12">
+            <div><em><small>Companies: { this.props.companyCount || '-' }</small></em></div>
+            <div><em><small>Users: { this.props.userCount || '-' }</small></em></div>
           </div>
         </div>
       </div>
