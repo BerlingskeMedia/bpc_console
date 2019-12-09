@@ -1246,11 +1246,13 @@ class Users extends React.Component {
 class User extends React.Component {
   constructor(props){
     super(props);
+    this.getAddedByDetails = this.getAddedByDetails.bind(this);
     this.state = {
       foundUser: null,
       addedByUser: null
     };
   }
+
 
   getUserDetails() {
     this.props.searchUser(this.props.user.uid)
@@ -1264,13 +1266,28 @@ class User extends React.Component {
     });
   }
 
-  componentDidMount() {
-    this.getUserDetails(this.props.user.uid);
 
+  getAddedByDetails() {
     if(this.props.user.addedBy && this.props.user.addedBy.user) {
       Bpc.request(`/users/${ encodeURIComponent(this.props.user.addedBy.user) }`)
       .then(addedByUser => this.setState({ addedByUser }));
     }
+  }
+
+
+  componentDidUpdate(prevProps) {
+    const fieldIsHereNow = this.props.user.addedBy && this.props.user.addedBy.user;
+    const fieldWasHereBefore = prevProps.user.addedBy && prevProps.user.addedBy.user;
+
+    if(fieldIsHereNow !== undefined && fieldWasHereBefore !== undefined && fieldIsHereNow !== fieldWasHereBefore) {
+      this.getAddedByDetails();
+    }
+  }
+  
+  
+  componentDidMount() {
+    this.getUserDetails(this.props.user.uid);
+    this.getAddedByDetails();    
   }
 
   render() {
