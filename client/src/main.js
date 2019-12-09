@@ -158,7 +158,7 @@ class Main extends React.Component {
     return (
       <BrowserRouter>
         <div>
-          <h1 style={environment_style}>BPC Console</h1>
+          <h1 style={environment_style}>Permissions Console</h1>
           <MainMenu />
           <Route exact path="/" component={Users} />
           <Route path="/users" component={Users}/>
