@@ -750,28 +750,28 @@ class CompanyCreatedDetails extends React.Component {
     if(company.createdBy) {
 
       ths = [
-        <th>Created</th>,
-        <th>Created by</th>
+        <th key="1">Created</th>,
+        <th key="2">Created by</th>
       ];
 
       tds = [
-        <td>{this.props.company.createdAt || ''}</td>,
-        <td>{(this.state.createdByUser ? this.state.createdByUser.email : null ) || (company.createdBy ? company.createdBy.user : '')}</td>
+        <td key="1">{this.props.company.createdAt || ''}</td>,
+        <td key="2">{(this.state.createdByUser ? this.state.createdByUser.email : null ) || (company.createdBy ? company.createdBy.user : '')}</td>
       ];
 
     } else {
 
       ths = [
-        <th>ARIA Account No</th>,
-        <th>ARIA Account ID</th>,
-        <th>cid</th>
+        <th key="1">ARIA Account No</th>,
+        <th key="2">ARIA Account ID</th>,
+        <th key="3">cid</th>
       ];
 
       tds = [
-        <td>{ company.ariaAccountNo || '-' }</td>,
-        <td>{ company.ariaAccountID || '-' }</td>,
-        <td>{ company.cid }</td>,
-        <td>{ company.active || '-' }</td>
+        <td key="1">{ company.ariaAccountNo || '-' }</td>,
+        <td key="2">{ company.ariaAccountID || '-' }</td>,
+        <td key="3">{ company.cid }</td>,
+        <td key="4">{ company.active || '-' }</td>
       ];
     }
 
@@ -1314,7 +1314,13 @@ class CompanyCreate extends React.Component {
 
   onClickCreateCompany() {
     const title = this.companyTitleBox.value;
-    this.props.createCompany({ title });
+    if(title.length > 0) {
+      return this.setState({ creatingCompany: true }, () => {
+        return this.props.createCompany({ title }, () => {
+          return this.setState({ creatingCompany: false });
+        });
+      });
+    }
   }
 
   componentDidMount() {
@@ -1328,6 +1334,8 @@ class CompanyCreate extends React.Component {
     if(!this.state.canCreateCompanies) {
       return (null);
     }
+
+    const createButtonDisabled = this.state.creatingCompany;
 
     return(
       <div style={{ marginTop: '20px', marginBottom: '20px' }}>
@@ -1343,7 +1351,7 @@ class CompanyCreate extends React.Component {
             <div style={{ paddingLeft: '4px', color: 'darkgrey' }}><small><em>Min. 3 chars. Max. 100 chars.</em></small></div>
           </div>
           <div className="col-xs-4" style={{ textAlign: 'left' }}>
-            <button type="button" className="btn btn-default" onClick={this.onClickCreateCompany}>
+            <button type="button" className="btn btn-default" onClick={this.onClickCreateCompany} disabled={createButtonDisabled}>
               <span className="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span> <span>Create</span>
             </button>
           </div>
