@@ -20,6 +20,8 @@ module.exports = class extends React.Component {
       grantscount: 0,
       grants: []
     };
+
+    document.title = 'BPC - Admins';
   }
 
 

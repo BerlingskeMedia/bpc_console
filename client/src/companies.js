@@ -17,6 +17,8 @@ module.exports = class extends React.Component {
       accessrules: [],
       authorized: false
     };
+
+    document.title = 'BPC - Companies';
   }
 
 
@@ -27,8 +29,6 @@ module.exports = class extends React.Component {
       const userCount = companies.reduce((acc, cur) => {
         return acc + cur.userCount;
       }, 0);
-      console.log(companyCount)
-      console.log(userCount)
       this.setState({ companies, companyCount, userCount });
     });
   }

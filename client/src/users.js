@@ -9,6 +9,8 @@ module.exports = class extends React.Component {
     super(props);
     this.setUsers = this.setUsers.bind(this);
     this.state = { users: null };
+
+    document.title = 'BPC - Users';
   }
 
   
@@ -110,6 +112,7 @@ class SearchUser extends React.Component {
 
   clearSearch() {
     window.history.pushState({ search: "" }, "search", `/users`);
+    document.title = 'BPC - Users';
     this.props.setUsers(null);
   }
 
@@ -147,6 +150,8 @@ class SearchResult extends React.Component {
   }
 
   render(){
+
+    document.title = 'BPC - Users';
 
     let rows = [];
 
@@ -208,6 +213,7 @@ class ShowFullUser extends React.Component {
     return Bpc.request(`/users/${ user_id }`)
     .then(data => {
       this.setState({user: data});
+      document.title = `BPC - ${ data.email }`;
     });
   }
 

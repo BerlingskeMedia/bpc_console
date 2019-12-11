@@ -39,6 +39,8 @@ module.exports = class extends React.Component {
         data.settings = {};
       }
       this.setState({application: data});
+
+      document.title = `BPC - ${ data.id }`;
     })
     .catch(err => {
       console.error(err);

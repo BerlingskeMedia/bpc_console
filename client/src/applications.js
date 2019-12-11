@@ -12,6 +12,8 @@ module.exports = class extends React.Component {
     };
     this.getApplications = this.getApplications.bind(this);
     this.createApplication = this.createApplication.bind(this);
+
+    document.title = 'BPC - Applications';
   }
 
   getApplications() {
