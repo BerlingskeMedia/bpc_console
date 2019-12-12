@@ -703,14 +703,21 @@ class CompanyOverview extends React.Component {
     const userCountMax = this.props.data.userCountMax === undefined || this.props.data.userCountMax === null || this.props.data.userCountMax === ''
       ? '-' : this.props.data.userCountMax;
 
-    const userCountMaxExeeded =
-      typeof userCountMax === 'number' &&
-      typeof this.props.data.userCount === 'number' &&
-      userCountMax < this.props.data.userCount;
+    // In case the userCountMax is not a number, it means there is not limit to the usercount
+    let userCountLeft = 1;
+    let userCountbackgroundColor = 'inherit';
+    if(typeof userCountMax === 'number' && typeof this.props.data.userCount === 'number') {
+      userCountLeft = userCountMax - this.props.data.userCount;
+      if(userCountLeft < 0) {
+        userCountbackgroundColor = 'inhcrimsonerit';
+      } else if(userCountLeft === 0) {
+        userCountbackgroundColor = 'coral';
+      }
+    }
 
     return (
       <div>
-        <div style={{ paddingLeft: '4px', backgroundColor: userCountMaxExeeded ? 'red' : 'inherit' }}>
+        <div style={{ paddingLeft: '4px', backgroundColor: userCountbackgroundColor }}>
           <em><small>User count: {this.props.data.userCount || 0}/{ userCountMax }</small></em>
         </div>
         <div style={{ paddingLeft: '4px' }}>
