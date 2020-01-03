@@ -316,7 +316,7 @@ class ParseHawkAuthHeader extends React.Component {
     };
     return Bpc.request('/parse', {
       method: 'POST',
-      boby: JSON.stringify(payload)
+      body: JSON.stringify(payload)
     })
     .then(data => {
       this.setState({result: data, error: null});
