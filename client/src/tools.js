@@ -66,7 +66,7 @@ class ParseBase64Cookie extends React.Component {
   render() {
 
     return (
-      <div>
+      <div style={{margin: '60px 0px'}}>
         <hr />
         <h3>Parse base64 cookie</h3>
         <textarea
@@ -141,7 +141,7 @@ class ParseTicketID extends React.Component {
   render() {
 
     return (
-      <div>
+      <div style={{margin: '60px 0px'}}>
         <hr />
         <h3>Parse BPC Ticket ID</h3>
         <textarea
@@ -150,7 +150,7 @@ class ParseTicketID extends React.Component {
           cols="50"
           style={{fontFamily:"monospace", fontSize: "0.9em"}}
           onChange={this.onChange}
-          placeholder="Paste ticket ID">
+          placeholder="Paste ticket ID eg. Fe26.2**2f387bfa86a67ffbc8b6Ng2ZPLqB24">
         </textarea>
 
         <div style={{ marginTop: '5px' }}>        
@@ -246,7 +246,7 @@ class GenerateHawkAuthHeader extends React.Component {
   render() {
 
     return (
-      <div>
+      <div style={{margin: '60px 0px'}}>
         <hr />
         <h3>Generate Hawk Authorization header</h3>
         <form onSubmit={this.handleSubmit}>
@@ -260,7 +260,7 @@ class GenerateHawkAuthHeader extends React.Component {
             <label>Key</label>
             <input type="text" className="form-control" ref={this.setKeyInputRef} onChange={this.onChange} />
             <label>App</label>
-            <input type="text" className="form-control" ref={this.setAppInputRef} onChange={this.onChange} placeholder="Not needed when using Application ID above" />
+            <input type="text" className="form-control" ref={this.setAppInputRef} onChange={this.onChange} placeholder="Only needed when using Ticket ID above" />
             <label>Algoritm</label>
             <input type="text" className="form-control" placeholder="sha256" disabled="disabled" />
           </div>
@@ -329,7 +329,7 @@ class ParseHawkAuthHeader extends React.Component {
   render() {
 
     return (
-      <div>
+      <div style={{margin: '60px 0px'}}>
         <hr />
         <h3>Parse Hawk Authorization header</h3>
         <textarea
@@ -338,7 +338,7 @@ class ParseHawkAuthHeader extends React.Component {
           cols="55"
           style={{fontFamily:"monospace", fontSize: "0.9em"}}
           onChange={this.onChange}
-          placeholder="Paste Hawk Authorization header">
+          placeholder="Paste Hawk Authorization header eg. Hawk id='Fe26.2**...LqB24', ts='1578055320', nonce='Kz0cSz', mac='+CHqerG3JJC7LI=', app='someapp'">
         </textarea>
 
         <div style={{ marginTop: '5px' }}>
@@ -388,7 +388,7 @@ class GetGoogleRsvp extends React.Component {
   render() {
 
     return (
-      <div>
+      <div style={{margin: '60px 0px'}}>
         <hr />
         <h3>Generate payload for /rsvp (for Google apps)</h3>
         <input type="text" className="form-control" placeholder="Insert app ID" ref={this.input} />
