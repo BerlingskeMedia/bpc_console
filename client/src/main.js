@@ -67,20 +67,7 @@ class ConsoleApp extends React.Component {
   }
 
   getUserTicket(googleUser) {
-
-    var authResponse = googleUser.getAuthResponse();
-
-    const payload = {
-      id_token: authResponse.id_token,
-      access_token: authResponse.access_token,
-      app: 'console'
-    };
-
-    return Bpc.request('/rsvp', {
-      method: 'POST',
-      body: JSON.stringify(payload)
-    })
-    .then(rsvp => Bpc.authorize(rsvp))
+    return Bpc.authorize()
     .then((ticket) => {
       this.setState({ authorized: true, unauthorized: false });
     })

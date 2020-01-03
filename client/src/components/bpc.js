@@ -31,10 +31,11 @@ const request = (path, options = {}) => {
   .then(response => {
     if(response.status === 200) {
       return response.json().then(data => data);
+    } else if(response.status === 401 && response.message === "Expired ticket") {
+      authorize(credentials);
+    } else if(response.status === 401 && response.message === "Missing authentication") {
+      authorize();
     } else {
-      if(response.status === 401 && response.message === "Expired ticket") {
-        authorize(credentials);
-      }
       return Promise.reject(response);
     }
   });
@@ -54,6 +55,14 @@ const setReissueTimeout = (credentials) => {
 
 
 const authorize = (credentials) => {
+  if (!credentials) {
+    const auth = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse();
+    credentials = {
+      id_token: auth.id_token,
+      access_token: auth.access_token
+    };
+  }
+
   return fetch('/authorize', {
     method: 'POST',
     body: JSON.stringify(credentials)

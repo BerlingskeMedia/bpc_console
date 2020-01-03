@@ -28,11 +28,14 @@ const request = (path, options = {}) => {
 
   return fetch(_request)
   .then(response => {
+
     if(response.status === 200) {
       return response.json().then(data => data);
-    } else {
-      return Promise.reject(response);
+    } else if(response.status === 401) {
+      authorize(credentials);
     }
+
+    return Promise.reject(response);
   });
 };
 
@@ -46,6 +49,39 @@ const saveTicket = (credentials) => {
 const setReissueTimeout = (credentials) => {
   setTimeout(() => authorize(credentials), credentials.exp - Date.now() - 10000);
   return Promise.resolve(credentials);
+};
+
+
+const authorize = (credentials) => {
+  if (!credentials) {
+    const auth = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse();
+    credentials = {
+      id_token: auth.id_token,
+      access_token: auth.access_token
+    };
+  }
+
+  return request('/authenticate', {
+    method: 'POST',
+    body: JSON.stringify(credentials)
+  })
+  .then(saveTicket)
+  .then(setReissueTimeout)
+  .catch(err => {
+    window.sessionStorage.removeItem('bpp_ticket');
+  });
+};
+
+
+const unauthorize = () => {
+  const options = {
+    method: 'DELETE'
+  };
+
+  return request('/authenticate', options)
+  .then(() => {
+    window.sessionStorage.removeItem('bpp_ticket');
+  });
 };
 
 
@@ -77,29 +113,4 @@ const isAccessAdmin = () => {
 };
 
 
-const authorize = (credentials) => {
-  return request('/authenticate', {
-    method: 'POST',
-    body: JSON.stringify(credentials)
-  })
-  .then(saveTicket)
-  .then(setReissueTimeout)
-  .catch(err => {
-    window.sessionStorage.removeItem('bpp_ticket');
-  });
-};
-
-
-const unauthorize = () => {
-  const options = {
-    method: 'DELETE'
-  };
-
-  return request('/authenticate', options)
-  .then(() => {
-    window.sessionStorage.removeItem('bpp_ticket');
-  });
-};
-
-
-module.exports = { request, getRoles, isCompanyUser, isCompanyAdmin, isAccessAdmin, authorize, unauthorize };
+module.exports = { request, authorize, unauthorize, getRoles, isCompanyUser, isCompanyAdmin, isAccessAdmin };

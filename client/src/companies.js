@@ -82,13 +82,8 @@ module.exports = class extends React.Component {
 
 
   componentDidMount() {
-    const auth = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse();
-
-    return Bpp.authorize({
-      id_token: auth.id_token,
-      access_token: auth.access_token
-    })
-    .then(ticket => {
+    return Bpp.authorize()
+    .then(() => {
       this.setState({ authorized: true });
     })
     .then(this.getCompanies)
