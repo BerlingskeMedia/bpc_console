@@ -133,7 +133,7 @@ class CompanySearch extends React.Component {
   constructor(props){
     super(props);
     this.onUserSearchChange = this.onUserSearchChange.bind(this);
-    this.onTitleSearchChange = this.onTitleSearchChange.bind(this);
+    this.searchOnTextChange = this.searchOnTextChange.bind(this);
     this.searchUser = this.searchUser.bind(this);
     this.search = this.search.bind(this);
     this.state = {
@@ -166,7 +166,7 @@ class CompanySearch extends React.Component {
   }
 
 
-  onTitleSearchChange(e) {
+  searchOnTextChange(e) {
     clearTimeout(this.state.searchTimer);
     this.setState({searchTimer: setTimeout(this.search, 1000)});
   }
@@ -181,6 +181,11 @@ class CompanySearch extends React.Component {
 
     if(this.titleSearchBox.value.length > 0) {
       searchParams.push(`title=${ encodeURIComponent(this.titleSearchBox.value) }`);
+    }
+
+
+    if(this.ipFilterSearchBox.value.length > 0) {
+      searchParams.push(`ipFilter=${ encodeURIComponent(this.ipFilterSearchBox.value) }`);
     }
 
     if(this.state.foundUser) {
@@ -212,13 +217,17 @@ class CompanySearch extends React.Component {
 
     let userSearchFeedback = null;
     let userSearchBoxClass = 'form-group has-feedback';
+    let userSearchFeedbackReadable = '';
     if(this.state.userSearchBoxHasInput) {
       if (this.state.foundUser) {
         userSearchFeedback = <span className="glyphicon glyphicon-ok form-control-feedback" aria-hidden="true"></span>;
         userSearchBoxClass += ' has-success'
+        userSearchFeedbackReadable = 'Searching in users'
       // } else {
         // userSearchFeedback = <span className="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>;
         // userSearchBoxClass += ' has-error'
+      } else {
+        userSearchFeedbackReadable = 'Searching in email masks'
       }
     }
 
@@ -237,17 +246,18 @@ class CompanySearch extends React.Component {
     return (
       <div style={{ marginBottom: '20px' }}>
         <div className="row">
-          <div className="col-xs-4">
+          <div className="col-xs-3">
             <input
               type="text"
               name="titleSearchBox"
-              onChange={this.onTitleSearchChange}
+              onChange={this.searchOnTextChange}
               className="form-control"
               placeholder="Type company name start search"
               ref={(titleSearchBox) => this.titleSearchBox = titleSearchBox} />
-            <div style={{ paddingLeft: '4px', color: 'darkgrey' }}><small><em>Use ^ for the start, $ for the end.</em></small></div>
+            <div style={{ paddingLeft: '4px', color: 'darkgrey' }}><small><em>^ marks the start</em></small></div>
+            <div style={{ paddingLeft: '4px', color: 'darkgrey' }}><small><em>$ marks the end</em></small></div>
           </div>
-          <div className="col-xs-4">
+          <div className="col-xs-3">
             <div className={ userSearchBoxClass }>
               <input
                 type="text"
@@ -259,8 +269,19 @@ class CompanySearch extends React.Component {
                 placeholder="Type user email or ID start search"
                 ref={(userSearchBox) => this.userSearchBox = userSearchBox} />
                 { userSearchFeedback }
-              <div style={{ paddingLeft: '4px', color: 'darkgrey' }}><small><em></em></small></div>
+                <div style={{ paddingLeft: '4px', color: 'darkgrey' }}><small><em>{ userSearchFeedbackReadable }</em></small></div>
             </div>
+          </div>
+          <div className="col-xs-2">
+            <input
+              type="text"
+              name="ipFilterSearchBox"
+              onChange={this.searchOnTextChange}
+              className="form-control"
+              placeholder="Type IP start search"
+              ref={(ipFilterSearchBox) => this.ipFilterSearchBox = ipFilterSearchBox} />
+            <div style={{ paddingLeft: '4px', color: 'darkgrey' }}><small><em>^ marks the start</em></small></div>
+            <div style={{ paddingLeft: '4px', color: 'darkgrey' }}><small><em>$ marks the end</em></small></div>
           </div>
           <div className="col-xs-2">
             <select
@@ -270,6 +291,7 @@ class CompanySearch extends React.Component {
               <option value=""></option>
               { accessFeaturesOptions }
             </select>
+            <div style={{ paddingLeft: '4px', color: 'darkgrey' }}><small><em>accessFeature</em></small></div>
           </div>
           <div className="col-xs-2">
             <select
@@ -279,6 +301,7 @@ class CompanySearch extends React.Component {
               <option value=""></option>
               { titleDomainsOptions }
             </select>
+            <div style={{ paddingLeft: '4px', color: 'darkgrey' }}><small><em>titleDomain</em></small></div>
           </div>
         </div>
       </div>
@@ -1363,7 +1386,6 @@ class CompanyCreate extends React.Component {
             <input
                 type="text"
                 name="companyTitleBox"
-                onChange={this.onTitleSearchChange}
                 className="form-control"
                 placeholder="Type company name to create"
                 ref={(companyTitleBox) => this.companyTitleBox = companyTitleBox} />
