@@ -32,7 +32,8 @@ const request = (path, options = {}) => {
     if(response.status === 200) {
       return response.json().then(data => data);
     } else if(response.status === 401) {
-      authorize(credentials);
+      authorize(credentials)
+      .then(ticket => window.location.reload());
     }
 
     return Promise.reject(response);

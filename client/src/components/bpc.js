@@ -31,13 +31,12 @@ const request = (path, options = {}) => {
   .then(response => {
     if(response.status === 200) {
       return response.json().then(data => data);
-    } else if(response.status === 401 && response.message === "Expired ticket") {
-      authorize(credentials);
-    } else if(response.status === 401 && response.message === "Missing authentication") {
-      authorize();
-    } else {
-      return Promise.reject(response);
+    } else if(response.status === 401) {
+      authorize(credentials)
+      .then(ticket => window.location.reload());
     }
+    
+    return Promise.reject(response);
   });
 };
 
