@@ -660,6 +660,10 @@ class Company extends React.Component {
 
               <CompanyCreatedDetails company={this.state.company} />
               
+              <CompanyNote
+                note={this.state.company.note}
+                addCompanyNote={this.addCompanyNote} />
+              
               <AccessRules
                 data={this.state.company.accessRules}
                 accessrules={this.props.accessrules}
@@ -667,9 +671,9 @@ class Company extends React.Component {
 
               {/* <AddAccessRules accessrules={this.props.accessrules} addAccessRule={this.addAccessRule} /> */}
 
-              <CompanyNote
-                note={this.state.company.note}
-                addCompanyNote={this.addCompanyNote} />
+              <PlanInstances
+                data={this.state.company.masterPlanInstances}
+                accessrules={this.props.accessrules} />
               
               <ArrayItems
                 data={this.state.company.ipFilter}
@@ -818,7 +822,6 @@ class CompanyCreatedDetails extends React.Component {
         </div>
       </div>
     );
-
   }
 }
 
@@ -847,6 +850,76 @@ class CompanyNote extends React.Component {
             defaultValue={this.props.note}
             rows="2"
             onChange={this.handleChange}></textarea>
+        </div>
+      </div>
+    );
+  }
+}
+
+
+class PlanInstances extends React.Component {
+  constructor(props){
+    super(props);
+  }
+
+  render() {
+
+    if(!this.props.data || !(this.props.data instanceof Array)) {
+      return null;
+    }
+
+    const masterPlanInstances = this.props.data.map(masterPlanInstance => {
+
+      const services = masterPlanInstance.services.map(service => {
+
+        const access = this.props.accessrules.find((accessrule) => {
+          return accessrule.accessFeature === service.accessFeature && accessrule.titleDomain === service.titleDomain
+        });
+
+        const accessRoles = Object.keys(access.access).map((k, index) => {
+          return (<div key={index}>
+            <span>- {k}:</span> <span>{access.access[k].join(', ')}</span>
+          </div>);
+        });
+
+        return (
+          <div className="row" key={service.serviceNo}>
+            <div className="col-xs-11 col-xs-offset-1">
+              <div>Service Desc: {service.serviceDesc}</div>
+              <div>Service ID: {service.serviceId}</div>
+              <div>Service No: {service.serviceNo}</div>
+              <div>Access Feature: {service.accessFeature}</div>
+              <div>Title Domain: {service.titleDomain}</div>
+              <div>Access roles:</div>
+              { accessRoles }
+            </div>
+          </div>
+        )
+      });
+
+      return (
+        <div className="row" key={masterPlanInstance.instanceNo}>
+          <div className="col-xs-12">
+            <div>Plan Name: {masterPlanInstance.planName}</div>
+            <div>Plan ID: {masterPlanInstance.planId}</div>
+            <div>Instance ID: {masterPlanInstance.instanceId}</div>
+            <div>Instance No: {masterPlanInstance.instanceNo}</div>
+            <div>Units: {masterPlanInstance.units}</div>
+            <div>Services:</div>
+            {services}
+          </div>
+        </div>
+      );
+    });
+
+    return (
+      <div className="row" style={{ marginTop: '40px', minHeight: '10px' }}>
+        <div className="col-xs-2" style={{ textAlign: 'right' }}>
+          <strong>Plan instances</strong>
+          <div><em><small></small></em></div>
+        </div>
+        <div className="col-xs-10">
+          { masterPlanInstances }
         </div>
       </div>
     );
