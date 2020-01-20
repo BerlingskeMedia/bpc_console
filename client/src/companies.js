@@ -23,7 +23,7 @@ module.exports = class extends React.Component {
 
 
   getCompanies(query) {
-    return Bpp.request(`/api/companies${ query || '' }`)
+    return Bpp.request(`/api/companies?customerType=B&${ query || '' }`)
     .then(companies => {
       const companyCount = companies.length;
       const userCount = companies.reduce((acc, cur) => {
@@ -204,7 +204,7 @@ class CompanySearch extends React.Component {
       searchParams.push(`titleDomain=${ encodeURIComponent(this.titleDomainSelect.value) }`)
     }
     
-    const query = `?${ searchParams.join('&') }`;
+    const query = `${ searchParams.join('&') }`;
 
     this.setState({ searchInProgress: true }, () => {
       this.props.getCompanies(query)
