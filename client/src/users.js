@@ -310,23 +310,27 @@ class UserDetails extends React.Component {
     const user = this.props.user;
 
     if (user.gigya) {
-
-      dataFromGigya = [
-        <div key="UID"><strong>Gigya UID</strong>: {user.gigya.UID}</div>,
-        <div key="loginProvider"><strong>Gigya login provider</strong>: {user.gigya.loginProvider || ''}</div>,
-        <div key="email"><strong>Gigya email</strong>: {user.gigya.profile ? user.gigya.profile.email : user.gigya.email || ''}</div>,
-      ];
-
-
-      if(user.gigya.emails) {
-        if(user.gigya.emails.verified instanceof Array) {
-          dataFromGigya.push(<div key="verified"><strong>Gigya verified emails</strong>: { user.gigya.emails.verified.join(', ') }</div>);
-        }
-
-        if(user.gigya.emails.unverified instanceof Array) {
-          dataFromGigya.push(<div key="5unverified"><strong>Gigya unverified emails</strong>: { user.gigya.emails.unverified.join(', ') }</div>);
-        }
-      }
+      dataFromGigya = (
+        <div>
+          <h4>Gigya</h4>
+          <table className="table table-condensed">
+            <tbody>
+              {/* { gigyaTableRows } */}
+              <tr><td>UID</td><td>{user.gigya.UID}</td></tr>
+              <tr><td>Login provider</td><td>{user.gigya.loginProvider || ''}</td></tr>
+              <tr><td>Email</td><td>{user.gigya.profile ? user.gigya.profile.email : user.gigya.email || ''}</td></tr>
+              { user.gigya.emails && user.gigya.emails.verified instanceof Array
+                ? <tr><td>Verified emails</td><td>{ user.gigya.emails.verified.join(', ') }</td></tr>
+                : null
+              }
+              { user.gigya.emails && user.gigya.emails.unverified instanceof Array
+                ? <tr><td>Unverified emails</td><td>{ user.gigya.emails.unverified.join(', ') }</td></tr>
+                : null
+              }
+            </tbody>
+          </table>
+        </div>
+      );
     }
 
     const hasKuUid = user.dataScopes && user.dataScopes.profile && user.dataScopes.profile.kundeunivers_uid;
@@ -342,14 +346,19 @@ class UserDetails extends React.Component {
       <div>
         <div className="row">
           <div className="col-xs-6">
-            <div><strong>ID</strong>: {user.id}</div>
-            <div><strong>Email</strong>: {user.email}</div>
-            <div><strong>Provider</strong>: <span style={{ color: styleProviderColor}}>{user.provider}</span></div>
-            <div><strong>Internt id</strong>: {user._id}</div>
-            <div><strong>Created</strong>: {user.createdAt}</div>
-            <div><strong>Last updated</strong>: {user.lastUpdated}</div>
-            <div><strong>Last fetched</strong>: {user.lastFetched}</div>
-            <div><strong>Last login</strong>: {user.lastLogin}</div>
+            <h4>BPC</h4>
+            <table className="table table-condensed">
+              <tbody>
+                <tr><td>ID</td><td>{user.id}</td></tr>
+                <tr><td>Email</td><td>{user.email}</td></tr>
+                <tr><td>Provider</td><td><span style={{ color: styleProviderColor}}>{user.provider}</span></td></tr>
+                <tr><td>Internt id</td><td>{user._id}</td></tr>
+                <tr><td>Created</td><td>{user.createdAt}</td></tr>
+                <tr><td>Last updated</td><td>{user.lastUpdated}</td></tr>
+                <tr><td>Last fetched</td><td>{user.lastFetched}</td></tr>
+                <tr><td>Last login</td><td>{user.lastLogin}</td></tr>
+              </tbody>
+            </table>
           </div>
           <div className="col-xs-6">
             { dataFromGigya }
