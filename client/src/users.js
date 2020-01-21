@@ -310,19 +310,23 @@ class UserDetails extends React.Component {
     const user = this.props.user;
 
     if (user.gigya) {
-      dataFromGigya = Object.keys(user.gigya).map(function(gigya_key) {
-        return (
-          <div key={gigya_key}><strong>Gigya {gigya_key}</strong>: {user.gigya[gigya_key]}</div>
-        );
-      });
-      
-      const gigya_url = `https://console.gigya.com/Site/partners/UserManagement.aspx/User#/details/id/${user.gigya.UID}/identity/all`;
 
-      dataFromGigya.push(
-        <div key="gigya_link">
-          <a href={gigya_url} target="_blank">Link to Gigya</a>
-        </div>
-      );
+      dataFromGigya = [
+        <div key="UID"><strong>Gigya UID</strong>: {user.gigya.UID}</div>,
+        <div key="loginProvider"><strong>Gigya login provider</strong>: {user.gigya.loginProvider || ''}</div>,
+        <div key="email"><strong>Gigya email</strong>: {user.gigya.profile ? user.gigya.profile.email : user.gigya.email || ''}</div>,
+      ];
+
+
+      if(user.gigya.emails) {
+        if(user.gigya.emails.verified instanceof Array) {
+          dataFromGigya.push(<div key="verified"><strong>Gigya verified emails</strong>: { user.gigya.emails.verified.join(', ') }</div>);
+        }
+
+        if(user.gigya.emails.unverified instanceof Array) {
+          dataFromGigya.push(<div key="5unverified"><strong>Gigya unverified emails</strong>: { user.gigya.emails.unverified.join(', ') }</div>);
+        }
+      }
     }
 
     const hasKuUid = user.dataScopes && user.dataScopes.profile && user.dataScopes.profile.kundeunivers_uid;
