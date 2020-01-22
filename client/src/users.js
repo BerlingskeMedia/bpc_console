@@ -316,15 +316,15 @@ class UserDetails extends React.Component {
           <table className="table table-condensed">
             <tbody>
               {/* { gigyaTableRows } */}
-              <tr><td>UID</td><td>{user.gigya.UID}</td></tr>
-              <tr><td>Login provider</td><td>{user.gigya.loginProvider || ''}</td></tr>
-              <tr><td>Email</td><td>{user.gigya.profile ? user.gigya.profile.email : user.gigya.email || ''}</td></tr>
+              <tr><td><span className="label label-default">UID</span></td><td>{user.gigya.UID}</td></tr>
+              <tr><td><span className="label label-default">Login provider</span></td><td>{user.gigya.loginProvider || ''}</td></tr>
+              <tr><td><span className="label label-default">Email</span></td><td>{user.gigya.profile ? user.gigya.profile.email : user.gigya.email || ''}</td></tr>
               { user.gigya.emails && user.gigya.emails.verified instanceof Array
-                ? <tr><td>Verified emails</td><td>{ user.gigya.emails.verified.join(', ') }</td></tr>
+                ? <tr><td><span className="label label-default">Verified emails</span></td><td>{ user.gigya.emails.verified.join(', ') }</td></tr>
                 : null
               }
               { user.gigya.emails && user.gigya.emails.unverified instanceof Array
-                ? <tr><td>Unverified emails</td><td>{ user.gigya.emails.unverified.join(', ') }</td></tr>
+                ? <tr><td><span className="label label-default">Unverified emails</span></td><td>{ user.gigya.emails.unverified.join(', ') }</td></tr>
                 : null
               }
             </tbody>
@@ -349,14 +349,14 @@ class UserDetails extends React.Component {
             <h4>BPC</h4>
             <table className="table table-condensed">
               <tbody>
-                <tr><td>ID</td><td>{user.id}</td></tr>
-                <tr><td>Email</td><td>{user.email}</td></tr>
-                <tr><td>Provider</td><td><span style={{ color: styleProviderColor}}>{user.provider}</span></td></tr>
-                <tr><td>Internt id</td><td>{user._id}</td></tr>
-                <tr><td>Created</td><td>{user.createdAt}</td></tr>
-                <tr><td>Last updated</td><td>{user.lastUpdated}</td></tr>
-                <tr><td>Last fetched</td><td>{user.lastFetched}</td></tr>
-                <tr><td>Last login</td><td>{user.lastLogin}</td></tr>
+                <tr><td><span className="label label-default">ID</span></td><td>{user.id}</td></tr>
+                <tr><td><span className="label label-default">Email</span></td><td>{user.email}</td></tr>
+                <tr><td><span className="label label-default">Provider</span></td><td><span style={{ color: styleProviderColor}}>{user.provider}</span></td></tr>
+                <tr><td><span className="label label-default">Internt id</span></td><td>{user._id}</td></tr>
+                <tr><td><span className="label label-default">Created</span></td><td>{user.createdAt}</td></tr>
+                <tr><td><span className="label label-default">Last updated</span></td><td>{user.lastUpdated}</td></tr>
+                <tr><td><span className="label label-default">Last fetched</span></td><td>{user.lastFetched}</td></tr>
+                <tr><td><span className="label label-default">Last login</span></td><td>{user.lastLogin}</td></tr>
               </tbody>
             </table>
           </div>
