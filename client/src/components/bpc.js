@@ -33,7 +33,11 @@ const request = (path, options = {}) => {
       return response.json().then(data => data);
     } else if(response.status === 401) {
       authorize(credentials)
-      .then(ticket => window.location.reload());
+      .then(ticket => {
+        if(ticket) {
+          window.location.reload();
+        }
+      });
     }
     
     return Promise.reject(response);
