@@ -9,7 +9,6 @@ module.exports = class extends React.Component {
     super(props);
     this.getCompanies = this.getCompanies.bind(this);
     this.createCompany = this.createCompany.bind(this);
-    this.getAccessRules = this.getAccessRules.bind(this);
     this.searchUser = this.searchUser.bind(this);
     this.createUser = this.createUser.bind(this);
     this.state = {
@@ -47,12 +46,6 @@ module.exports = class extends React.Component {
   }
 
 
-  getAccessRules() {
-    return Bpp.request(`/api/accessrules`)
-    .then(accessrules => this.setState({ accessrules }));
-  }
-
-
   createUser(email) {
     if(email.length === 0) {
       return Promise.reject();
@@ -83,11 +76,10 @@ module.exports = class extends React.Component {
 
   componentDidMount() {
     return Bpp.authorize()
-    .then(() => {
-      this.setState({ authorized: true });
-    })
+    .then(() => this.setState({ authorized: true }))
     .then(this.getCompanies)
-    .then(this.getAccessRules)
+    .then(() => Bpp.request(`/api/accessrules`))
+    .then(accessrules => this.setState({ accessrules }))
     .catch(err => {
       this.setState({ authorized: false });
     })
