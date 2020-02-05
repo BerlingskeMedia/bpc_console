@@ -20,6 +20,14 @@ module.exports = class extends React.Component {
 
 
   getCustomers(query) {
+    if(!query) {
+      this.setState({
+        customer: null,
+        customers: []
+      });
+      return Promise.resolve();
+    }
+
     return Bpp.request(`/api/companies?customerType=C&${ query || '' }`)
     .then(customers => {
       if(customers.length === 1) {
@@ -143,18 +151,18 @@ class CustomerSearch extends React.Component {
               name="titleSearchBox"
               onChange={this.searchOnTextChange}
               className="form-control"
-              placeholder="Type ARIA account name start search"
+              placeholder="Type name start search"
               ref={(titleSearchBox) => this.titleSearchBox = titleSearchBox} />
             <div style={{ paddingLeft: '4px', color: 'darkgrey' }}><small><em>^ marks the start</em></small></div>
             <div style={{ paddingLeft: '4px', color: 'darkgrey' }}><small><em>$ marks the end</em></small></div>
           </div>
-          <div className="col-xs-3">
+          <div className="col-xs-2">
             <input
               type="text"
               name="ariaAccountNoBox"
               onChange={this.searchOnTextChange}
               className="form-control"
-              placeholder="Type ARIA account number"
+              placeholder="Type account number"
               ref={(ariaAccountNoBox) => this.ariaAccountNoBox = ariaAccountNoBox} />
           </div>
           <div className="col-xs-3">
@@ -163,7 +171,7 @@ class CustomerSearch extends React.Component {
               name="ariaAccountIDBox"
               onChange={this.searchOnTextChange}
               className="form-control"
-              placeholder="Type ARIA account ID"
+              placeholder="Type account ID"
               ref={(ariaAccountIDBox) => this.ariaAccountIDBox = ariaAccountIDBox} />
           </div>
         </div>
@@ -184,7 +192,12 @@ class Customer extends React.Component {
       <div className="customer" style={{ paddingBottom: '4px' }}>
         <div className="row">
           <div className="col-xs-12">
-            <h2><span className="label label-success">Title</span> {this.props.data.title || ''}</h2>
+            {/* <h2><span className="label label-success">Title</span> {this.props.data.title || ''}</h2> */}
+            
+            <h3>
+              <div><small><strong>Title</strong></small></div>
+              {this.props.data.title || ''}
+            </h3>
             <pre>
               { JSON.stringify(this.props.data, undefined, 2) }
             </pre>
