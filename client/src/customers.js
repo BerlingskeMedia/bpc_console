@@ -7,6 +7,7 @@ module.exports = class extends React.Component {
 
   constructor(props) {
     super(props);
+    this.getCustomer = this.getCustomer.bind(this);
     this.getCustomers = this.getCustomers.bind(this);
     this.state = {
       customers: [],
@@ -31,19 +32,23 @@ module.exports = class extends React.Component {
     return Bpp.request(`/api/companies?customerType=C&${ query || '' }`)
     .then(customers => {
       if(customers.length === 1) {
-        return Bpp.request(`/api/companies/${ customers[0]._id }`)
-        .then(customer => {
-          this.setState({
-            customer: customer,
-            customers: []
-          });
-        })
+        return this.getCustomer(customers[0]._id);
       } else {
         this.setState({
           customer: null,
           customers
         });
       }
+    });
+  }
+
+  getCustomer(id) {
+    return Bpp.request(`/api/companies/${ id }`)
+    .then(customer => {
+      this.setState({
+        customer: customer,
+        customers: []
+      });
     });
   }
 
@@ -62,14 +67,6 @@ module.exports = class extends React.Component {
 
 
   render() {
-    const customers = this.state.customers.map(customer => {
-
-      return <Customer
-              key={customer._id}
-              data={customer}
-              accessrules={this.state.accessrules}
-              />
-    });
 
     if(!this.state.authorized) {
       return (
@@ -79,11 +76,16 @@ module.exports = class extends React.Component {
       );
     }
 
+    const customers = this.state.customers.map(customer => {
+
+      return <CustomerOverview key={customer._id} data={customer} />
+    });
+
     return (
       <div className="customers" style={{ paddingTop: '30px' }}>
         <CustomerSearch getCustomers={this.getCustomers} accessrules={this.state.accessrules} />
         { this.state.customer
-          ? <Customer key={this.state.customer._id} data={this.state.customer} />
+          ? <CustomerDetails key={this.state.customer._id} data={this.state.customer} getCustomer={this.getCustomer} />
           : null
         }
         { customers }
@@ -181,7 +183,38 @@ class CustomerSearch extends React.Component {
 }
 
 
-class Customer extends React.Component {
+class CustomerOverview extends React.Component {
+  constructor(props){
+    super(props);
+  }
+
+  render() {
+    return (
+      <div className="customer" style={{ paddingBottom: '4px' }}>
+        <div className="row">
+          <div className="col-xs-8">
+            <h3>
+              <div><small><strong>Title</strong></small></div>
+              {this.props.data.title || ''}
+            </h3>
+          </div>
+          <div className="col-xs-4" style={{ textAlign: 'right' }}>
+          </div>
+        </div>
+        <div className="row">
+          <div className="col-xs-12">
+            <pre>
+              { JSON.stringify(this.props.data, undefined, 2) }
+            </pre>
+          </div>
+        </div>
+      </div>
+    );
+  }
+}
+
+
+class CustomerDetails extends React.Component {
   constructor(props){
     super(props);
     this.state = {};
@@ -191,16 +224,133 @@ class Customer extends React.Component {
     return (
       <div className="customer" style={{ paddingBottom: '4px' }}>
         <div className="row">
-          <div className="col-xs-12">
-            {/* <h2><span className="label label-success">Title</span> {this.props.data.title || ''}</h2> */}
-            
+          <div className="col-xs-8">
             <h3>
               <div><small><strong>Title</strong></small></div>
               {this.props.data.title || ''}
             </h3>
+          </div>
+          <div className="col-xs-4" style={{ textAlign: 'right' }}>
+            <button type="button" className="btn btn-sm btn-warning" onClick={this.props.getCustomer.bind(this, this.props.data._id)}>
+              <span className="glyphicon glyphicon-refresh" aria-hidden="true"></span>
+            </button>
+          </div>
+        </div>
+        <div className="row">
+          <div className="col-xs-12">
             <pre>
               { JSON.stringify(this.props.data, undefined, 2) }
             </pre>
+          </div>
+        </div>
+        <ChangeAriaAccountID data={this.props.data} />
+      </div>
+    );
+  }
+}
+
+
+class ChangeAriaAccountID extends React.Component {
+  constructor(props){
+    super(props);
+    this.onUserSearchChange = this.onUserSearchChange.bind(this);
+    this.searchUser = this.searchUser.bind(this);
+    this.requestChangeAriaAccountID = this.requestChangeAriaAccountID.bind(this);
+    this.state = {
+      searchUserTimer: null,
+      userSearchBoxHasInput: false,
+      foundUser: null,
+      messageSent: false
+    };
+  }
+
+
+  onUserSearchChange() {
+    this.setState({foundUser: null});
+    clearTimeout(this.state.searchUserTimer);
+    this.setState({searchUserTimer: setTimeout(this.searchUser, 1000)});
+  }
+
+
+  searchUser() {
+    const searchText = this.userSearchBox.value;
+    if(searchText.length > 0) {
+      const search = encodeURIComponent(searchText);
+      const query = `?provider=gigya&email=${ search }&id=${ search }`;
+
+      Bpc.request(`/users${ query }`)
+      .then(users => {
+        const foundUser = users.length === 1 ? users[0] : null;
+        this.setState({ foundUser, userSearchBoxHasInput: true }, this.search);
+      });      
+    } else {
+      this.setState({ foundUser: null, userSearchBoxHasInput: false }, this.search);
+    }
+  }
+
+
+  requestChangeAriaAccountID() {
+    if(this.state.foundUser && this.props.data && this.props.data.ariaAccountNo) {
+      const message = {
+        "type": "updateEmail",
+        "ariaAccountNo": this.props.data.ariaAccountNo,
+        "email": this.state.foundUser.email,
+        "newAriaAccountID": this.state.foundUser.id
+      };
+
+      return Bpp.request(`/api/accounts/message`, {
+        method: 'POST',
+        body: JSON.stringify(message)
+      }).then(() => this.setState({ messageSent: true }))
+    }
+  }
+
+  render() {
+
+    let userSearchFeedback = null;
+    let userSearchBoxClass = 'form-group has-feedback';
+    if(this.state.userSearchBoxHasInput) {
+      if (this.state.foundUser) {
+        userSearchFeedback = <span className="glyphicon glyphicon-ok form-control-feedback" aria-hidden="true"></span>;
+        userSearchBoxClass += ' has-success'
+      } else {
+        userSearchFeedback = <span className="glyphicon glyphicon-warning-sign form-control-feedback" aria-hidden="true"></span>;
+        userSearchBoxClass += ' has-error'
+      }
+    }
+
+    const disableButton = this.state.messageSent || userSearchFeedback === null;
+
+    return (
+      <div>
+        <div className="row">
+          <div className="col-xs-12">
+            <div><p>Change ariaAccountID and email on account.</p></div>
+          </div>
+        </div>
+        <div className="row">
+          <div className="col-xs-10">
+            <div className={ userSearchBoxClass }>
+              <input
+                type="text"
+                name="userSearchBox"
+                id="userSearchBox"
+                className="form-control"
+                aria-describedby="inputSuccess2Status"
+                onChange={this.onUserSearchChange}
+                placeholder="Type user email or ID start search"
+                ref={(userSearchBox) => this.userSearchBox = userSearchBox}
+                disabled={this.state.messageSent} />
+                { userSearchFeedback }
+            </div>
+          </div>
+          <div className="col-xs-2" style={{ textAlign: 'right' }}>
+            <button type="button" className="btn btn-sm btn-default" onClick={this.requestChangeAriaAccountID} disabled={disableButton}>
+              { this.state.messageSent
+                ? <span>Request sent to ARIA</span>
+                : <span>Send request to ARIA</span>
+              }
+            </button>
           </div>
         </div>
       </div>

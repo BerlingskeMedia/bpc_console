@@ -113,7 +113,6 @@ class CompanySearch extends React.Component {
   }
 
 
-  
   onUserSearchChange() {
     clearTimeout(this.state.searchUserTimer);
     this.setState({searchUserTimer: setTimeout(this.searchUser, 1000)});
@@ -123,7 +122,7 @@ class CompanySearch extends React.Component {
   searchUser() {
     const searchText = this.userSearchBox.value;
     if(searchText.length > 0) {
-      const search = encodeURIComponent(searchText.length);
+      const search = encodeURIComponent(searchText);
       const query = `?provider=gigya&email=${ search }&id=${ search }`;
 
       Bpc.request(`/users${ query }`)
@@ -350,11 +349,6 @@ class CompanyCreate extends React.Component {
       body: JSON.stringify(company)
     })
     .then(company => this.props.addNewCompany(company));
-    // .then(company => {
-    //   let companies = this.state.companies;
-    //   companies.push(company)
-    //   this.setState({ companies });
-    // });
   }
 
 

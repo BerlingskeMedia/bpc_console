@@ -99,8 +99,6 @@ module.exports = class extends React.Component {
     const foundUser = this.state.foundUser;
     if(foundUser) {
       this.setState({ addingUser: true }, () => {
-        console.log('this.props')
-        console.log(this.props)
         this.props.addUser(foundUser);
           this.addUserInput.value = '';
           this.setState({

@@ -137,7 +137,10 @@ module.exports = class extends React.Component {
         <div className="row">
           <div className="col-xs-4">
             <div className="text-wrap" style={{ textDecorationLine: '' }}>
-              <h5>{ company.title }</h5>
+              <h4>
+                <div><small><em>Title</em></small></div>
+                { company.title || ''}
+              </h4>
               <div>
                 { company.ariaAccountNo
                   ? <small><span className="label label-info">ariaAccountNo</span> { company.ariaAccountNo }</small>
@@ -352,6 +355,10 @@ class CompanyNote extends React.Component {
   constructor(props){
     super(props);
     this.handleChange = this.handleChange.bind(this);
+    this.saveNote = this.saveNote.bind(this);
+    this.state = {
+      saveButtonDisabled: false
+    };
   }
 
   handleChange(e) {
@@ -359,7 +366,19 @@ class CompanyNote extends React.Component {
     this.props.addCompanyNote(note);
   }
 
+  saveNote() {
+    this.setState({ saveButtonDisabled: true }, () => {
+      this.props.saveNote()
+      .then(() => {
+        this.setState({ saveButtonDisabled: false });
+      });
+    })
+  }
+
   render() {
+
+    const saveButtonDisabled = this.state.saveButtonDisabled;
+
     return (
       <div className="row" style={{ marginTop: '40px', minHeight: '10px' }}>
         <div className="col-xs-2" style={{ textAlign: 'right' }}>
@@ -374,7 +393,7 @@ class CompanyNote extends React.Component {
             onChange={this.handleChange}></textarea>
         </div>
         <div className="col-xs-1" style={{ textAlign: 'right' }}>
-          <button type="button" className="btn btn-sm btn-warning" onClick={this.props.saveNote}>
+          <button type="button" className="btn btn-sm btn-warning" onClick={this.saveNote} disabled={saveButtonDisabled}>
             <span className="glyphicon glyphicon-save" aria-hidden="true"></span> <span>Save</span>
           </button>
         </div>
