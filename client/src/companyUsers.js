@@ -155,6 +155,8 @@ module.exports = class extends React.Component {
           <div className="col-xs-2" style={{ textAlign: 'right' }}>
             <strong>{ this.props.label }</strong>
             <div><em><small>{this.props.note}</small></em></div>
+            <p></p>
+            <p>User count {users.length}</p>
           </div>
           <div className="col-xs-10">
             <table className="table table-condensed">

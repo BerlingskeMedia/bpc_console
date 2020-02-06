@@ -89,9 +89,7 @@ module.exports = class extends React.Component {
   getCompany() {
     const id = this.props.company._id;
     return Bpp.request(`/api/companies/${ id }`)
-    .then(company => this.setState({
-      company
-    }));
+    .then(company => this.setState({ company }));
   }
 
 
@@ -113,10 +111,7 @@ module.exports = class extends React.Component {
 
   showHideCompanyDetails() {
     if(this.state.showDetails) {
-      this.setState({
-        showDetails: false,
-        company: null
-      });
+      this.setState({ showDetails: false });
     } else {
       this.setState({ showLoader: true });
       this.getCompany()
@@ -162,7 +157,10 @@ module.exports = class extends React.Component {
             } */}
           </div>
           <div className="col-xs-4">
-            <CompanyOverview company={company} />
+          { this.state.showDetails
+            ? null
+            : <CompanyOverview company={company} />
+          }
           </div>
           <div className="col-xs-4" style={{ textAlign: 'right' }}>
             { this.state.showDetails
@@ -207,10 +205,9 @@ module.exports = class extends React.Component {
                 removeUser={this.removeUser}
                 addUser={this.addUser} />
 
-              {/* We dont show these yet */}
-              {/* <Planinstances
+              <Planinstances
                 planinstances={company.planinstances}
-                accessrules={this.props.accessrules} /> */}
+                accessrules={this.props.accessrules} />
 
             </div>  
           : null
@@ -230,29 +227,29 @@ class CompanyOverview extends React.Component {
   render() {
 
     const planinstances = this.props.company.planinstances || [];
-    const planinstancesOverview = planinstances.map((planinstance, index) => {
+    // const planinstancesOverview = planinstances.map((planinstance, index) => {
 
-      const userCount = planinstance.users instanceof Array ? planinstance.users : 0;
-      const units = planinstance.units || NaN;
+    //   const userCount = planinstance.users instanceof Array ? planinstance.users : 0;
+    //   const units = planinstance.units || NaN;
 
-      let userCountbackgroundColor = 'inherit';
+    //   let userCountbackgroundColor = 'inherit';
 
-      if(isNaN(units)) {
-        // Nothing
-      } else if(userCount > units) {
-        userCountbackgroundColor = 'inhcrimsonerit';
-      } else if(userCount === units) {
-        userCountbackgroundColor = 'coral';
-      }
+    //   if(isNaN(units)) {
+    //     // Nothing
+    //   } else if(userCount > units) {
+    //     userCountbackgroundColor = 'inhcrimsonerit';
+    //   } else if(userCount === units) {
+    //     userCountbackgroundColor = 'coral';
+    //   }
 
-      return(
-        <div key={planinstance._id} style={{ backgroundColor: userCountbackgroundColor }}>
-          <em><small>Planinstance: {planinstance.planId}</small></em>
-          <span> </span>
-          <em><small>(Users: {userCount}/{units})</small></em>
-        </div>
-      );
-    });
+    //   return(
+    //     <div key={planinstance._id} style={{ backgroundColor: userCountbackgroundColor }}>
+    //       <em><small>{planinstance.planName}</small></em>
+    //       <span> </span>
+    //       <em><small>(Users: {userCount}/{units})</small></em>
+    //     </div>
+    //   );
+    // });
 
     return (
       <div>
@@ -266,7 +263,7 @@ class CompanyOverview extends React.Component {
           <em><small>User count: {this.props.company.userCount || '-'}</small></em>
         </div>
         <div style={{ paddingLeft: '4px' }}>
-          { planinstancesOverview }
+          <em><small>Plan instances: {planinstances.length}</small></em>
         </div>
       </div>
     );

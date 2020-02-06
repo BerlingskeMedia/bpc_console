@@ -194,46 +194,72 @@ class Planinstance extends React.Component {
       //   </div>);
       // });
 
-      return (
-        <div className="row" key={service.serviceNo} style={{ padding: '4px' }}>
-          <div className="col-xs-11 col-xs-offset-1">
-            <div>Access Feature: {service.accessFeature}</div>
-            <div>Service Desc: {service.serviceDesc}</div>
-            <div>Service ID: {service.serviceId}</div>
-            <div>Service No: {service.serviceNo}</div>
-          </div>
-        </div>
-      )
-    });
+      // return (
+      //   <div className="row" key={service.serviceNo} style={{ padding: '4px' }}>
+      //     <div className="col-xs-11 col-xs-offset-1">
+      //       <div>Access Feature: {service.accessFeature}</div>
+      //       <div>Service Desc: {service.serviceDesc}</div>
+      //       <div>Service ID: {service.serviceId}</div>
+      //       <div>Service No: {service.serviceNo}</div>
+      //     </div>
+      //   </div>
+      // )
+
+      return service.accessFeature
+    }).join(', ');
 
     return (
       <div className="row" key={planinstance.instanceNo}>
-        <div className="col-xs-12">
-          <div>Plan Name: {planinstance.planName}</div>
-          <div>Plan ID: {planinstance.planId}</div>
-          <div>Instance ID: {planinstance.instanceId}</div>
-          <div>Instance No: {planinstance.instanceNo}</div>
-          <div>Title Domain: {planinstance.titleDomain}</div>
-          <div>Units: {planinstance.units}</div>
-          <div>Services:</div>
-          {services}
+        <div className="col-xs-8">
+          <div className="panel panel-default">
+            <div className="panel-body">
+              <div>
+                <div><small><em>Plan instance ID</em></small></div>
+                {planinstance.instanceId}
+              </div>
+              <div>
+                <div><small><em>Plan name</em></small></div>
+                {planinstance.planName}
+              </div>
+              <div>
+                <div><small><em>Plan ID</em></small></div>
+                {planinstance.planId}
+              </div>
+              <div>
+                <div><small><em>Units</em></small></div>
+                {planinstance.units}
+              </div>
+              <div>
+                <div><small><em>Title Domain</em></small></div>
+                {planinstance.titleDomain}
+              </div>
+              <div>
+                <div><small><em>Services</em></small></div>
+                {services}
+              </div>
+              <p></p>
+              <p>No email domain masks yet.</p>
+              <p>No users yet.</p>
+
+
+              {/* <ArrayItems
+                data={this.props.planinstance.emailMasks}
+                label="Email masks"
+                note="Users with matching email will automatically be included under Users."
+                removeItem={this.removeEmailmask}
+                addItem={this.addEmailmask}
+                validateItem={this.validateEmailmask} />
+
+              <Users
+                users={this.props.planinstance.users}
+                label="Users"
+                note="Users that receive access according to Access rules."
+                removeUser={this.removeUser}
+                addUser={this.addUser}
+                apiRoute="planinstances" /> */}
+            </div>
+          </div>
         </div>
-
-        <ArrayItems
-          data={this.props.planinstance.emailMasks}
-          label="Email masks"
-          note="Users with matching email will automatically be included under Users."
-          removeItem={this.removeEmailmask}
-          addItem={this.addEmailmask}
-          validateItem={this.validateEmailmask} />
-
-        <Users
-          users={this.props.planinstance.users}
-          label="Users"
-          note="Users that receive access according to Access rules."
-          removeUser={this.removeUser}
-          addUser={this.addUser}
-          apiRoute="planinstances" />
       </div>
     );
   }
