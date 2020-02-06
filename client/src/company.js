@@ -166,7 +166,7 @@ module.exports = class extends React.Component {
           </div>
           <div className="col-xs-4" style={{ textAlign: 'right' }}>
             { this.state.showDetails
-              ? <button type="button" className="btn btn-sm btn-default" onClick={this.showHideCompanyDetails}>
+              ? <button type="button" className="btn btn-sm btn-info" onClick={this.showHideCompanyDetails}>
                   <span><span className="glyphicon glyphicon-resize-small" aria-hidden="true"></span> <span>Close</span></span>
                 </button>
               : <button type="button" className="btn btn-sm btn-default" onClick={this.showHideCompanyDetails}>
