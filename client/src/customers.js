@@ -78,14 +78,14 @@ module.exports = class extends React.Component {
 
     const customers = this.state.customers.map(customer => {
 
-      return <CustomerOverview key={customer._id} data={customer} />
+      return <CustomerOverview key={customer._id} customer={customer} />
     });
 
     return (
       <div className="customers" style={{ paddingTop: '30px' }}>
         <CustomerSearch getCustomers={this.getCustomers} accessrules={this.state.accessrules} />
         { this.state.customer
-          ? <CustomerDetails key={this.state.customer._id} data={this.state.customer} getCustomer={this.getCustomer} />
+          ? <CustomerDetails key={this.state.customer._id} customer={this.state.customer} getCustomer={this.getCustomer} />
           : null
         }
         { customers }
@@ -195,7 +195,7 @@ class CustomerOverview extends React.Component {
           <div className="col-xs-8">
             <h3>
               <div><small><strong>Title</strong></small></div>
-              {this.props.data.title || ''}
+              {this.props.customer.title || ''}
             </h3>
           </div>
           <div className="col-xs-4" style={{ textAlign: 'right' }}>
@@ -204,7 +204,7 @@ class CustomerOverview extends React.Component {
         <div className="row">
           <div className="col-xs-12">
             <pre>
-              { JSON.stringify(this.props.data, undefined, 2) }
+              { JSON.stringify(this.props.customer, undefined, 2) }
             </pre>
           </div>
         </div>
@@ -227,11 +227,11 @@ class CustomerDetails extends React.Component {
           <div className="col-xs-8">
             <h3>
               <div><small><strong>Title</strong></small></div>
-              {this.props.data.title || ''}
+              {this.props.customer.title || ''}
             </h3>
           </div>
           <div className="col-xs-4" style={{ textAlign: 'right' }}>
-            <button type="button" className="btn btn-sm btn-warning" onClick={this.props.getCustomer.bind(this, this.props.data._id)}>
+            <button type="button" className="btn btn-sm btn-warning" onClick={this.props.getCustomer.bind(this, this.props.customer._id)}>
               <span className="glyphicon glyphicon-refresh" aria-hidden="true"></span>
             </button>
           </div>
@@ -239,11 +239,11 @@ class CustomerDetails extends React.Component {
         <div className="row">
           <div className="col-xs-12">
             <pre>
-              { JSON.stringify(this.props.data, undefined, 2) }
+              { JSON.stringify(this.props.customer, undefined, 2) }
             </pre>
           </div>
         </div>
-        <ChangeAriaAccountID data={this.props.data} />
+        <ChangeAriaAccountID customer={this.props.customer} />
       </div>
     );
   }
@@ -290,11 +290,12 @@ class ChangeAriaAccountID extends React.Component {
 
 
   requestChangeAriaAccountID() {
-    if(this.state.foundUser && this.props.data && this.props.data.ariaAccountNo) {
+    if(this.state.foundUser && this.props.customer && this.props.customer.ariaAccountNo) {
       const message = {
         "type": "updateEmail",
-        "ariaAccountNo": this.props.data.ariaAccountNo,
+        "ariaAccountNo": this.props.customer.ariaAccountNo,
         "email": this.state.foundUser.email,
+        "uid": this.props.customer.ariaAccountID,
         "newAriaAccountID": this.state.foundUser.id
       };
 
