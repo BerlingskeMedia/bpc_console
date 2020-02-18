@@ -2,6 +2,7 @@ const $ = require('jquery');
 const React = require('react');
 const Link = require('react-router-dom').Link;
 const Bpc = require('./components/bpc');
+const Bpp = require('./components/bpp');
 
 module.exports = class extends React.Component {
 
@@ -376,56 +377,72 @@ class RecalcPermissionsButton extends React.Component {
 
   constructor(props){
     super(props);
-    this.onClick = this.onClick.bind(this);
+    this.requestUpdatePermissions = this.requestUpdatePermissions.bind(this);
+    // this.onClick = this.onClick.bind(this);
+    this.state = {
+      authorized: false,
+      messageSentSuccesfulFadeOutTimeout: null
+    }
   }
 
-  onClick(recalcPermissionsUrl) {
-    return fetch(recalcPermissionsUrl)
-    .then(data => {
-      console.log('recalc', data);
+  componentDidMount() {
+    return Bpp.authorize()
+    .then(() => {
+      this.setState({ authorized: true });
     })
-    .fail(err => {
-      console.error(err.message);
-    });
+    .catch(err => {
+      this.setState({ authorized: false });
+    })
+  }
+
+  requestUpdatePermissions() {
+    const message = {
+      "type": "updatePermissions",
+      "uid": this.props.user.id
+    };
+
+    return Bpp.request(`/api/accounts/message`, {
+      method: 'POST',
+      body: JSON.stringify(message)
+    })
+    .then(() => this.setState({ messageSent: true }))
+    .then(() => {
+      $('.messageSentSuccess').fadeIn(100);
+      if(this.state.messageSentSuccesfulFadeOutTimeout) {
+        clearTimeout(this.state.messageSentSuccesfulFadeOutTimeout);
+      }
+
+      const newMessageSentSuccesfulFadeOutTimeout = setTimeout(
+        function() {
+          $('.messageSentSuccess').fadeOut(600);
+        },
+        3000
+      );
+
+      this.setState({
+        messageSentSuccesfulFadeOutTimeout: newMessageSentSuccesfulFadeOutTimeout
+      });
+    })
   }
 
   render() {
-    let nameQueryParam;
 
-    if (this.props.user.gigya && this.props.user.gigya.UID) {
-      nameQueryParam = this.props.user.gigya.UID;
-    } else if (this.props.user.dataScopes && this.props.user.dataScopes.profile) {
-      if (this.props.user.dataScopes.profile.sso_id) {
-        nameQueryParam = this.props.user.dataScopes.profile.sso_id;
-      } else if (this.props.user.dataScopes.profile.sso_uid) {
-        nameQueryParam = this.props.user.dataScopes.profile.sso_uid;
-      }
+    if(!this.state.authorized) {
+      return false;
     }
 
-    if (nameQueryParam) {
-      let recalcPermissionsUrl =
-      window.location.hostname === 'console.berlingskemedia.net' ?
-      'https://admin.kundeunivers.dk/tester?name='.concat(nameQueryParam) :
-      window.location.hostname === 'console.berlingskemedia-testing.net' ?
-      'https://admin.kundeunivers-testing.dk/tester?name='.concat(nameQueryParam) :
-      window.location.hostname === 'localhost' ?
-      'https://admin.kundeunivers-testing.dk/tester?name='.concat(nameQueryParam) :
-      null;
-
-      if(!recalcPermissionsUrl) {
-        return null;
-      }
-
-      return (
-        <div style={{paddingTop: '5px'}}>
-          <button className="btn btn-default" type="button" onClick={this.onClick.bind(this, recalcPermissionsUrl)}>
-            Recalc KU permissions
-          </button>
-        </div>
-      );
-    } else {
+    if(this.props.user.provider !== 'gigya') {
       return null;
     }
+
+    return (
+      <div style={{paddingTop: '5px'}}>
+        <button className="btn btn-default" type="button" onClick={this.requestUpdatePermissions}>
+          Recalc permissions
+        </button>
+        <span className="messageSentSuccess" style={{color: '#008000', verticalAlign: 'middle', marginLeft: '10px', display: 'none'}}>Message sent</span>
+      </div>
+    );
   }
 }
 
