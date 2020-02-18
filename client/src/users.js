@@ -363,10 +363,123 @@ class UserDetails extends React.Component {
           </div>
           <div className="col-xs-6">
             { dataFromGigya }
-            { linkToKu }
+            <GigyaResetPassword user={ user } />
             <RecalcPermissionsButton user={ user } />
           </div>
         </div>
+      </div>
+    );
+  }
+}
+
+
+class GigyaResetPassword extends React.Component {
+  constructor(props){
+    super(props);
+    this.isvalid = this.isvalid.bind(this);
+    this.showConfirm = this.showConfirm.bind(this);
+    this.resetPassword = this.resetPassword.bind(this);
+    this.state = {
+      showConfirmReset: false,
+      confirmResetTimeout: null,
+      resetSuccesfulFadeOutTimeout: null
+    }
+  }
+
+  isvalid() {
+    if(this.newPasswordInput.value.length < 6) {
+      return false;
+    }
+
+    if(this.props.user.provider !== 'gigya') {
+      return false;
+    }
+
+    if(!this.props.user.email) {
+      return false;
+    }
+
+    return {
+      loginID: this.props.user.email,
+      newPassword: this.newPasswordInput.value
+    };
+  }
+
+
+  showConfirm() {
+    if(!this.isvalid()) {
+      alert('Invalid user or password');
+      return;
+    }
+
+    confirmResetTimeout = setTimeout(() => {
+      this.setState({ showConfirmReset: false });
+    }, 2000);
+
+    this.setState({
+      showConfirmReset: true,
+      confirmResetTimeout
+     });
+  }
+
+
+  resetPassword() {
+    const payload = this.isvalid();
+    if(!payload) {
+      alert('Invalid user or password');
+      return;
+    }
+
+    return Bpc.request('/gigya/resetPassword', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    })
+    .then(() => {
+      this.newPasswordInput.value = '';
+      $('.resetSuccess').fadeIn(100);
+      if(this.state.resetSuccesfulFadeOutTimeout) {
+        clearTimeout(this.state.messageSentSuccesfulFadeOutTimeout);
+      }
+
+      const newResetSuccesfulFadeOutTimeout = setTimeout(
+        function() {
+          $('.resetSuccess').fadeOut(600);
+        },
+        3000
+      );
+
+      this.setState({
+        resetSuccesfulFadeOutTimeout: newResetSuccesfulFadeOutTimeout
+      });
+    })
+    .catch(err => {
+      alert('Error');
+    });
+  }
+
+  render() {
+    if(this.props.user.provider !== 'gigya') {
+      return null;
+    }
+    return(
+      <div className="form-inline">
+        <div className="form-group">
+          <input
+            type="text"
+            name="newPasswordInput"
+            className="form-control input"
+            placeholder="Set new password"
+            disabled={this.state.showConfirmReset}
+            ref={(newPasswordInput) => this.newPasswordInput = newPasswordInput} />
+        </div>
+        <span>&nbsp;</span>
+        <button type="button" className="btn btn btn-default" onClick={this.showConfirm} disabled={this.state.showConfirmReset}>Reset password</button>
+        <span>&nbsp;</span>
+        { this.state.showConfirmReset
+          ? <button type="button" className="btn btn btn-danger" onClick={this.resetPassword}>Confirm</button>
+          : null
+        }
+        <span className="resetSuccess" style={{color: '#008000', verticalAlign: 'middle', marginLeft: '10px', display: 'none'}}>Password reset</span>
       </div>
     );
   }
@@ -378,7 +491,6 @@ class RecalcPermissionsButton extends React.Component {
   constructor(props){
     super(props);
     this.requestUpdatePermissions = this.requestUpdatePermissions.bind(this);
-    // this.onClick = this.onClick.bind(this);
     this.state = {
       authorized: false,
       messageSentSuccesfulFadeOutTimeout: null
