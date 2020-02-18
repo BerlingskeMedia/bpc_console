@@ -29,7 +29,7 @@ module.exports = class extends React.Component {
       return Promise.resolve();
     }
 
-    return Bpp.request(`/api/companies?customerType=C&${ query || '' }`)
+    return Bpp.request(`/api/accounts?customerType=C&${ query || '' }`)
     .then(customers => {
       if(customers.length === 1) {
         return this.getCustomer(customers[0]._id);
@@ -43,7 +43,7 @@ module.exports = class extends React.Component {
   }
 
   getCustomer(id) {
-    return Bpp.request(`/api/companies/${ id }`)
+    return Bpp.request(`/api/accounts/${ id }`)
     .then(customer => {
       this.setState({
         customer: customer,
