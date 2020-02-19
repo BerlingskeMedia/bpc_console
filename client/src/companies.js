@@ -8,11 +8,13 @@ module.exports = class extends React.Component {
   constructor(props) {
     super(props);
     this.getCompanies = this.getCompanies.bind(this);
+    this.clearSearchResults = this.clearSearchResults.bind(this);
     this.addNewCompany = this.addNewCompany.bind(this);
     this.state = {
       companies: [],
       accessrules: [],
-      authorized: false
+      authorized: false,
+      searchCleared: true
     };
     
     document.title = 'BPC - Companies';
@@ -27,8 +29,13 @@ module.exports = class extends React.Component {
       const userCount = companies.reduce((acc, cur) => {
         return acc + cur.userCount;
       }, 0);
-      this.setState({ companies, companyCount, userCount });
+      this.setState({ companies, companyCount, userCount, searchCleared: false });
     });
+  }
+
+
+  clearSearchResults() {
+    this.setState({ companies: [], companyCount: 0, userCount: 0, searchCleared: true });
   }
 
 
@@ -42,7 +49,6 @@ module.exports = class extends React.Component {
   componentDidMount() {
     return Bpp.authorize()
     .then(() => this.setState({ authorized: true }))
-    .then(this.getCompanies)
     .then(() => Bpp.request(`/api/accessrules`))
     .then(accessrules => this.setState({ accessrules }))
     .catch(err => {
@@ -70,10 +76,10 @@ module.exports = class extends React.Component {
 
     return (
       <div className="companies" style={{ paddingTop: '30px' }}>
-        <CompanySearch getCompanies={this.getCompanies} accessrules={this.state.accessrules} />
+        <CompanySearch getCompanies={this.getCompanies} clearSearchResults={this.clearSearchResults} accessrules={this.state.accessrules} />
         <CompanySearchStatistics companyCount={this.state.companyCount} userCount={this.state.userCount} />
         { companies }
-        { companies.length === 0
+        { this.state.searchCleared !== true && companies.length === 0
           ? <div style={{textAlign: 'center'}}><em>(none)</em></div>
           : null
         }
@@ -175,6 +181,11 @@ class CompanySearch extends React.Component {
 
     if(this.titleDomainSelect.value.length > 0) {
       searchParams.push(`titleDomain=${ encodeURIComponent(this.titleDomainSelect.value) }`)
+    }
+
+    if(searchParams.length === 0) {
+      this.props.clearSearchResults();
+      return;
     }
     
     const query = `${ searchParams.join('&') }`;
