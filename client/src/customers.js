@@ -9,6 +9,7 @@ module.exports = class extends React.Component {
     super(props);
     this.getCustomer = this.getCustomer.bind(this);
     this.getCustomers = this.getCustomers.bind(this);
+    this.clearSearchResults = this.clearSearchResults.bind(this);
     this.state = {
       customers: [],
       customer: null,
@@ -29,7 +30,7 @@ module.exports = class extends React.Component {
       return Promise.resolve();
     }
 
-    return Bpp.request(`/api/accounts?customerType=C&${ query || '' }`)
+    return Bpp.request(`/api/accounts?${ query || '' }`)
     .then(customers => {
       if(customers.length === 1) {
         return this.getCustomer(customers[0]._id);
@@ -41,6 +42,12 @@ module.exports = class extends React.Component {
       }
     });
   }
+
+
+  clearSearchResults() {
+    return this.setState({ customer: null, customers: []});
+  }
+
 
   getCustomer(id) {
     return Bpp.request(`/api/accounts/${ id }`)
@@ -83,7 +90,7 @@ module.exports = class extends React.Component {
 
     return (
       <div className="customers" style={{ paddingTop: '30px' }}>
-        <CustomerSearch getCustomers={this.getCustomers} accessrules={this.state.accessrules} />
+        <CustomerSearch getCustomers={this.getCustomers} clearSearchResults={this.clearSearchResults} accessrules={this.state.accessrules} />
         { this.state.customer
           ? <CustomerDetails key={this.state.customer._id} customer={this.state.customer} getCustomer={this.getCustomer} />
           : null
@@ -99,7 +106,7 @@ module.exports = class extends React.Component {
 class CustomerSearch extends React.Component {
   constructor(props){
     super(props);
-    this.searchOnTextChange = this.searchOnTextChange.bind(this);
+    this.onSearchParamChange = this.onSearchParamChange.bind(this);
     this.search = this.search.bind(this);
     this.state = {
       searchInProgress: false,
@@ -108,7 +115,7 @@ class CustomerSearch extends React.Component {
   }
 
 
-  searchOnTextChange(e) {
+  onSearchParamChange(e) {
     clearTimeout(this.state.searchTimer);
     this.setState({searchTimer: setTimeout(this.search, 1000)});
   }
@@ -132,6 +139,17 @@ class CustomerSearch extends React.Component {
     if(this.ariaAccountIDBox.value.length > 0) {
       searchParams.push(`ariaAccountID=${ encodeURIComponent(this.ariaAccountIDBox.value) }`);
     }
+
+    
+    if(searchParams.length === 0) {
+      this.props.clearSearchResults();
+      return;
+    } else {
+      // This params is only set if there is serching on other params.
+      if(this.customerTypeSelect.value.length > 0) {
+        searchParams.push(`customerType=${ this.customerTypeSelect.value }`);
+      }
+    }
     
     const query = `${ searchParams.join('&') }`;
 
@@ -151,18 +169,18 @@ class CustomerSearch extends React.Component {
             <input
               type="text"
               name="titleSearchBox"
-              onChange={this.searchOnTextChange}
+              onChange={this.onSearchParamChange}
               className="form-control"
               placeholder="Type name start search"
               ref={(titleSearchBox) => this.titleSearchBox = titleSearchBox} />
-            <div style={{ paddingLeft: '4px', color: 'darkgrey' }}><small><em>^ marks the start</em></small></div>
-            <div style={{ paddingLeft: '4px', color: 'darkgrey' }}><small><em>$ marks the end</em></small></div>
+            <div style={{ paddingLeft: '4px', color: 'darkgrey' }}><small><em>^ marks the start of name</em></small></div>
+            <div style={{ paddingLeft: '4px', color: 'darkgrey' }}><small><em>$ marks the end of name</em></small></div>
           </div>
           <div className="col-xs-2">
             <input
               type="text"
               name="ariaAccountNoBox"
-              onChange={this.searchOnTextChange}
+              onChange={this.onSearchParamChange}
               className="form-control"
               placeholder="Type account number"
               ref={(ariaAccountNoBox) => this.ariaAccountNoBox = ariaAccountNoBox} />
@@ -171,10 +189,18 @@ class CustomerSearch extends React.Component {
             <input
               type="text"
               name="ariaAccountIDBox"
-              onChange={this.searchOnTextChange}
+              onChange={this.onSearchParamChange}
               className="form-control"
               placeholder="Type account ID"
               ref={(ariaAccountIDBox) => this.ariaAccountIDBox = ariaAccountIDBox} />
+          </div>
+          <div className="col-xs-2">
+            <select className="form-control input-sm" onChange={this.onSearchParamChange}
+              ref={(customerTypeSelect) => this.customerTypeSelect = customerTypeSelect}>
+                <option key={1} value='C'>Consumer</option>
+                <option key={2} value='B'>Business</option>
+                <option key={3} value=''>(all)</option>
+          </select>
           </div>
         </div>
       </div>
