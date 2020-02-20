@@ -6,30 +6,19 @@ const Bpc = require('./components/bpc');
 module.exports = class extends React.Component {
   constructor(props){
     super(props);
-    this.createUser_ = this.createUser_.bind(this);
+    this.validateEmail = this.validateEmail.bind(this);
     this.createUser = this.createUser.bind(this);
     this.searchUser = this.searchUser.bind(this);
     this.addUser = this.addUser.bind(this);
     this.onChangeAddUser = this.onChangeAddUser.bind(this);
     this.state = {
       hasInput: false,
-      inputValid: false,
+      inputAddUserValid: false,
+      inputCreateUserValid: false,
       searchUserInProgress: false,
       searchUserTimer: null,
       foundUser: null
     };
-  }
-
-
-  createUser_(email) {
-    if(email.length === 0) {
-      return Promise.reject();
-    }
-
-    return Bpc.request('/gigya/register', {
-      method: 'POST',
-      body: JSON.stringify({ email })
-    });
   }
 
 
@@ -52,46 +41,63 @@ module.exports = class extends React.Component {
   onChangeAddUser() {
     const value = this.addUserInput.value;
     if(value.length > 0) {
-      // Setting the inputValid flag now, because there is one second delay
+
+      const inputCreateUserValid = this.validateEmail(value);
+      console.log('inputCreateUserValid')
+      console.log(inputCreateUserValid)
+
+      // Setting the inputAddUserValid flag now, because there is one second delay
       //  before se start searching for users in BPC
-      this.setState({ hasInput: true, inputValid: false }, () => {
+      this.setState({ hasInput: true, inputAddUserValid: false, inputCreateUserValid }, () => {
 
         clearTimeout(this.state.searchUserTimer);
 
         this.setState({ searchUserInProgress: true, searchUserTimer: setTimeout(() => {
           this.searchUser(value)
-          .then(foundUser => this.setState({ inputValid: foundUser !== null, foundUser, searchUserInProgress: false }));
+          .then(foundUser => this.setState({ inputAddUserValid: foundUser !== null, foundUser, searchUserInProgress: false }));
         }, 1000)});
 
       });
     } else {
-      this.setState({ hasInput: false, inputValid: false });
+      this.setState({ hasInput: false, inputAddUserValid: false });
     }
+  }
+
+
+  validateEmail(email) {
+    const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(String(email).toLowerCase());
   }
 
 
   createUser() {
     const value = this.addUserInput.value;
-    if(value.length > 0) {
-      return this.setState({ creatingUser: true }, () => {
-        return this.props.createUser(value)
-        .then((response) => {
 
-          this.setState({
-            creatingUser: false,
-            inputValid: true,
-            hasInput: true,
-            foundUser: {
-              id: response.UID,
-              email: response.profile.email || value
-            }
-          });
-        })
-        .catch((err) => {
-          this.setState({ creatingUser: false });
-        });
-      });
+    if(!this.validateEmail(value)) {
+      return Promise.reject();
     }
+
+    return this.setState({ creatingUser: true }, () => {
+      return Bpc.request('/gigya/register', {
+        method: 'POST',
+        body: JSON.stringify({ email: value })
+      })
+      .then((response) => {
+
+        this.setState({
+          creatingUser: false,
+          inputAddUserValid: true,
+          hasInput: true,
+          foundUser: {
+            id: response.UID,
+            email: response.profile.email || value
+          }
+        });
+      })
+      .catch((err) => {
+        this.setState({ creatingUser: false });
+      });
+    });
   }
 
 
@@ -103,7 +109,7 @@ module.exports = class extends React.Component {
           this.addUserInput.value = '';
           this.setState({
             addingUser: false,
-            inputValid: false, // Setting inputValid to false to disable the button
+            inputAddUserValid: false, // Setting inputAddUserValid to false to disable the button
             hasInput: false
           });
       });
@@ -118,11 +124,11 @@ module.exports = class extends React.Component {
 
     let items = users.map((user) => <User key={user.uid} user={user} removeUser={this.props.removeUser} searchUser={this.searchUser} />)
 
-    const inputClassName = this.state.hasInput && !this.state.inputValid ? 'form-group has-error' : 'form-group';
+    const inputClassName = this.state.hasInput && !this.state.inputAddUserValid ? 'form-group has-error' : 'form-group';
 
-    // The "inputValid" means the user was already found.
-    const createButtonDisabled = this.state.creatingUser || !this.state.hasInput || this.state.inputValid || this.state.searchUserInProgress;
-    const addButtonDisabled = !this.state.inputValid || this.state.addingUser || this.state.searchUserInProgress;
+    // The "inputAddUserValid" means the user was already found.
+    const createButtonDisabled = !this.state.inputCreateUserValid || this.state.creatingUser || this.state.inputAddUserValid || this.state.searchUserInProgress;
+    const addButtonDisabled = !this.state.inputAddUserValid || this.state.addingUser || this.state.searchUserInProgress;
 
     items.push(
       <tr key={-1}>
