@@ -282,6 +282,7 @@ class ShowFullUser extends React.Component {
       this.state.user !== null
       ? <div style={{marginTop: '30px', marginBottom: '30px'}}>
           <UserDetails key={this.state.user.id + 'fulluser_1'} user={this.state.user} />
+          <Access key={this.state.user.id + 'fulluser_4'} dataScopes={this.state.user.dataScopes} />
           <hr />
           <Permissions key={this.state.user.id + 'fulluser_2'} user={this.state.user} dataScopes={this.state.user.dataScopes} />
           <hr />
@@ -553,6 +554,67 @@ class RecalcPermissionsButton extends React.Component {
           Recalc permissions
         </button>
         <span className="messageSentSuccess" style={{color: '#008000', verticalAlign: 'middle', marginLeft: '10px', display: 'none'}}>Message sent</span>
+      </div>
+    );
+  }
+}
+
+
+class Access extends React.Component {
+
+  constructor(props){
+    super(props);
+  }
+
+  render() {
+
+    const dataScopes = this.props.dataScopes || {};
+    const dataScopesKeys = Object.keys(dataScopes);
+
+    const requiredAccessObjects = ['berlingske', 'bt', 'weekendavisen'];
+
+    // If any of the keys 'berlingske', 'bt', 'weekendavisen' are missing, or they don't have an "access" object
+    if(dataScopesKeys.length === 0
+      || requiredAccessObjects.some(key => dataScopesKeys.indexOf(key) === -1)
+      || requiredAccessObjects.some(key => !dataScopes[key].hasOwnProperty('access'))) {
+      return null;
+    }
+
+    const calculatedAt = dataScopes.berlingske.access.calculatedAt;
+
+    const yes = <span className="glyphicon glyphicon-ok" style={{color: 'lightgreen'}} aria-hidden="true"></span>;
+    const no = <span className="glyphicon glyphicon-minus" style={{color: 'red'}} aria-hidden="true"></span>;
+
+    return(
+      <div>
+        <hr />
+        <table className="table table-striped">
+          <thead>
+            <tr>
+              <th></th>
+              <th>Web</th>
+              <th>E-paper</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th>Berlingske</th>
+              <td>{dataScopes.berlingske.access.bdk_paywall ? yes : no}</td>
+              <td>{dataScopes.berlingske.access.bdk_apps ? yes : no}</td>
+            </tr>
+            <tr>
+              <th>BT</th>
+              <td></td>
+              <td>{dataScopes.bt.access.bta_epaper ? yes : no}</td>
+            </tr>
+            <tr>
+              <th>Weekendavisen</th>
+              <td>{dataScopes.weekendavisen.access.wea_paywall ? yes : no}</td>
+              <td>{dataScopes.weekendavisen.access.waa_epaper ? yes : no}</td>
+            </tr>
+          </tbody>
+        </table>
+        <div style={{textAlign: 'right'}}><em><small>Calculated at {calculatedAt}</small></em></div>
       </div>
     );
   }
