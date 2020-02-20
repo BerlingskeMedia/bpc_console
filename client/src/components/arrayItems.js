@@ -5,9 +5,11 @@ module.exports = class extends React.Component {
     super(props);
     this.addItem = this.addItem.bind(this);
     this.onChangeAddItem = this.onChangeAddItem.bind(this);
+    this.showFullList = this.showFullList.bind(this);
     this.state = {
       hasInput: false,
-      inputValid: false
+      inputValid: false,
+      showTruncatedList: false
     };
   }
 
@@ -48,35 +50,64 @@ module.exports = class extends React.Component {
   }
 
 
+  showFullList() {
+    this.setState({ showTruncatedList: false });
+  }
+
+
+  componentDidMount() {
+    if(this.props.data.length > 5) {
+      this.setState({ showTruncatedList: true });
+    }
+  }
+
+
   render() {
 
     // In case of undefined
-    const data = this.props.data || [];
+    let data = this.props.data || [];
+
+    if(this.state.showTruncatedList) {
+      data = data.slice(0, 5);
+    }
 
     let items = data.map((item) => <ArrayItem key={item} data={item} removeItem={this.props.removeItem} translateItem={this.props.translateItem} />)
 
     const inputClassName = this.state.hasInput && !this.state.inputValid ? 'form-group has-error' : 'form-group';
 
-    items.push(
-      <tr key={-1}>
-        <td>
-          {/* <div className="form-group has-feedback"> */}
-          <div className={inputClassName}>
-            <input
-              type="text"
-              name="addItemInput"
-              className="form-control input-sm"
-              onChange={this.onChangeAddItem}
-              ref={(addItemInput) => this.addItemInput = addItemInput} />
-          </div>
-        </td>
-        <td style={{ textAlign: 'right'}}>
-          <button type="button" className='btn btn-xs btn-success' onClick={this.addItem} disabled={!this.state.inputValid || this.state.addingItem} style={{ minWidth: '90px' }}>
-            <span className='glyphicon glyphicon-plus' aria-hidden="true"></span> <span>Add</span>
-          </button>
-        </td>
-      </tr>
-    );
+    if(this.state.showTruncatedList) {
+      items.push(
+        <tr key={-1}>
+          <td>
+            <button type="button" className="btn btn-sm btn-link" style={{marginLeft: '0px', padding: '0px'}} onClick={this.showFullList}>
+              <span>Show all {this.props.data.length} items </span>
+            </button>
+          </td>
+          <td></td>
+        </tr>
+      );
+    } else {
+      items.push(
+        <tr key={-1}>
+          <td>
+            {/* <div className="form-group has-feedback"> */}
+            <div className={inputClassName}>
+              <input
+                type="text"
+                name="addItemInput"
+                className="form-control input-sm"
+                onChange={this.onChangeAddItem}
+                ref={(addItemInput) => this.addItemInput = addItemInput} />
+            </div>
+          </td>
+          <td style={{ textAlign: 'right'}}>
+            <button type="button" className='btn btn-xs btn-success' onClick={this.addItem} disabled={!this.state.inputValid || this.state.addingItem} style={{ minWidth: '90px' }}>
+              <span className='glyphicon glyphicon-plus' aria-hidden="true"></span> <span>Add</span>
+            </button>
+          </td>
+        </tr>
+      );
+    }
 
     return (
       <div style={{ marginTop: '40px', minHeight: '10px' }}>
