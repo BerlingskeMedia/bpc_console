@@ -176,9 +176,11 @@ class User extends React.Component {
   constructor(props){
     super(props);
     this.getAddedByDetails = this.getAddedByDetails.bind(this);
+    this.showAddedByDetails = this.showAddedByDetails.bind(this);
     this.state = {
       foundUser: null,
-      addedByUser: null
+      addedByUser: null,
+      showAddedByDetails: false
     };
   }
 
@@ -196,28 +198,26 @@ class User extends React.Component {
   }
 
 
+  showAddedByDetails() {
+    this.getAddedByDetails()
+    .then(() => this.setState({ showAddedByDetails: true }))
+  }
+
+
   getAddedByDetails() {
     if(this.props.user.addedBy && this.props.user.addedBy.user) {
-      Bpc.request(`/users/${ encodeURIComponent(this.props.user.addedBy.user) }`)
+      return Bpc.request(`/users/${ encodeURIComponent(this.props.user.addedBy.user) }`)
       .then(addedByUser => this.setState({ addedByUser }));
+    } else {
+      return Promise.resolve();
     }
   }
 
 
-  componentDidUpdate(prevProps) {
-    const fieldIsHereNow = this.props.user.addedBy && this.props.user.addedBy.user;
-    const fieldWasHereBefore = prevProps.user.addedBy && prevProps.user.addedBy.user;
-
-    if(fieldIsHereNow !== undefined && fieldWasHereBefore !== undefined && fieldIsHereNow !== fieldWasHereBefore) {
-      this.getAddedByDetails();
-    }
-  }
-  
-  
   componentDidMount() {
     this.getUserDetails(this.props.user.uid);
-    this.getAddedByDetails();    
   }
+
 
   render() {
 
@@ -228,13 +228,25 @@ class User extends React.Component {
       item = <Link to={`/users?search=${ foundUser.id }`}>{ foundUser.email }</Link>
     }
 
+    let addedByDetails = '';
+    if(this.state.addedByUser) {
+      addedByDetails = this.state.addedByUser.email;
+    } else if(this.props.user.addedBy) {
+      addedByDetails = this.props.user.addedBy.user || this.props.user.addedBy.system;
+    } 
+
     return (
       <tr key={this.props.user.uid}>
         <td>
           <div style={{ marginTop: '3px', marginBottom: '3px' }}>
             { item }
-            <div><em><small>Added: {this.props.user.addedAt || ''}</small></em></div>
-            <div><em><small>Added by: {(this.state.addedByUser ? this.state.addedByUser.email : null ) || (this.props.user.addedBy ? this.props.user.addedBy.user : '')}</small></em></div>
+            { this.state.showAddedByDetails
+              ? <div>
+                  <div><em><small>Added: {this.props.user.addedAt || ''}</small></em></div>
+                  <div><em><small>Added by: { addedByDetails }</small></em></div>
+                </div>
+              : <button type="button" className="btn btn-sm btn-link" style={{marginLeft: '10px', padding: '0px'}} onClick={this.showAddedByDetails}>Details</button>
+            }
           </div>
         </td>
         <td style={{ textAlign: 'right'}}>
