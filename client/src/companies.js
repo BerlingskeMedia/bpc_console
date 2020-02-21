@@ -108,14 +108,47 @@ class CompanySearch extends React.Component {
   }
 
   componentDidMount() {
-    const searchText = getUrlParameter("search");
-    console.log('searchText')
-    console.log(searchText)
-    // title=DJ&emailmask=dako
-    // if(searchText.length > 0) {
-    //   this.searchBox.value = decodeURIComponent(searchText);
-    //   this.searchUser();
-    // }
+    const searchParams = getUrlParameter("search");
+    if(searchParams.length > 0) {
+
+      // Turning http://console.local:8086/companies?search=title%3Dberlingske%26uid%3De26a4c20f02b48baa1f1eb36fd7378c1
+      // Into {title: "berlingske", uid: "e26a4c20f02b48baa1f1eb36fd7378c1"}
+      const preloadedSearhParams = decodeURIComponent(searchParams).split('&').reduce((acc,cur) => {
+        const temp = cur.split('=');
+        if(temp.length !== 2) {
+          return;
+        }
+        acc[temp[0]] = temp[1];
+        return acc;
+      }, {});
+
+
+      if(Object.keys(preloadedSearhParams).length > 0) {
+        if(preloadedSearhParams.title) {
+          this.titleSearchBox.value = preloadedSearhParams.title;
+        }
+        if(preloadedSearhParams.ariaAccountNo) {
+          this.ariaAccountNoBox.value = preloadedSearhParams.ariaAccountNo;
+        }
+        if(preloadedSearhParams.uid) {
+          this.userSearchBox.value = preloadedSearhParams.uid;
+          this.searchUser();
+        } else if(preloadedSearhParams.emailmask) {
+          this.userSearchBox.value = preloadedSearhParams.emailmask;
+        }        
+        if(preloadedSearhParams.ipFilter) {
+          this.ipFilterSearchBox.value = preloadedSearhParams.ipFilter;
+        }
+        if(preloadedSearhParams.titleDomain) {
+          this.titleDomainSelect.value = preloadedSearhParams.titleDomain;
+        }
+        if(preloadedSearhParams.accessFeature) {
+          this.accessFeatureSelect.value = preloadedSearhParams.accessFeature;
+        }
+
+        this.searchOnTextChange();
+      }
+    }
   }
 
 
@@ -131,13 +164,14 @@ class CompanySearch extends React.Component {
       const search = encodeURIComponent(searchText);
       const query = `?provider=gigya&email=${ search }&id=${ search }`;
 
-      Bpc.request(`/users${ query }`)
+      return Bpc.request(`/users${ query }`)
       .then(users => {
         const foundUser = users.length === 1 ? users[0] : null;
         this.setState({ foundUser, userSearchBoxHasInput: true }, this.search);
       });      
     } else {
       this.setState({ foundUser: null, userSearchBoxHasInput: false }, this.search);
+      return Promise.resolve();
     }
   }
 
@@ -183,7 +217,9 @@ class CompanySearch extends React.Component {
       searchParams.push(`titleDomain=${ encodeURIComponent(this.titleDomainSelect.value) }`)
     }
 
+
     if(searchParams.length === 0) {
+      window.history.pushState({ search: "" }, "search", `/companies`);
       this.props.clearSearchResults();
       return;
     }
