@@ -56,7 +56,7 @@ module.exports = class extends React.Component {
 
 
   componentDidMount() {
-    if(this.props.data.length > 5) {
+    if(this.props.data && this.props.data.length > 5) {
       this.setState({ showTruncatedList: true });
     }
   }
