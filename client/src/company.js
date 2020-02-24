@@ -12,6 +12,7 @@ module.exports = class extends React.Component {
     super(props);
     this.getCompany = this.getCompany.bind(this);
     this.saveCompany = this.saveCompany.bind(this);
+    this.showCompanyDetails = this.showCompanyDetails.bind(this);
     this.showHideCompanyDetails = this.showHideCompanyDetails.bind(this);
     this.addCompanyNote = this.addCompanyNote.bind(this);
     this.saveCompanyNote = this.saveCompanyNote.bind(this);
@@ -109,16 +110,28 @@ module.exports = class extends React.Component {
   }
 
 
-  showHideCompanyDetails() {
-    if(this.state.showDetails) {
-      this.setState({ showDetails: false });
-    } else {
-      this.setState({ showLoader: true });
+  showCompanyDetails() {
+    this.setState({ showLoader: true }, () => {
       this.getCompany()
       .then(() => this.setState({
         showDetails: true,
         showLoader: false
       }));
+    });
+  }
+
+  showHideCompanyDetails() {
+    if(this.state.showDetails) {
+      this.setState({ showDetails: false });
+    } else {
+      this.showCompanyDetails();
+    }
+  }
+
+
+  componentDidMount() {
+    if(this.props.autoLoadDetails) {
+      this.showCompanyDetails();
     }
   }
   

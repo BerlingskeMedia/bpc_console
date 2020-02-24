@@ -58,12 +58,16 @@ module.exports = class extends React.Component {
 
 
   render() {
+
+    const isTheOnlyCompanyFound = this.state.companyCount === 1;
+
     const companies = this.state.companies.map(company => {
 
       return <Company
               key={company._id}
               company={company}
-              accessrules={this.state.accessrules} />
+              accessrules={this.state.accessrules}
+              autoLoadDetails={isTheOnlyCompanyFound} />
     });
 
     if(!this.state.authorized) {
