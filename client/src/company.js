@@ -438,7 +438,7 @@ class AccessRules extends React.Component {
 
 
       return (
-        <tr key={accessRule.accessFeature + accessRule.titleDomain }>
+        <tr key={accessRule.accessFeature + accessRule.titleDomain + Math.random() }>
           <td>{accessRule.accessFeature}</td>
           <td>{accessRule.titleDomain}</td>
           <td>{ accessRoles }</td>
