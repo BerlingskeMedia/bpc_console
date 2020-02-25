@@ -49,6 +49,14 @@ module.exports = class extends React.Component {
   componentDidMount() {
     return Bpp.authorize()
     .then(() => this.setState({ authorized: true }))
+    .then(() => {
+      const preloaded_id = getUrlParameter("id");
+      if(preloaded_id) {
+        return this.getCompanies(`id=${ preloaded_id }`);
+      } else {
+        return Promise.resolve();
+      }
+    })
     .then(() => Bpp.request(`/api/accessrules`))
     .then(accessrules => this.setState({ accessrules }))
     .catch(err => {
