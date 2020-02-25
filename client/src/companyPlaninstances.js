@@ -118,7 +118,6 @@ class Planinstance extends React.Component {
 
   
   removeUser(user) {
-    console.log('DSFSD')
     return this.updateUser({ remove: { uid: user.uid } });
   }
 
