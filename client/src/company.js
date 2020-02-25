@@ -316,12 +316,14 @@ class CompanyCreatedDetails extends React.Component {
 
       ths = [
         <th key="1">Created</th>,
-        <th key="2">Created by</th>
+        <th key="2">Created by</th>,
+        <th key="3">ID</th>
       ];
 
       tds = [
         <td key="1">{this.props.company.createdAt || ''}</td>,
-        <td key="2">{(this.state.createdByUser ? this.state.createdByUser.email : null ) || (company.createdBy ? company.createdBy.user : '')}</td>
+        <td key="2">{(this.state.createdByUser ? this.state.createdByUser.email : null ) || (company.createdBy ? company.createdBy.user : '')}</td>,
+        <td key="3">{this.props.company._id || ''}</td>
       ];
 
     } else {
