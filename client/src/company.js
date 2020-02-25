@@ -365,48 +365,56 @@ class CompanyNote extends React.Component {
   constructor(props){
     super(props);
     this.handleChange = this.handleChange.bind(this);
+    this.onBlur = this.onBlur.bind(this);
     this.saveNote = this.saveNote.bind(this);
     this.state = {
-      saveButtonDisabled: false
+      saveInProgress: false
     };
   }
+
 
   handleChange(e) {
     const note = e.target.value;
     this.props.addCompanyNote(note);
   }
 
+
+  onBlur(e) {
+    this.saveNote();
+  }
+
+
   saveNote() {
-    this.setState({ saveButtonDisabled: true }, () => {
+    this.setState({ saveInProgress: true }, () => {
       this.props.saveNote()
       .then(() => {
-        this.setState({ saveButtonDisabled: false });
+        this.setState({ saveInProgress: false });
       });
     })
   }
 
+
   render() {
-
-    const saveButtonDisabled = this.state.saveButtonDisabled;
-
     return (
       <div className="row" style={{ marginTop: '40px', minHeight: '10px' }}>
         <div className="col-xs-2" style={{ textAlign: 'right' }}>
           <strong>Note</strong>
           <div><em><small></small></em></div>
         </div>
-        <div className="col-xs-9">
+        <div className="col-xs-10">
           <textarea
             className="form-control"
             defaultValue={this.props.note}
-            rows="2"
-            onChange={this.handleChange}></textarea>
+            rows="4"
+            disabled={this.state.saveInProgress}
+            onChange={this.handleChange}
+            onBlur={this.onBlur}></textarea>
         </div>
-        <div className="col-xs-1" style={{ textAlign: 'right' }}>
-          <button type="button" className="btn btn-sm btn-warning" onClick={this.saveNote} disabled={saveButtonDisabled}>
+        {/* <div className="col-xs-1" style={{ textAlign: 'right' }}>
+          <button type="button" className="btn btn-sm btn-warning" onClick={this.saveNote} disabled={this.state.saveInProgress}>
             <span className="glyphicon glyphicon-save" aria-hidden="true"></span> <span>Save</span>
           </button>
-        </div>
+        </div> */}
       </div>
     );
   }
