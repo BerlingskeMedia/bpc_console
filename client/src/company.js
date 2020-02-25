@@ -90,7 +90,10 @@ module.exports = class extends React.Component {
   getCompany() {
     const id = this.props.company._id;
     return Bpp.request(`/api/companies/${ id }`)
-    .then(company => this.setState({ company }));
+    .then(company => {
+      this.setState({ company })
+      return Promise.resolve(company);
+    });
   }
 
 
@@ -214,12 +217,12 @@ module.exports = class extends React.Component {
               <Users
                 users={this.state.company.users}
                 label="Users"
-                note="Users that receive access according to Access rules."
+                note="Users that receive access according to all the access rules above."
                 removeUser={this.removeUser}
                 addUser={this.addUser} />
 
               <Planinstances
-                planinstances={company.planinstances}
+                ariaAccountNo={company.ariaAccountNo}
                 accessrules={this.props.accessrules} />
 
             </div>  

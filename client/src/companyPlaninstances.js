@@ -1,24 +1,33 @@
 const React = require('react');
+const Link = require('react-router-dom').Link;
 const Bpp = require('./components/bpp');
-const Users = require('./companyUsers');
-const ArrayItems = require('./components/arrayItems');
+const Bpc = require('./components/bpc');
 
 
 module.exports = class extends React.Component {
   constructor(props){
     super(props);
+    this.state = {
+      planinstances: []
+    }
   }
 
-  render() {
-    if(!this.props.planinstances || !(this.props.planinstances instanceof Array)) {
-      return null;
-    }
 
-    const planinstances = this.props.planinstances.map(planinstance => {
+  componentDidMount() {
+    if(this.props.ariaAccountNo) {
+      Bpp.request(`/api/planinstances?ariaAccountNo=${ this.props.ariaAccountNo }`)
+      .then(planinstances => this.setState({ planinstances }));
+    }
+  }
+
+
+  render() {
+
+    const planinstances = this.state.planinstances.map(planinstance => {
       return (
         <Planinstance
           key={planinstance._id}
-          planinstance={planinstance} />
+          id={planinstance._id} />
       );
     });
 
@@ -29,7 +38,20 @@ module.exports = class extends React.Component {
           <div><em><small></small></em></div>
         </div>
         <div className="col-xs-10">
-          { planinstances }
+          <table className="table table-striped">
+            <thead>
+              <tr>
+                <th>Subscription No</th>
+                <th>Plan name</th>
+                <th>Note</th>
+                <th>Units</th>
+                <th>Users</th>
+              </tr>
+            </thead>
+            <tbody>
+              { planinstances }
+            </tbody>
+          </table>
         </div>
       </div>
     );
@@ -42,53 +64,15 @@ class Planinstance extends React.Component {
     super(props);
     this.savePlaninstance = this.savePlaninstance.bind(this);
     this.updatePlaninstanceState = this.updatePlaninstanceState.bind(this);
-    this.addUser = this.addUser.bind(this);
     this.validateEmailmask = this.validateEmailmask.bind(this);
     this.addEmailmask = this.addEmailmask.bind(this);
     this.removeEmailmask = this.removeEmailmask.bind(this);
+    this.addUser = this.addUser.bind(this);
+    this.removeUser = this.removeUser.bind(this);
+    this.updateUser = this.updateUser.bind(this);
     this.state = {
-      planinstance: null,
-      usersToAdd: [],
-      usersToRemove: [],
-      hasAnyChanges: false
+      planinstance: null
     };
-  }
-
-
-  addUser(foundUser) {
-    const planinstance = this.props.planinstance;
-
-    newCompany.users = newCompany.users || [];
-    // const existingUsersIndex = newCompany.users.indexOf(foundUser.id);
-    const existingUsersIndex = newCompany.users.findIndex((u) => u.uid === foundUser.id);
-    if(existingUsersIndex === -1) {
-      
-      // For the visual 
-      newCompany.users.push({
-        uid: foundUser.id
-      });
-
-      this.setState({
-        company: newCompany,
-        hasAnyChanges: true
-      });
-
-
-      // If the user was removed but not saved
-      // const removedUsersIndex = this.state.usersToRemove.indexOf(foundUser.id);
-      const removedUsersIndex = this.state.usersToRemove.findIndex((u) => u.uid === foundUser.id);
-      if(removedUsersIndex > -1) {
-        this.setState((prevState) => {
-          usersToRemove: prevState.usersToRemove.splice(removedUsersIndex, 1)
-        });
-      } else {
-        this.setState((prevState) => {
-          usersToAdd: prevState.usersToAdd.push({ uid: foundUser.id })
-        });
-      }
-    }
-
-    return Promise.resolve();
   }
 
 
@@ -123,143 +107,295 @@ class Planinstance extends React.Component {
 
   updatePlaninstanceState(planinstance) {
     return new Promise((resolve) => {
-      return this.setState({
-        planinstance,
-        hasAnyChanges: true
-      }, resolve);
+      return this.setState({ planinstance }, resolve);
     });
   }
 
+
+  addUser(foundUser) {
+    return this.updateUser({ add: { uid: foundUser.id } });
+  }
+
   
-  savePlaninstance() {
-    const id = this.props.planinstance._id;
+  removeUser(user) {
+    console.log('DSFSD')
+    return this.updateUser({ remove: { uid: user.uid } });
+  }
 
-    const updateCompanyUsers = (payload) => {
-      return Bpp.request(`/api/planinstance/${ id }/users`, {
-        method: 'POST',
-        body: JSON.stringify(payload)
-      });
-    };
 
-    const usersToAddPayloads = this.state.usersToAdd.map((user) => { return { add: user }});
-    const usersToAddRequests = usersToAddPayloads.map((payload) => updateCompanyUsers(payload));
-    
-    const usersToRemovePayloads = this.state.usersToRemove.map((user) => { return { remove: user }});
-    const usersToRemoveRequests = usersToRemovePayloads.map((payload) => updateCompanyUsers(payload));
-
-    this.setState({ confirmSave: false });
-    clearTimeout(this.state.confirmTimeout);
-
-    Promise.all(usersToAddRequests.concat(usersToRemoveRequests))
-    .then(() => {
-      return Bpp.request(`/api/planinstance/${ id }`, {
-        method: 'PUT',
-        body: JSON.stringify(this.state.company)
-      })
+  updateUser(payload) {
+    const id = this.props.id;
+    return Bpp.request(`/api/planinstances/${ id }/users`, {
+      method: 'POST',
+      body: JSON.stringify(payload)
     })
-    .then((response) => this.setState({
-      company: response,
-      usersToAdd: [],
-      usersToRemove: [],
-      hasAnyChanges: false
-    }))
-    .then(() => {
-      this.setState({ showSaveSuccesful: true}, () => {
-        setTimeout(function() {
-          this.setState({ showSaveSuccesful: false });
-        }.bind(this), 2000);
-      });
+    .then((planinstance) => this.setState({ planinstance }));
+  }
+
+
+  savePlaninstance(planinstance) {
+    const id = this.props.id;
+    return Bpp.request(`/api/planinstances/${ id }`, {
+      method: 'PUT',
+      body: JSON.stringify(planinstance)
     })
     .catch((err) => {
       alert('Error when saving!');
-      this.getCompany();
     });
+  }
+  
+
+  componentDidMount() {
+    if(this.props.id) {
+      Bpp.request(`/api/planinstances/${ this.props.id }`)
+      .then(planinstance => this.setState({ planinstance }));
+    }
   }
 
 
   render() {
 
-    const planinstance = this.props.planinstance;
+    if(!this.state.planinstance) {
+      return null;
+    }
 
-    const _services = planinstance.services || [];
-    const services = _services.map(service => {
-
-      // const access = this.props.accessrules.find((accessrule) => {
-      //   return accessrule.accessFeature === service.accessFeature && accessrule.titleDomain === service.titleDomain
-      // });
-
-      // const accessRoles = Object.keys(access.access).map((k, index) => {
-      //   return (<div key={index}>
-      //     <span>- {k}:</span> <span>{access.access[k].join(', ')}</span>
-      //   </div>);
-      // });
-
-      // return (
-      //   <div className="row" key={service.serviceNo} style={{ padding: '4px' }}>
-      //     <div className="col-xs-11 col-xs-offset-1">
-      //       <div>Access Feature: {service.accessFeature}</div>
-      //       <div>Service Desc: {service.serviceDesc}</div>
-      //       <div>Service ID: {service.serviceId}</div>
-      //       <div>Service No: {service.serviceNo}</div>
-      //     </div>
-      //   </div>
-      // )
-
-      return service.accessFeature
-    }).join(', ');
+    const planinstance = this.state.planinstance;
 
     return (
-      <div className="row" key={planinstance.instanceNo}>
-        <div className="col-xs-8">
-          <div className="panel panel-default">
-            <div className="panel-body">
-              <div>
-                <div><small><em>Plan instance ID</em></small></div>
-                {planinstance.instanceId}
-              </div>
-              <div>
-                <div><small><em>Plan name</em></small></div>
-                {planinstance.planName}
-              </div>
-              <div>
-                <div><small><em>Plan ID</em></small></div>
-                {planinstance.planId}
-              </div>
-              <div>
-                <div><small><em>Units</em></small></div>
-                {planinstance.units}
-              </div>
-              <div>
-                <div><small><em>Title Domain</em></small></div>
-                {planinstance.titleDomain}
-              </div>
-              <div>
-                <div><small><em>Services</em></small></div>
-                {services}
-              </div>
-              <p></p>
-              <p>No email domain masks yet.</p>
-              <p>No users yet.</p>
+      <tr>
+        <td>{planinstance.instanceNo}</td>
+        <td>{planinstance.planName}</td>
+        <td><Note planinstance={planinstance} savePlaninstance={this.savePlaninstance} /></td>
+        <td>{planinstance.units}</td>
+        <td>
+          <PlaninstancesUsers removeUser={this.removeUser} users={planinstance.users} />
+          <AddPlaninstancesUser addUser={this.addUser} />
+        </td>
+      </tr>
+    );
+  }
+}
 
 
-              {/* <ArrayItems
-                data={this.props.planinstance.emailMasks}
-                label="Email masks"
-                note="Users with matching email will automatically be included under Users."
-                removeItem={this.removeEmailmask}
-                addItem={this.addEmailmask}
-                validateItem={this.validateEmailmask} />
+class Note extends React.Component {
+  constructor(props){
+    super(props);
+    this.handleChange = this.handleChange.bind(this);
+    this.onBlur = this.onBlur.bind(this);
+    this.saveNote = this.saveNote.bind(this);
+    this.state = {
+      note: '',
+      saveTimer: null,
+      saveInProgress: false
+    };
+  }
+  
+  handleChange(e) {
+    clearTimeout(this.state.saveTimer);
+    const note = e.target.value;
+    this.setState({ note });
+    this.setState({saveTimer: setTimeout(this.saveNote, 2500)});
+  }
 
-              <Users
-                users={this.props.planinstance.users}
-                label="Users"
-                note="Users that receive access according to Access rules."
-                removeUser={this.removeUser}
-                addUser={this.addUser}
-                apiRoute="planinstances" /> */}
-            </div>
+  onBlur(e) {
+    clearTimeout(this.state.saveTimer);
+    this.saveNote();
+  }
+  
+  saveNote() {
+    if(this.state.saveInProgress){
+      return false;
+    }
+
+    const planinstance = this.props.planinstance;
+    planinstance.note = this.state.note;
+    this.setState({ saveInProgress: true }, () => {
+      this.props.savePlaninstance(planinstance)
+      .finally(() => {
+        this.setState({ saveInProgress: false })
+      })
+    });
+  }
+
+  render() {
+
+    const planinstance = this.props.planinstance;
+
+    return (
+      <textarea
+        className="form-control"
+        defaultValue={planinstance.note}
+        rows="4"
+        disabled={this.state.saveInProgress}
+        onChange={this.handleChange}
+        onBlur={this.onBlur}></textarea>
+    );
+  }
+}
+
+
+class PlaninstancesUsers extends React.Component {
+  constructor(props){
+    super(props);
+  }
+
+
+  render() {
+    if(!this.props.users || !this.props.users instanceof Array) {
+      return null;
+    }
+
+    const _users = this.props.users || [];
+    const users = _users.map((user) => {
+      return <PlaninstancesUser key={user.uid} user={user} removeUser={this.props.removeUser.bind(this, user)} />;
+    });
+    return (
+      <table className="table table-striped">
+        <tbody>
+          {users}
+        </tbody>
+      </table>
+    );
+  }
+}
+
+
+class PlaninstancesUser extends React.Component {
+  constructor(props){
+    super(props);
+    this.getUserDetails = this.getUserDetails.bind(this);
+    this.state = {
+      foundUser: null
+    };
+  }
+
+
+  getUserDetails() {
+    const user = this.props.user;
+    if(user && user.uid) {
+      const query = `?provider=gigya&id=${ encodeURIComponent(user.uid) }`;
+    
+      return Bpc.request(`/users${ query }`)
+      .then(users => {
+        const foundUser = users.length === 1 ? users[0] : null;
+        this.setState({ foundUser,});
+      });
+    }
+  }
+
+
+  componentDidMount() {
+    this.getUserDetails();
+  }
+
+
+  render() {
+    const user = this.state.foundUser || this.props.user;
+
+    return (
+      <tr>
+        <td>
+          <Link to={`/users?search=${ user.id || user.uid }`}>{user.email || user.id || user.uid}</Link>
+        </td>
+        <td>
+          <div style={{textAlign: 'right'}}>
+            <button type="button" className='btn btn-xs btn-danger' onClick={this.props.removeUser} style={{ minWidth: '30px' }}>
+              <span className='glyphicon glyphicon-trash' aria-hidden="true"></span> <span>Remove</span>
+            </button>
           </div>
-        </div>
+        </td>
+      </tr>
+    );
+  }
+}
+
+
+class AddPlaninstancesUser extends React.Component {
+  constructor(props){
+    super(props);
+    this.searchUser = this.searchUser.bind(this);
+    this.onChangeAddUser = this.onChangeAddUser.bind(this);
+    this.addUser = this.addUser.bind(this);
+    this.state = {
+      searchUserTimer: null,
+      userSearchCompleted: false,
+      foundUser: null
+    };
+  }
+
+
+  searchUser() {
+    const input = this.addUserInput.value;
+    if(input.length > 0) {
+      const encoded_input = encodeURIComponent(input);
+      const query = `?provider=gigya&email=${ encoded_input }&id=${ encoded_input }`;
+
+      return Bpc.request(`/users${ query }`)
+      .then(users => {
+        const foundUser = users.length === 1 ? users[0] : null;
+        this.setState({ foundUser, userSearchCompleted: true });
+      });
+    }
+  }
+
+
+  onChangeAddUser() {
+    this.setState({ foundUser: null, userSearchCompleted: false });
+    clearTimeout(this.state.searchUserTimer);
+    this.setState({searchUserTimer: setTimeout(this.searchUser, 1000)});
+  }
+
+  
+  addUser() {
+    const foundUser = this.state.foundUser;
+    if(foundUser) {
+      this.setState({ addingUser: true }, () => {
+        this.props.addUser(foundUser);
+          this.addUserInput.value = '';
+          this.setState({
+            addingUser: false,
+            userSearchCompleted: false,
+            foundUser: null
+          });
+      });
+    }
+  }
+
+
+  componentDidMount() {
+  }
+
+
+  render() {
+
+    let userSearchFeedback = null;
+    let userSearchBoxClass = 'form-group has-feedback';
+    if(this.state.userSearchCompleted) {
+      if (this.state.foundUser) {
+        userSearchFeedback = <span className="glyphicon glyphicon-ok form-control-feedback" aria-hidden="true"></span>;
+        userSearchBoxClass += ' has-success'
+      } else {
+        userSearchFeedback = <span className="glyphicon glyphicon-warning-sign form-control-feedback" aria-hidden="true"></span>;
+        userSearchBoxClass += ' has-error'
+      }
+    }
+
+    const addButtonDisabled = !this.state.userSearchCompleted || this.state.addingUser || !this.state.foundUser;
+
+    return (
+      <div className={ userSearchBoxClass } style={{marginTop: '5px'}}>
+        <input
+          type="text"
+          name="addUserInput"
+          className="form-control input-sm"
+          onChange={this.onChangeAddUser}
+          ref={(addUserInput) => this.addUserInput = addUserInput} />
+          { userSearchFeedback }
+          <div style={{ textAlign: 'right', marginTop: '3px' }}>
+            <button type="button" className='btn btn-xs btn-success' onClick={this.addUser} disabled={addButtonDisabled} style={{ minWidth: '90px' }}>
+              <span className='glyphicon glyphicon-plus' aria-hidden="true"></span> <span>Add</span>
+            </button>
+          </div>
       </div>
     );
   }
