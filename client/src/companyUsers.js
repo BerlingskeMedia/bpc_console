@@ -43,8 +43,6 @@ module.exports = class extends React.Component {
     if(value.length > 0) {
 
       const inputCreateUserValid = this.validateEmail(value);
-      console.log('inputCreateUserValid')
-      console.log(inputCreateUserValid)
 
       // Setting the inputAddUserValid flag now, because there is one second delay
       //  before se start searching for users in BPC
@@ -192,8 +190,9 @@ class User extends React.Component {
 
 
   getUserDetails() {
-    this.props.searchUser(this.props.user.uid)
-    .then((foundUser) => {
+    return Bpc.request(`/users?provider=gigya&id=${ encodeURIComponent(this.props.user.uid) }`)
+    .then((users) => {
+      const foundUser = users.length === 1 ? users[0] : null;
       if(foundUser) {
         this.setState({ foundUser });
       } else {
