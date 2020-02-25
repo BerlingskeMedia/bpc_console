@@ -203,8 +203,6 @@ module.exports = class extends React.Component {
               <AccessRules
                 data={this.state.company.accessRules}
                 accessrules={this.props.accessrules} />
-
-              {/* <AddAccessRules accessrules={this.props.accessrules} addAccessRule={this.addAccessRule} /> */}
               
               <ArrayItems
                 data={this.state.company.ipFilter}
@@ -242,30 +240,18 @@ class CompanyOverview extends React.Component {
 
   render() {
 
+    if(!this.props.company) {
+      return null;
+    }
+
+    const ipFilter = this.props.company.ipFilter || [];
+    const ipFilterCount = this.props.company.ipFilterCount || ipFilter.length;
+
+    const users = this.props.company.users || [];
+    const userCount = this.props.company.userCount || users.length;
+    
     const planinstances = this.props.company.planinstances || [];
-    // const planinstancesOverview = planinstances.map((planinstance, index) => {
-
-    //   const userCount = planinstance.users instanceof Array ? planinstance.users : 0;
-    //   const units = planinstance.units || NaN;
-
-    //   let userCountbackgroundColor = 'inherit';
-
-    //   if(isNaN(units)) {
-    //     // Nothing
-    //   } else if(userCount > units) {
-    //     userCountbackgroundColor = 'inhcrimsonerit';
-    //   } else if(userCount === units) {
-    //     userCountbackgroundColor = 'coral';
-    //   }
-
-    //   return(
-    //     <div key={planinstance._id} style={{ backgroundColor: userCountbackgroundColor }}>
-    //       <em><small>{planinstance.planName}</small></em>
-    //       <span> </span>
-    //       <em><small>(Users: {userCount}/{units})</small></em>
-    //     </div>
-    //   );
-    // });
+    const planinstanceCount = this.props.company.planinstanceCount || planinstances.length;
 
     return (
       <div>
@@ -273,13 +259,13 @@ class CompanyOverview extends React.Component {
           <em><small>Note: {this.props.company.note || ''}</small></em>
         </div>
         <div style={{ paddingLeft: '4px' }}>
-          <em><small>IP count: {this.props.company.ipFilterCount || '-'}</small></em>
+          <em><small>IP count: {ipFilterCount}</small></em>
         </div>
         <div style={{ paddingLeft: '4px' }}>
-          <em><small>User count: {this.props.company.userCount || '-'}</small></em>
+          <em><small>User count: {userCount}</small></em>
         </div>
         <div style={{ paddingLeft: '4px' }}>
-          <em><small>Plan instances: {planinstances.length}</small></em>
+          <em><small>Plan instances: {planinstanceCount}</small></em>
         </div>
       </div>
     );
