@@ -23,6 +23,10 @@ module.exports = class extends React.Component {
 
   render() {
 
+    if(this.state.planinstances.length === 0) {
+      return null;
+    }
+
     const planinstances = this.state.planinstances.map(planinstance => {
       return (
         <Planinstance
