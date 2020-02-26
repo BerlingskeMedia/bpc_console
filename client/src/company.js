@@ -46,7 +46,7 @@ module.exports = class extends React.Component {
 
   
   removeUser(user) {
-    return this.updateUser({ remove: { uid: user.uid } });
+    return this.updateUser({ remove: { uid: user.uid || user.id } });
   }
 
 
