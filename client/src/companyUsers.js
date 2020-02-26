@@ -144,7 +144,7 @@ module.exports = class extends React.Component {
     }
 
     const originalUserCount = users.length;
-    const maxUsersToShow = 100;
+    const maxUsersToShow = 500;
     const showTruncatedUserList = originalUserCount > maxUsersToShow;
 
     // Using "slice" to get a copy so the original array is not changed, as it will cause issues when re-rendering.
