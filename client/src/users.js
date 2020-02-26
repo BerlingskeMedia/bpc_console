@@ -335,10 +335,6 @@ class UserDetails extends React.Component {
       );
     }
 
-    const hasKuUid = user.dataScopes && user.dataScopes.profile && user.dataScopes.profile.kundeunivers_uid;
-    const showLinkToKu = hasKuUid && window.location.hostname === 'console.berlingskemedia.net';
-    const linkToKu = showLinkToKu ? <a href={`https://admin.kundeunivers.dk/user/${ user.dataScopes.profile.kundeunivers_uid }`} target="_blank">Link to KU Admin</a> : null;
-
     const styleProviderColor = 
       user.provider === 'gigya' ? "#ff0000" : // Red
       user.provider === 'google' ? "#0000ff" : // Blue
