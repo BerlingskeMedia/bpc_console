@@ -31,7 +31,8 @@ module.exports = class extends React.Component {
       return (
         <Planinstance
           key={planinstance._id}
-          id={planinstance._id} />
+          id={planinstance._id} 
+          accessrules={this.props.accessrules}/>
       );
     });
 
@@ -164,10 +165,37 @@ class Planinstance extends React.Component {
 
     const planinstance = this.state.planinstance;
 
+    let alerts = [];
+
+    if(!planinstance.titleDomain) {
+      alerts.push(<span key={-1} className='glyphicon glyphicon-warning-sign' title="Missing titleDomain" aria-hidden="true"></span>);
+    }
+    
+    if(!planinstance.services instanceof Array) {
+      alerts.push(<span key={-1} className='glyphicon glyphicon-warning-sign' title="No services" aria-hidden="true"></span>);
+    }
+
+    const accessRules = this.props.accessrules || [];
+    if(planinstance.services instanceof Array) {
+      const everyServiceIsInvalid = planinstance.services.every((service) => {
+        // Not a valid service
+        const isAValidService = accessRules.some(accessRule => accessRule.titleDomain === planinstance.titleDomain && accessRule.accessFeature === service.accessFeature)
+        return !isAValidService;
+      });
+
+      if(everyServiceIsInvalid) {
+        alerts.push(<span key={-1} className='glyphicon glyphicon-warning-sign' title="No valid services" aria-hidden="true"></span>);
+      }
+    }
+
+
     return (
       <tr>
         <td>{planinstance.instanceNo}</td>
-        <td>{planinstance.planName}</td>
+        <td>
+          <div>{planinstance.planName}</div>
+          <div>{ alerts }</div>
+        </td>
         <td><Note planinstance={planinstance} savePlaninstance={this.savePlaninstance} /></td>
         <td>{planinstance.units}</td>
         <td>
