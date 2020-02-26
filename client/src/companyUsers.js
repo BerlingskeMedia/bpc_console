@@ -10,11 +10,14 @@ module.exports = class extends React.Component {
     this.createUser = this.createUser.bind(this);
     this.searchUser = this.searchUser.bind(this);
     this.addUser = this.addUser.bind(this);
+    this.removeUser = this.removeUser.bind(this);
+    this.addRemoveUser = this.addRemoveUser.bind(this);
     this.onChangeAddUser = this.onChangeAddUser.bind(this);
     this.state = {
       hasInput: false,
       inputAddUserValid: false,
       inputCreateUserValid: false,
+      creatingUser: false,
       searchUserInProgress: false,
       searchUserTimer: null,
       foundUser: null
@@ -39,7 +42,7 @@ module.exports = class extends React.Component {
 
 
   onChangeAddUser() {
-    const value = this.addUserInput.value;
+    const value = this.findUserInput.value;
     if(value.length > 0) {
 
       const inputCreateUserValid = this.validateEmail(value);
@@ -57,7 +60,7 @@ module.exports = class extends React.Component {
 
       });
     } else {
-      this.setState({ hasInput: false, inputAddUserValid: false });
+      this.setState({ hasInput: false, inputAddUserValid: false, inputCreateUserValid: false });
     }
   }
 
@@ -69,7 +72,7 @@ module.exports = class extends React.Component {
 
 
   createUser() {
-    const value = this.addUserInput.value;
+    const value = this.findUserInput.value;
 
     if(!this.validateEmail(value)) {
       return Promise.reject();
@@ -100,16 +103,30 @@ module.exports = class extends React.Component {
 
 
   addUser() {
+    return this.addRemoveUser(this.props.addUser);
+  }
+
+
+  removeUser() {
+    return this.addRemoveUser(this.props.removeUser);
+  }
+
+
+  addRemoveUser(addRemoveFunc) {
     const foundUser = this.state.foundUser;
     if(foundUser) {
       this.setState({ addingUser: true }, () => {
-        this.props.addUser(foundUser);
-          this.addUserInput.value = '';
+        addRemoveFunc(foundUser)
+        .then(() => {
+          this.findUserInput.value = '';
           this.setState({
             addingUser: false,
             inputAddUserValid: false, // Setting inputAddUserValid to false to disable the button
-            hasInput: false
+            inputCreateUserValid: false,
+            hasInput: false,
+            foundUser: null
           });
+        });
       });
     }
   }
@@ -118,9 +135,35 @@ module.exports = class extends React.Component {
   render() {
 
     // In case of undefined
-    const users = this.props.users || [];
+    let users = this.props.users || [];
 
+    let foundUserIsAlreadyAdded = false;
+    if(this.state.foundUser && users.length > 0) {
+      // const foundUserIsAlreadyAdded = users.find((user) => user.uid === this.state.foundUser.id);
+      foundUserIsAlreadyAdded = users.some((user) => user.uid === this.state.foundUser.id);
+    }
+
+    const originalUserCount = users.length;
+    const maxUsersToShow = 100;
+    const showTruncatedUserList = originalUserCount > maxUsersToShow;
+
+    // Using "slice" to get a copy so the original array is not changed, as it will cause issues when re-rendering.
+    users = showTruncatedUserList ? users.slice(0, maxUsersToShow) : users;
+
+    // Using the props.removeUser instead of this.removeUser, since this component does not need to clear the input field
     let items = users.map((user) => <User key={user.uid} user={user} removeUser={this.props.removeUser} searchUser={this.searchUser} />)
+
+    if(showTruncatedUserList) {
+      items.push(
+        <tr key={-20}>
+          <td>
+            <div>Showing {maxUsersToShow} out of {originalUserCount} users. <small>Use input below to find and remove a user.</small></div>
+            <div></div>
+            </td>
+          <td></td>
+        </tr>
+      );
+    }
 
     const inputClassName = this.state.hasInput && !this.state.inputAddUserValid ? 'form-group has-error' : 'form-group';
 
@@ -135,10 +178,10 @@ module.exports = class extends React.Component {
           <div className={inputClassName}>
             <input
               type="text"
-              name="addUserInput"
+              name="findUserInput"
               className="form-control input-sm"
               onChange={this.onChangeAddUser}
-              ref={(addUserInput) => this.addUserInput = addUserInput} />
+              ref={(findUserInput) => this.findUserInput = findUserInput} />
           </div>
         </td>
         <td style={{ textAlign: 'right'}}>
@@ -146,9 +189,14 @@ module.exports = class extends React.Component {
             <span className='glyphicon glyphicon-cloud-upload' aria-hidden="true"></span> <span>Create</span>
           </button>
           <span>&nbsp;</span>
-          <button type="button" className='btn btn-xs btn-success' onClick={this.addUser} disabled={addButtonDisabled} style={{ minWidth: '90px' }}>
-            <span className='glyphicon glyphicon-plus' aria-hidden="true"></span> <span>Add</span>
-          </button>
+          { foundUserIsAlreadyAdded
+            ? <button type="button" className='btn btn-xs btn-danger' onClick={this.removeUser.bind(this, this.state.foundUser)} style={{ minWidth: '90px' }}>
+                <span className='glyphicon glyphicon-trash' aria-hidden="true"></span> <span>Remove</span>
+              </button>
+            : <button type="button" className='btn btn-xs btn-success' onClick={this.addUser} disabled={addButtonDisabled} style={{ minWidth: '90px' }}>
+                <span className='glyphicon glyphicon-plus' aria-hidden="true"></span> <span>Add</span>
+              </button>
+          }
         </td>
       </tr>
     );
