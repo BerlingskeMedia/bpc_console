@@ -14,7 +14,8 @@ module.exports = class extends React.Component {
       customers: [],
       customer: null,
       accessrules: [],
-      authorized: false
+      authorized: false,
+      searchComplete: false
     };
 
     document.title = 'BPC - Customers';
@@ -25,7 +26,8 @@ module.exports = class extends React.Component {
     if(!query) {
       this.setState({
         customer: null,
-        customers: []
+        customers: [],
+        searchComplete: false
       });
       return Promise.resolve();
     }
@@ -37,7 +39,8 @@ module.exports = class extends React.Component {
       } else {
         this.setState({
           customer: null,
-          customers
+          customers,
+          searchComplete: true
         });
       }
     });
@@ -45,7 +48,7 @@ module.exports = class extends React.Component {
 
 
   clearSearchResults() {
-    return this.setState({ customer: null, customers: []});
+    return this.setState({ customer: null, customers: [], searchComplete: false });
   }
 
 
@@ -84,18 +87,22 @@ module.exports = class extends React.Component {
     }
 
     const customers = this.state.customers.map(customer => {
-
       return <CustomerOverview key={customer._id} customer={customer} />
     });
+
+    const emptyResult = this.state.searchComplete && customers.length === 0;
 
     return (
       <div className="customers" style={{ paddingTop: '30px' }}>
         <CustomerSearch getCustomers={this.getCustomers} clearSearchResults={this.clearSearchResults} accessrules={this.state.accessrules} />
-        { this.state.customer
-          ? <CustomerDetails key={this.state.customer._id} customer={this.state.customer} getCustomer={this.getCustomer} />
+        { emptyResult
+          ? <div style={{textAlign: 'center'}}>(none)</div>
           : null
         }
-        { customers }
+        { this.state.customer
+          ? <CustomerDetails key={this.state.customer._id} customer={this.state.customer} getCustomer={this.getCustomer} />
+          : customers
+        }
       </div>
     );
   }
