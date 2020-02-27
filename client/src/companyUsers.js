@@ -60,7 +60,12 @@ module.exports = class extends React.Component {
 
       });
     } else {
-      this.setState({ hasInput: false, inputAddUserValid: false, inputCreateUserValid: false });
+      this.setState({
+        hasInput: false,
+        inputAddUserValid: false,
+        inputCreateUserValid: false,
+        foundUser: null
+      });
     }
   }
 
@@ -138,7 +143,7 @@ module.exports = class extends React.Component {
     let users = this.props.users || [];
 
     let foundUserIsAlreadyAdded = false;
-    if(this.state.foundUser && users.length > 0) {
+    if(this.state.inputAddUserValid && this.state.foundUser && users.length > 0) {
       // const foundUserIsAlreadyAdded = users.find((user) => user.uid === this.state.foundUser.id);
       foundUserIsAlreadyAdded = users.some((user) => user.uid === this.state.foundUser.id);
     }
