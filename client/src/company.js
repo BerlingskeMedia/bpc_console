@@ -295,39 +295,37 @@ class CompanyCreatedDetails extends React.Component {
 
     const company = this.props.company;
 
-    let ths = [];
-    let tds = [];
+    let ths = [
+      <th key="1">Internal ID</th>
+    ];
+    let tds = [
+      <td key="1"><Link to={`/companies?id=${ company._id }`}>{ company._id }</Link></td>
+    ];
 
-    if(company.createdBy) {
 
-      ths = [
-        <th key="1">Created</th>,
-        <th key="2">Created by</th>,
-        <th key="3">ID</th>
-      ];
 
-      tds = [
-        <td key="1">{this.props.company.createdAt || ''}</td>,
-        <td key="2">{(this.state.createdByUser ? this.state.createdByUser.email : null ) || (company.createdBy ? company.createdBy.user : '')}</td>,
-        <td key="3">{this.props.company._id || ''}</td>
-      ];
+    if(company.createdBy || !company.ariaAccountNo) {
+
+      ths.push(<th key="2">Created</th>);
+      tds.push(<td key="2">{company.createdAt || ''}</td>);
+
+      ths.push(<th key="3">Created by</th>);
+      tds.push(<td key="3">{(this.state.createdByUser ? this.state.createdByUser.email : null ) || (company.createdBy ? company.createdBy.user : '')}</td>);
 
     } else {
 
-      ths = [
-        <th key="1">ARIA Account No</th>,
-        <th key="2">ARIA Account ID</th>,
-        <th key="3">cid</th>
-      ];
+      ths.push(<th key="2">ARIA Account No</th>);
+      tds.push(<td key="2">{ company.ariaAccountNo || '-' }</td>);
 
       const idLink = company.ariaAccountID ? <Link to={`/users?search=${ company.ariaAccountID }`}>{ company.ariaAccountID }</Link> : null;
-
-      tds = [
-        <td key="1">{ company.ariaAccountNo || '-' }</td>,
-        <td key="2">{ idLink || '-' }</td>,
-        <td key="3">{ company.cid }</td>,
-        <td key="4">{ company.active || '-' }</td>
-      ];
+      tds.push(<td key="2">{ idLink || '-' }</td>)
+      
+            
+      ths.push(<th key="4">Active</th>);
+      const active = company.active
+        ? <span className="glyphicon glyphicon-ok" style={{color: 'lightgreen'}} aria-hidden="true"></span>
+        : <span className="glyphicon glyphicon-minus" style={{color: 'red'}} aria-hidden="true"></span>;
+      tds.push(<td key="4">{ active }</td>);
     }
 
     return(
