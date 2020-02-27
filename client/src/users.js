@@ -238,17 +238,13 @@ class ShowFullUser extends React.Component {
   }
 
   expireGrant(grant) {
-
     grant.exp = Date.now();
     return this.updateGrant(grant);
-
   }
 
   reactivateGrant(grant) {
-
     grant.exp = null;
     return this.updateGrant(grant);
-
   }
 
   updateGrant(grant) {
@@ -283,6 +279,8 @@ class ShowFullUser extends React.Component {
       ? <div style={{marginTop: '30px', marginBottom: '30px'}}>
           <UserDetails key={this.state.user.id + 'fulluser_1'} user={this.state.user} />
           <Access key={this.state.user.id + 'fulluser_4'} dataScopes={this.state.user.dataScopes} />
+          <hr />
+          <Tools user={this.state.user} />
           <hr />
           <Permissions key={this.state.user.id + 'fulluser_2'} user={this.state.user} dataScopes={this.state.user.dataScopes} />
           <hr />
@@ -360,6 +358,31 @@ class UserDetails extends React.Component {
           </div>
           <div className="col-xs-6">
             { dataFromGigya }
+          </div>
+        </div>
+      </div>
+    );
+  }
+}
+
+
+class Tools extends React.Component {
+
+  constructor(props){
+    super(props);
+  }
+
+  render() {
+    const user = this.props.user;
+    console.log('user')
+    console.log(user)
+    return (
+      <div>
+        <div className="row">
+          <div className="col-xs-2">
+            <h4>Tools</h4>
+          </div>
+          <div className="col-xs-6">
             <GigyaResetPassword user={ user } />
             <RecalcPermissionsButton user={ user } />
           </div>
