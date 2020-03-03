@@ -420,19 +420,24 @@ class AccessRules extends React.Component {
   render() {
 
     const data = this.props.data || [];
+    const allAccessRules = this.props.accessrules || [];
 
+    // Mapping each if the company accessRules up against the accessRules in BPP
     const items = data.map(accessRule => {
 
-      const access = this.props.accessrules.find((a) => {
+      const matchedAccessRules = allAccessRules.find((a) => {
         return a.accessFeature === accessRule.accessFeature && a.titleDomain === accessRule.titleDomain
       });
 
-      const accessRoles = Object.keys(access.access).map((k, index) => {
-        return (<div key={index}>
-          <span>{k}:</span> <span>{access.access[k].join(', ')}</span>
-        </div>);
-      });
+      let accessRoles = '';
 
+      if(matchedAccessRules && matchedAccessRules.access) {
+        accessRoles = Object.keys(matchedAccessRules.access).map((k, index) => {
+          return (<div key={index}>
+            <span>{k}:</span> <span>{matchedAccessRules.access[k].join(', ')}</span>
+          </div>);
+        });
+      }
 
       return (
         <tr key={accessRule.accessFeature + accessRule.titleDomain + Math.random() }>
