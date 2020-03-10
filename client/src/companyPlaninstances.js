@@ -178,8 +178,17 @@ class Planinstance extends React.Component {
     const accessRules = this.props.accessrules || [];
     if(planinstance.services instanceof Array) {
       const everyServiceIsInvalid = planinstance.services.every((service) => {
+        let isAValidService = false;
+
+        // If the planinstance does not have titleDomain, there's already one warning-sign for this. (See above.)
+        // In this case we only need to show an additional warning-sign, if there no generel valid services on the planinstance.
+        if(planinstance.titleDomain) {
+          isAValidService = accessRules.some(accessRule => accessRule.titleDomain === planinstance.titleDomain && accessRule.accessFeature === service.accessFeature)
+        } else {
+          isAValidService = accessRules.some(accessRule => accessRule.accessFeature === service.accessFeature)
+        }
+
         // Not a valid service
-        const isAValidService = accessRules.some(accessRule => accessRule.titleDomain === planinstance.titleDomain && accessRule.accessFeature === service.accessFeature)
         return !isAValidService;
       });
 
