@@ -302,8 +302,6 @@ class CompanyCreatedDetails extends React.Component {
       <td key="1"><Link to={`/companies?id=${ company._id }`}>{ company._id }</Link></td>
     ];
 
-
-
     if(company.createdBy || !company.ariaAccountNo) {
 
       ths.push(<th key="2">Created</th>);
@@ -317,16 +315,17 @@ class CompanyCreatedDetails extends React.Component {
       ths.push(<th key="2">ARIA Account No</th>);
       tds.push(<td key="2">{ company.ariaAccountNo || '-' }</td>);
 
+      ths.push(<th key="3">ARIA Account ID</th>);
       const idLink = company.ariaAccountID ? <Link to={`/users?search=${ company.ariaAccountID }`}>{ company.ariaAccountID }</Link> : null;
-      tds.push(<td key="2">{ idLink || '-' }</td>)
+      tds.push(<td key="3">{ idLink || '-' }</td>)
       
-            
-      ths.push(<th key="4">Active</th>);
-      const active = company.active
-        ? <span className="glyphicon glyphicon-ok" style={{color: 'lightgreen'}} aria-hidden="true"></span>
-        : <span className="glyphicon glyphicon-minus" style={{color: 'red'}} aria-hidden="true"></span>;
-      tds.push(<td key="4">{ active }</td>);
     }
+
+    ths.push(<th key="4">Active</th>);
+    const active = company.active
+      ? <span className="glyphicon glyphicon-ok" style={{color: 'lightgreen'}} aria-hidden="true"></span>
+      : <span className="glyphicon glyphicon-minus" style={{color: 'red'}} aria-hidden="true"></span>;
+    tds.push(<td key="4">{ active }</td>);
 
     return(
       <div className="row">
