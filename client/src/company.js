@@ -321,11 +321,11 @@ class CompanyCreatedDetails extends React.Component {
       
     }
 
-    ths.push(<th key="4">Active</th>);
-    const active = company.active
-      ? <span className="glyphicon glyphicon-ok" style={{color: 'lightgreen'}} aria-hidden="true"></span>
-      : <span className="glyphicon glyphicon-minus" style={{color: 'red'}} aria-hidden="true"></span>;
-    tds.push(<td key="4">{ active }</td>);
+    ths.push(<th key="4">Status</th>);
+    const status = company.status >= 1
+      ? <span title={company.status} className="glyphicon glyphicon-ok" style={{color: 'lightgreen'}} aria-hidden="true"></span>
+      : <span title={company.status} className="glyphicon glyphicon-minus" style={{color: 'red'}} aria-hidden="true"></span>;
+    tds.push(<td key="4">{ status }</td>);
 
     return(
       <div className="row">
