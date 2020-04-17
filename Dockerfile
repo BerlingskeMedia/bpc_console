@@ -1,34 +1,34 @@
-FROM ubuntu:14.04
+FROM node:10.16-alpine as build
 
 MAINTAINER Daniel Kokott <dako@berlingskemedia.dk>
 
-# Installing wget - needed to download node.js
-RUN apt-get update
-RUN apt-get install -y wget
+WORKDIR /build
 
-ENV NODE_VERSION v8.4.0
-
-# Downloading and installing Node.
-RUN wget -O - https://nodejs.org/dist/$NODE_VERSION/node-$NODE_VERSION-linux-x64.tar.gz \
-    | tar xzf - --strip-components=1 --exclude="README.md" --exclude="LICENSE" \
-    --exclude="ChangeLog" -C "/usr/local"
-
-# Set the working directory.
-WORKDIR /bpc_console
-
-# Copying the code into image. Be aware no config files are including.
-COPY ./server /bpc_console/server
-COPY ./client /bpc_console/client
-COPY ./package.json /bpc_console/package.json
-COPY ./webpack.config.js /bpc_console/webpack.config.js
+ADD package.json .
+ADD package-lock.json .
+ADD ./client ./client
+ADD webpack.config.js .
 
 # Installing packages
 RUN npm install
 RUN npm install webpack
 RUN npm install webpack-cli
-
 # Building the client
 RUN npx webpack
+
+
+FROM node:10.16-alpine
+
+# Set the working directory.
+WORKDIR /bpc_console
+
+# Copying the code into image. Be aware no config files are including.
+COPY --from=build /build/client ./client
+ADD ./server ./server
+ADD package.json .
+ADD package-lock.json .
+
+RUN npm i --production
 
 # Exposing our endpoint to Docker.
 EXPOSE  8000
