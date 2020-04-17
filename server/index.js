@@ -7,7 +7,6 @@ process.env.BPC_APP_KEY = process.env.BPC_APP_KEY || process.env.BPC_APP_SECRET;
 const log = require('util').log;
 const Hapi = require('@hapi/hapi');
 const Inert = require('@hapi/inert');
-const Proxy = require('./proxy');
 const HapiBpc = require('hapi-bpc');
 
 const server = Hapi.server({
@@ -31,7 +30,6 @@ const init = async () => {
 
   await server.register(Inert);
   await server.register(HapiBpc);
-  await server.register(Proxy, { routes: { prefix: '/api' } });
 
   server.route({
     method: 'GET',
