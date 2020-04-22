@@ -332,7 +332,7 @@ class ChangeAriaAccountID extends React.Component {
         "newAriaAccountID": this.state.foundUser.id
       };
 
-      return Bpp.request(`/api/accounts/message`, {
+      return Bpp.request(`/api/queue/message`, {
         method: 'POST',
         body: JSON.stringify(message)
       }).then(() => this.setState({ messageSent: true }))

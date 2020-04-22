@@ -533,7 +533,7 @@ class RecalcPermissionsButton extends React.Component {
       "uid": this.props.user.id
     };
 
-    return Bpp.request(`/api/accounts/message`, {
+    return Bpp.request(`/api/queue/message`, {
       method: 'POST',
       body: JSON.stringify(message)
     })
