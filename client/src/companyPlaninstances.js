@@ -204,6 +204,8 @@ class Planinstance extends React.Component {
         <td>
           <div>{planinstance.planName}</div>
           <div>{ alerts }</div>
+          <div>Activation date: { planinstance.activationDate }</div>
+          <div>Termination date: { planinstance.terminationDate || '' }</div>
         </td>
         <td><Note planinstance={planinstance} savePlaninstance={this.savePlaninstance} /></td>
         <td>{planinstance.units}</td>
