@@ -113,7 +113,7 @@ module.exports = class extends React.Component {
 class CustomerSearch extends React.Component {
   constructor(props){
     super(props);
-    this.onSearchParamChange = this.onSearchParamChange.bind(this);
+    this.searchOnTextChange = this.searchOnTextChange.bind(this);
     this.search = this.search.bind(this);
     this.state = {
       searchInProgress: false,
@@ -122,7 +122,40 @@ class CustomerSearch extends React.Component {
   }
 
 
-  onSearchParamChange(e) {
+  componentDidMount() {
+    const searchParams = getUrlParameter("search");
+    if(searchParams.length > 0) {
+
+      // Turning http://console.local:8086/companies?search=title%3Dberlingske%26uid%3De26a4c20f02b48baa1f1eb36fd7378c1
+      // Into {title: "berlingske", uid: "e26a4c20f02b48baa1f1eb36fd7378c1"}
+      const preloadedSearhParams = decodeURIComponent(searchParams).split('&').reduce((acc,cur) => {
+        const temp = cur.split('=');
+        if(temp.length !== 2) {
+          return;
+        }
+        acc[temp[0]] = temp[1];
+        return acc;
+      }, {});
+
+      
+      if(Object.keys(preloadedSearhParams).length > 0) {
+        if(preloadedSearhParams.title) {
+          this.titleSearchBox.value = preloadedSearhParams.title;
+        }
+        if(preloadedSearhParams.ariaAccountNo) {
+          this.ariaAccountNoBox.value = preloadedSearhParams.ariaAccountNo;
+        }
+        if(preloadedSearhParams.ariaAccountID) {
+          this.ariaAccountIDBox.value = preloadedSearhParams.ariaAccountID;
+        }
+
+        this.searchOnTextChange();
+      }
+    }
+  }
+
+
+  searchOnTextChange(e) {
     clearTimeout(this.state.searchTimer);
     this.setState({searchTimer: setTimeout(this.search, 1000)});
   }
@@ -149,6 +182,7 @@ class CustomerSearch extends React.Component {
 
     
     if(searchParams.length === 0) {
+      window.history.pushState({ search: "" }, "search", `/customers`);
       this.props.clearSearchResults();
       return;
     } else {
@@ -159,6 +193,9 @@ class CustomerSearch extends React.Component {
     }
     
     const query = `${ searchParams.join('&') }`;
+
+    const search = encodeURIComponent(query);
+    window.history.pushState({ search: search }, "search", `/customers?search=${search}`);
 
     this.setState({ searchInProgress: true }, () => {
       this.props.getCustomers(query)
@@ -176,7 +213,7 @@ class CustomerSearch extends React.Component {
             <input
               type="text"
               name="titleSearchBox"
-              onChange={this.onSearchParamChange}
+              onChange={this.searchOnTextChange}
               className="form-control"
               placeholder="Type name start search"
               ref={(titleSearchBox) => this.titleSearchBox = titleSearchBox} />
@@ -187,7 +224,7 @@ class CustomerSearch extends React.Component {
             <input
               type="text"
               name="ariaAccountNoBox"
-              onChange={this.onSearchParamChange}
+              onChange={this.searchOnTextChange}
               className="form-control"
               placeholder="Type account number"
               ref={(ariaAccountNoBox) => this.ariaAccountNoBox = ariaAccountNoBox} />
@@ -196,13 +233,13 @@ class CustomerSearch extends React.Component {
             <input
               type="text"
               name="ariaAccountIDBox"
-              onChange={this.onSearchParamChange}
+              onChange={this.searchOnTextChange}
               className="form-control"
               placeholder="Type account ID"
               ref={(ariaAccountIDBox) => this.ariaAccountIDBox = ariaAccountIDBox} />
           </div>
           <div className="col-xs-2">
-            <select className="form-control input-sm" onChange={this.onSearchParamChange}
+            <select className="form-control input-sm" onChange={this.searchOnTextChange}
               ref={(customerTypeSelect) => this.customerTypeSelect = customerTypeSelect}>
                 <option key={1} value='C'>Consumer</option>
                 <option key={2} value='B'>Business</option>
@@ -390,4 +427,12 @@ class ChangeAriaAccountID extends React.Component {
       </div>
     );
   }
+}
+
+
+function getUrlParameter(name) {
+  name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+  var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+  var results = regex.exec(location.search);
+  return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
 }
