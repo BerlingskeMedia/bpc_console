@@ -137,7 +137,7 @@ class CustomerSearch extends React.Component {
         return acc;
       }, {});
 
-      
+
       if(Object.keys(preloadedSearhParams).length > 0) {
         if(preloadedSearhParams.title) {
           this.titleSearchBox.value = preloadedSearhParams.title;
@@ -147,6 +147,9 @@ class CustomerSearch extends React.Component {
         }
         if(preloadedSearhParams.ariaAccountID) {
           this.ariaAccountIDBox.value = preloadedSearhParams.ariaAccountID;
+        }
+        if(preloadedSearhParams.email) {
+          this.ariaEmailBox.value = preloadedSearhParams.email;
         }
 
         this.searchOnTextChange();
@@ -180,6 +183,9 @@ class CustomerSearch extends React.Component {
       searchParams.push(`ariaAccountID=${ encodeURIComponent(this.ariaAccountIDBox.value) }`);
     }
 
+    if(this.ariaEmailBox.value.length > 0) {
+      searchParams.push(`email=${ encodeURIComponent(this.ariaEmailBox.value) }`);
+    }
     
     if(searchParams.length === 0) {
       window.history.pushState({ search: "" }, "search", `/customers`);
@@ -237,6 +243,15 @@ class CustomerSearch extends React.Component {
               className="form-control"
               placeholder="Type account ID"
               ref={(ariaAccountIDBox) => this.ariaAccountIDBox = ariaAccountIDBox} />
+          </div>
+          <div className="col-xs-2">
+            <input
+              type="email"
+              name="ariaEmailBox"
+              onChange={this.searchOnTextChange}
+              className="form-control"
+              placeholder="Type email"
+              ref={(ariaEmailBox) => this.ariaEmailBox = ariaEmailBox} />
           </div>
           <div className="col-xs-2">
             <select className="form-control input-sm" onChange={this.searchOnTextChange}
