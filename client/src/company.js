@@ -318,45 +318,12 @@ class CompanyIDsAndDates extends React.Component {
 
     const company = this.props.company;
 
-    // let ths = [
-    //   <th key="1">Internal ID</th>,
-    //   <th key="2">Created</th>,
-    //   <th key="3">Last update</th>
-    // ];
-    // let tds = [
-    //   <td key="1"><Link to={`/companies?id=${ company._id }`}>{ company._id }</Link></td>,
-    //   <td key="2">{company.createdAt || ''}</td>,
-    //   <td key="3">{company.lastUpdatedAt || ''}</td>
-    // ];
-    
     const createdTitle = (this.state.createdByUser ? this.state.createdByUser.email : null ) || (company.createdBy ? company.createdBy.user : '');
     const created = <span title={ createdTitle }>{ company.createdAt || '-' }</span>;
 
-    // if(company.createdBy || !company.ariaAccountNo) {
-
-    //   ths.push(<th key="2">Created</th>);
-    //   tds.push(<td key="2">{company.createdAt || ''}</td>);
-      
-
-    //   ths.push(<th key="3">Created by</th>);
-    //   tds.push(<td key="3">{(this.state.createdByUser ? this.state.createdByUser.email : null ) || (company.createdBy ? company.createdBy.user : '')}</td>);
-
-    // } else {
-
-    //   ths.push(<th key="2">ARIA Account No</th>);
-    //   tds.push(<td key="2">{ company.ariaAccountNo || '-' }</td>);
-
-    //   ths.push(<th key="3">ARIA Account ID</th>);
-    const userLink = company.ariaAccountID ? <Link to={`/users?search=${ company.ariaAccountID }`}>{ company.ariaAccountID }</Link> : null;
-    //   tds.push(<td key="3">{ idLink || '-' }</td>)
-      
-    // }
-
-    // ths.push(<th key="4">Status</th>);
     const status = company.status >= 1
       ? <span title={company.status} className="glyphicon glyphicon-ok" style={{color: 'lightgreen'}} aria-hidden="true"></span>
       : <span title={company.status} className="glyphicon glyphicon-minus" style={{color: 'red'}} aria-hidden="true"></span>;
-    // tds.push(<td key="4">{ status }</td>);
 
     return(
       <div>
@@ -380,6 +347,7 @@ class CompanyIDsAndDates extends React.Component {
             </table>
           </div>
         </div>
+
         { company.ariaAccountNo ?
           <div className="row">
             <div className="col-xs-10 col-xs-offset-2">
