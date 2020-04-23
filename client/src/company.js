@@ -422,7 +422,19 @@ class AccessRules extends React.Component {
     const allAccessRules = this.props.accessrules || [];
 
     // Mapping each if the company accessRules up against the accessRules in BPP
-    const items = data.map(accessRule => {
+    const items = data
+    // Reducing to unique accessRules (Aria sends a long list of duplicated accessRule)
+    .reduce((acc, cur) => {
+      let a = acc || [];
+      const temp = a.findIndex(existing => {
+        return cur.accessFeature === existing.accessFeature && cur.eligibleForSharing === existing.eligibleForSharing && cur.titleDomain === existing.titleDomain;
+      });
+      if(temp === -1) {
+        a.push(cur);
+      }
+      return a;
+    }, [])
+    .map(accessRule => {
 
       const matchedAccessRules = allAccessRules.find((a) => {
         return a.accessFeature === accessRule.accessFeature && a.titleDomain === accessRule.titleDomain
