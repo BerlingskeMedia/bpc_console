@@ -136,27 +136,16 @@ class CompanySearch extends React.Component {
 
 
       if(Object.keys(preloadedSearhParams).length > 0) {
-        if(preloadedSearhParams.title) {
-          this.titleSearchBox.value = preloadedSearhParams.title;
-        }
-        if(preloadedSearhParams.ariaAccountNo) {
-          this.ariaAccountNoBox.value = preloadedSearhParams.ariaAccountNo;
-        }
+        this.titleSearchBox.value = preloadedSearhParams.title || '';
+        this.ariaAccountNoBox.value = preloadedSearhParams.ariaAccountNo || '';
+        this.ipFilterSearchBox.value = preloadedSearhParams.ipFilter || '';
+        this.titleDomainSelect.value = preloadedSearhParams.titleDomain || '';
+        this.accessFeatureSelect.value = preloadedSearhParams.accessFeature || '';
+        this.userSearchBox.value = preloadedSearhParams.uid || preloadedSearhParams.emailmask || '';
+
         if(preloadedSearhParams.uid) {
-          this.userSearchBox.value = preloadedSearhParams.uid;
           this.searchUser();
-        } else if(preloadedSearhParams.emailmask) {
-          this.userSearchBox.value = preloadedSearhParams.emailmask;
         }        
-        if(preloadedSearhParams.ipFilter) {
-          this.ipFilterSearchBox.value = preloadedSearhParams.ipFilter;
-        }
-        if(preloadedSearhParams.titleDomain) {
-          this.titleDomainSelect.value = preloadedSearhParams.titleDomain;
-        }
-        if(preloadedSearhParams.accessFeature) {
-          this.accessFeatureSelect.value = preloadedSearhParams.accessFeature;
-        }
 
         this.searchOnTextChange();
       }

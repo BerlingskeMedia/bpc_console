@@ -139,18 +139,10 @@ class CustomerSearch extends React.Component {
 
 
       if(Object.keys(preloadedSearhParams).length > 0) {
-        if(preloadedSearhParams.title) {
-          this.titleSearchBox.value = preloadedSearhParams.title;
-        }
-        if(preloadedSearhParams.ariaAccountNo) {
-          this.ariaAccountNoBox.value = preloadedSearhParams.ariaAccountNo;
-        }
-        if(preloadedSearhParams.ariaAccountID) {
-          this.ariaAccountIDBox.value = preloadedSearhParams.ariaAccountID;
-        }
-        if(preloadedSearhParams.email) {
-          this.ariaEmailBox.value = preloadedSearhParams.email;
-        }
+        this.titleSearchBox.value = preloadedSearhParams.title || '';
+        this.ariaAccountNoBox.value = preloadedSearhParams.ariaAccountNo || '';
+        this.ariaAccountIDBox.value = preloadedSearhParams.ariaAccountID || '';
+        this.ariaEmailBox.value = preloadedSearhParams.email || '';
 
         this.searchOnTextChange();
       }
