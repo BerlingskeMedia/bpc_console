@@ -143,6 +143,8 @@ module.exports = class extends React.Component {
 
     const company = this.state.company || this.props.company;
 
+    const userLink = company.ariaAccountID ? <Link to={`/users?search=${ company.ariaAccountID }`}>{ company.ariaAccountID }</Link> : null;
+
     return (
       <div style={{ paddingBottom: '4px' }}>
         <div className="row">
@@ -160,7 +162,7 @@ module.exports = class extends React.Component {
               </div>
               <div>
                 { company.ariaAccountID
-                  ? <small><span className="label label-info">ariaAccountID</span> { company.ariaAccountID }</small>
+                  ? <small><span className="label label-info">ariaAccountID</span> { userLink }</small>
                   : null
                 }
               </div>
@@ -193,7 +195,7 @@ module.exports = class extends React.Component {
         { this.state.showDetails
           ?  <div style={{ marginTop: '10px', marginBottom: '100px', minHeight: '100px' }}>
 
-              <CompanyCreatedDetails company={this.state.company} />
+              <CompanyIDsAndDates company={this.state.company} />
               
               <CompanyNote
                 note={this.state.company.note}
@@ -273,12 +275,33 @@ class CompanyOverview extends React.Component {
 }
 
 
-class CompanyCreatedDetails extends React.Component {
+class CompanyIDsAndDates extends React.Component {
   constructor(props){
     super(props);
+    this.retrieveAccountDetailsRequest = this.retrieveAccountDetailsRequest.bind(this);
     this.state = {
-      createdByUser: null
+      createdByUser: null,
+      messageSent: false
     };
+  }
+
+
+  retrieveAccountDetailsRequest() {
+
+    const company = this.props.company;
+    const ariaAccountNo = company.ariaAccountNo;
+
+    if(ariaAccountNo) {
+      const message = {
+        "type": "retrieveAccountDetails",
+        ariaAccountNo
+      };
+
+      return Bpp.request(`/api/queue/message`, {
+        method: 'POST',
+        body: JSON.stringify(message)
+      }).then(() => this.setState({ messageSent: true }))
+    }
   }
 
 
@@ -295,54 +318,102 @@ class CompanyCreatedDetails extends React.Component {
 
     const company = this.props.company;
 
-    let ths = [
-      <th key="1">Internal ID</th>
-    ];
-    let tds = [
-      <td key="1"><Link to={`/companies?id=${ company._id }`}>{ company._id }</Link></td>
-    ];
+    // let ths = [
+    //   <th key="1">Internal ID</th>,
+    //   <th key="2">Created</th>,
+    //   <th key="3">Last update</th>
+    // ];
+    // let tds = [
+    //   <td key="1"><Link to={`/companies?id=${ company._id }`}>{ company._id }</Link></td>,
+    //   <td key="2">{company.createdAt || ''}</td>,
+    //   <td key="3">{company.lastUpdatedAt || ''}</td>
+    // ];
+    
+    const createdTitle = (this.state.createdByUser ? this.state.createdByUser.email : null ) || (company.createdBy ? company.createdBy.user : '');
+    const created = <span title={ createdTitle }>{ company.createdAt || '-' }</span>;
 
-    if(company.createdBy || !company.ariaAccountNo) {
+    // if(company.createdBy || !company.ariaAccountNo) {
 
-      ths.push(<th key="2">Created</th>);
-      tds.push(<td key="2">{company.createdAt || ''}</td>);
-
-      ths.push(<th key="3">Created by</th>);
-      tds.push(<td key="3">{(this.state.createdByUser ? this.state.createdByUser.email : null ) || (company.createdBy ? company.createdBy.user : '')}</td>);
-
-    } else {
-
-      ths.push(<th key="2">ARIA Account No</th>);
-      tds.push(<td key="2">{ company.ariaAccountNo || '-' }</td>);
-
-      ths.push(<th key="3">ARIA Account ID</th>);
-      const idLink = company.ariaAccountID ? <Link to={`/users?search=${ company.ariaAccountID }`}>{ company.ariaAccountID }</Link> : null;
-      tds.push(<td key="3">{ idLink || '-' }</td>)
+    //   ths.push(<th key="2">Created</th>);
+    //   tds.push(<td key="2">{company.createdAt || ''}</td>);
       
-    }
 
-    ths.push(<th key="4">Status</th>);
+    //   ths.push(<th key="3">Created by</th>);
+    //   tds.push(<td key="3">{(this.state.createdByUser ? this.state.createdByUser.email : null ) || (company.createdBy ? company.createdBy.user : '')}</td>);
+
+    // } else {
+
+    //   ths.push(<th key="2">ARIA Account No</th>);
+    //   tds.push(<td key="2">{ company.ariaAccountNo || '-' }</td>);
+
+    //   ths.push(<th key="3">ARIA Account ID</th>);
+    const userLink = company.ariaAccountID ? <Link to={`/users?search=${ company.ariaAccountID }`}>{ company.ariaAccountID }</Link> : null;
+    //   tds.push(<td key="3">{ idLink || '-' }</td>)
+      
+    // }
+
+    // ths.push(<th key="4">Status</th>);
     const status = company.status >= 1
       ? <span title={company.status} className="glyphicon glyphicon-ok" style={{color: 'lightgreen'}} aria-hidden="true"></span>
       : <span title={company.status} className="glyphicon glyphicon-minus" style={{color: 'red'}} aria-hidden="true"></span>;
-    tds.push(<td key="4">{ status }</td>);
+    // tds.push(<td key="4">{ status }</td>);
 
     return(
-      <div className="row">
-        <div className="col-xs-10 col-xs-offset-2">
-          <table className="table table-condensed">
-            <thead>
-              <tr>
-                { ths }
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                { tds }
-              </tr>
-            </tbody>
-          </table>
+      <div>
+        <div className="row">
+          <div className="col-xs-10 col-xs-offset-2">
+            <table className="table table-condensed">
+              <thead>
+                <tr>
+                  <th>Internal ID</th>
+                  <th>Created</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><Link to={`/companies?id=${ company._id }`}>{ company._id }</Link></td>
+                  <td>{ created }</td>                  
+                  <td>{ status }</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
+        { company.ariaAccountNo ?
+          <div className="row">
+            <div className="col-xs-10 col-xs-offset-2">
+            <table className="table table-condensed">
+                <thead>
+                  <tr>
+                    <th><small>Last update from ARIA</small></th>
+                    <th style={{ textAlign: 'right' }}><small>Request latest contact information from ARIA</small></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><small>{ company.lastUpdatedAt || '' }</small></td>
+                    <td style={{ textAlign: 'right' }}>
+                      <button
+                        type="button"
+                        className="btn btn-xs btn-default"
+                        onClick={this.retrieveAccountDetailsRequest}
+                        disabled={this.state.messageSent}
+                        style={{ minWidth: '90px' }}>
+                        <span className='glyphicon glyphicon-send' aria-hidden="true"></span>
+                        <span> </span>
+                        { this.state.messageSent
+                          ? <span>Request sent</span>
+                          : <span>Send request</span>
+                        }
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        : null }
       </div>
     );
   }
