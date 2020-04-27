@@ -893,8 +893,11 @@ class Grants extends React.Component {
         <tr key={grant.id}>
           <td className="col-xs-6">
             <Link to={`/application/${grant.app}`}>{grant.app}</Link>
-            <br />
-            <small><em>Last login: {grant.lastLogin || 'n/a'}</em></small>
+            <div style={{marginTop: '7px'}}>
+              <div><small><em>Last login: {grant.lastLogin || '-'}</em></small></div>
+              <div><small><em>Last RSVP: {grant.lastFetched || '-'}</em></small></div>
+              <div><small><em>Created: {grant.createdAt || '-'}</em></small></div>
+            </div>
           </td>
           <td className="col-xs-2">
             {grant.exp
