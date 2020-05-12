@@ -1,4 +1,3 @@
-const $ = require('jquery');
 const React = require('react');
 const ApplicationGrants = require('./applicationGrants');
 const ApplicationAdmins = require('./applicationAdmins');

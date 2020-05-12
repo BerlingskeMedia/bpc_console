@@ -1,4 +1,3 @@
-const $ = require('jquery');
 const React = require('react');
 const Link = require('react-router-dom').Link;
 const Bpc = require('./components/bpc');

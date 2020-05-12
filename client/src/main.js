@@ -1,4 +1,3 @@
-const $ = require('jquery');
 const React = require('react');
 const ReactDOM = require('react-dom');
 const ReactRouterDom = require('react-router-dom');
