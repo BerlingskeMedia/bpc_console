@@ -11,6 +11,7 @@ const ConsoleUsers = require('./consoleUsers');
 const Application = require('./application');
 const Tools = require('./tools');
 const Companies = require('./companies');
+const Payments = require('./payments');
 const Customers = require('./customers');
 const GoogleLogin = require('react-google-login').default;
 const Bpc = require('./components/bpc');
@@ -113,6 +114,7 @@ class MainMenu extends React.Component {
       { linkTo: '/users', label: 'Users' },
       { linkTo: '/applications', label: 'Applications' },
       { linkTo: '/companies', label: 'Companies' },
+      { linkTo: '/payments', label: 'Payments' },
       { linkTo: '/customers', label: 'Customers' },
       { linkTo: '/admins', label: 'Admins' }
     ].map((tab, index) => {
@@ -155,6 +157,7 @@ class Main extends React.Component {
           <Route path={`/applications/:app`} component={Application}/>
           <Route path={`/application/:app`} component={Application}/>
           <Route path={`/companies`} component={Companies}/>
+          <Route path={`/payments`} component={Payments}/>
           <Route path={`/customers`} component={Customers}/>
           <Route path={`/tools`} component={Tools}/>
         </div>
