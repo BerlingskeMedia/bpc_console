@@ -17,7 +17,8 @@ module.exports = class extends React.Component {
   }
 
   getPayment() {
-    const id = this.props.payment.orderId;
+    const id = this.props.payment.userId;
+    // return PM.request(`/bmxpiku/jsonAPI/master/oneRecord.json`)//temporary
     return PM.request(`/api/orders/${ id }`)
     .then(payment => {
       this.setState({ payment })
@@ -67,7 +68,7 @@ module.exports = class extends React.Component {
               </h4>
               <div>
                 { payment.email
-                  ? <small><span className="label label-info">email</span> { payment.email }</small>
+                  ? <small><span className="label label-info">{ payment.email }</span> { userLink }</small>
                   : null
                 }
               </div>
@@ -78,17 +79,11 @@ module.exports = class extends React.Component {
                 }
               </div>
             </div>
-            {/* { this.state.showLoader
-              ? (<div className="loadSpinner">
-                  <img src="/assets/load_spinner.gif" />
-                </div>)
-              : null
-            } */}
           </div>
           <div className="col-xs-4">
           { this.state.showDetails
-            ? null
-            : <PaymentOverview payment={payment} />
+            ? <PaymentOverview payment={payment} />
+            : null
           }
           </div>
           <div className="col-xs-4" style={{ textAlign: 'right' }}>
@@ -122,31 +117,42 @@ class PaymentOverview extends React.Component {
     return (
       <div>
         <div style={{ paddingLeft: '4px' }}>
-          <em><small>Payment Type: {this.props.payment.paymentType || ''}</small></em>
+          <em><small><strong>Payment Type:</strong> {this.props.payment.paymentType || ''}</small></em>
         </div>
         <div style={{ paddingLeft: '4px' }}>
-          <em><small>Plan Description: {this.props.payment.description || ''}</small></em>
+          <em><small><strong>Changed at:</strong> {this.props.payment.changedAt || ''}</small></em>
         </div>
         <div style={{ paddingLeft: '4px' }}>
-          <em><small>User ID: {this.props.payment.userId || ''}</small></em>
+          <em><small><strong>Plan Description:</strong> {this.props.payment.description || ''}</small></em>
         </div>
         <div style={{ paddingLeft: '4px' }}>
-          <em><small>Price/Frequency Price: {this.props.payment.price || ''}/{this.props.payment.frequencyPrice || ''}</small></em>
+          <em><small><strong>User ID:</strong> {this.props.payment.userId || ''}</small></em>
         </div>
         <div style={{ paddingLeft: '4px' }}>
-          <em><small>Status: {this.props.payment.status || ''}</small></em>
+          <em><small><strong>Price/Frequency Price:</strong> {this.props.payment.price || ''}/{this.props.payment.frequencyPrice || ''}</small></em>
         </div>
         <div style={{ paddingLeft: '4px' }}>
-          <em><small>Transaction: {this.props.payment.transaction || ''}</small></em>
+          <em><small><strong>Status:</strong> {this.props.payment.status || ''}</small></em>
         </div>
         <div style={{ paddingLeft: '4px' }}>
-          <em><small>Agreement: {this.props.payment.agreement || ''}</small></em>
+          <em><small><strong>Transaction:</strong> {this.props.payment.transaction || ''}</small></em>
         </div>
         <div style={{ paddingLeft: '4px' }}>
-          <em><small>ariaBillingGroupID: {this.props.payment.ariaBillingGroupID || ''}</small></em>
+          <em><small><strong>Agreement:</strong> {this.props.payment.agreement || ''}</small></em>
         </div>
         <div style={{ paddingLeft: '4px' }}>
-          <pre><em><small>Offer: {this.props.payment.offer || ''}</small></em></pre>
+          <em><small><strong>ariaBillingGroupID:</strong> {this.props.payment.ariaBillingGroupID || ''}</small></em>
+        </div>
+        <div style={{ paddingLeft: '4px' }}>
+          <em><small><strong>Offer:</strong>
+          <div style={{ paddingLeft: '22px',border: '1px solid',marginLeft: '10px' }}>
+            {
+            Object.keys(this.props.payment.offer).map((key, i) => (
+              <p key={i}>
+                <span><strong>{key}:</strong> {this.props.payment.offer[key]}</span>
+              </p>
+            ))
+            }</div></small></em>
         </div>
       </div>
     );

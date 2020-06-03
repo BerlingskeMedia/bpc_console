@@ -19,9 +19,9 @@ module.exports = class extends React.Component {
   }
 
 
-  getPayments(query) {
-    // return PM.request(`/api/orders${ query || '' }`)
-     return PM.request(`/bmxpiku/jsonAPI/master/db.json`)
+  getPayments(query = '') {
+    return PM.request(`/api/orders${ query }`)
+     // return PM.request(`/bmxpiku/jsonAPI/master/db.json`)//temporary
     .then(payments => {
       const paymentsCount = payments.length;
       this.setState({ payments, paymentsCount, searchCleared: false });
@@ -34,14 +34,15 @@ module.exports = class extends React.Component {
   }
 
   componentDidMount() {
-    return PM.authorize()
+    return Bpc.authorize()
     .then(() => this.setState({ authorized: true }))
     .then(() => {
       const preloaded_id = getUrlParameter("id");
       if(preloaded_id) {
         return this.getPayments(`/${ preloaded_id }`);
       } else {
-        return Promise.resolve();
+        return this.getPayments();
+        // return Promise.resolve();
       }
     })
     .catch(err => {
@@ -92,6 +93,7 @@ class PaymentSearch extends React.Component {
     this.searchOnTextChange = this.searchOnTextChange.bind(this);
     this.searchUser = this.searchUser.bind(this);
     this.search = this.search.bind(this);
+    this.showAll = this.showAll.bind(this);
     this.state = {
       searchInProgress: false,
       searchTimer: null,
@@ -105,7 +107,7 @@ class PaymentSearch extends React.Component {
   componentDidMount() {
     const searchParams = getUrlParameter("search");
     if(searchParams.length > 0) {
-      const preloadedSearhParams = decodeURIComponent(searchParams).split('&').reduce((acc,cur) => {
+      const preloadedSearchParams = decodeURIComponent(searchParams).split('&').reduce((acc,cur) => {
         const temp = cur.split('=');
         if(temp.length !== 2) {
           return;
@@ -115,11 +117,10 @@ class PaymentSearch extends React.Component {
       }, {});
 
 
-      if(Object.keys(preloadedSearhParams).length > 0) {
-        this.ariaAccountNoBox.value = preloadedSearhParams.ariaAccountNo || '';
-        this.userSearchBox.value = preloadedSearhParams.uid || preloadedSearhParams.emailmask || '';
+      if(Object.keys(preloadedSearchParams).length > 0) {
+        this.userSearchBox.value = preloadedSearchParams.uid || preloadedSearchParams.emailmask || '';
 
-        if(preloadedSearhParams.uid) {
+        if(preloadedSearchParams.uid) {
           this.searchUser();
         }
 
@@ -166,35 +167,30 @@ class PaymentSearch extends React.Component {
 
     const searchParams = [];
 
-
-    if(this.ariaAccountNoBox.value.length > 0) {
-      searchParams.push(`ariaAccountNo=${ encodeURIComponent(this.ariaAccountNoBox.value) }`);
-    }
-
     if(this.state.foundUser) {
       searchParams.push(`uid=${ encodeURIComponent(this.state.foundUser.id) }`);
-    } else if (this.userSearchBox.value.length > 0) {
-      searchParams.push(`emailmask=${ encodeURIComponent(this.userSearchBox.value) }`);
     }
 
 
-    if(searchParams.length === 0) {
+    if(!this.state.foundUser && this.userSearchBox.value.length > 0 || searchParams.length === 0) {
       window.history.pushState({ search: "" }, "search", `/payments`);
       this.props.clearSearchResults();
       return;
     }
 
-    const query = `${ searchParams.join('&') }`;
-
-    const search = encodeURIComponent(query);
+    const search = encodeURIComponent(`${ searchParams.join('&') }`);
     window.history.pushState({ search: search }, "search", `/payments?search=${search}`);
-
     this.setState({ searchInProgress: true }, () => {
-      this.props.getPayments(query)
+      this.props.getPayments(`/api/orders/${this.state.foundUser.id}`)
       .finally(() => this.setState({ searchInProgress: false }));
     })
   }
 
+  showAll() {
+    this.userSearchBox.value = '';
+    this.setState({ foundUser: null, userSearchBoxHasInput: false }, this.search);
+    this.props.getPayments();
+  }
 
   render() {
 
@@ -217,27 +213,7 @@ class PaymentSearch extends React.Component {
     return (
       <div style={{ marginBottom: '20px' }}>
         <div className="row">
-          <div className="col-xs-3">
-            <input
-              type="text"
-              name="titleSearchBox"
-              onChange={this.searchOnTextChange}
-              className="form-control"
-              placeholder="Type title start search"
-              ref={(titleSearchBox) => this.titleSearchBox = titleSearchBox} />
-            <div style={{ paddingLeft: '4px', color: 'darkgrey' }}><small><em>^ marks the start</em></small></div>
-            <div style={{ paddingLeft: '4px', color: 'darkgrey' }}><small><em>$ marks the end</em></small></div>
-          </div>
-          <div className="col-xs-2">
-            <input
-              type="text"
-              name="ariaAccountNoBox"
-              onChange={this.searchOnTextChange}
-              className="form-control"
-              placeholder="Type account number"
-              ref={(ariaAccountNoBox) => this.ariaAccountNoBox = ariaAccountNoBox} />
-          </div>
-          <div className="col-xs-3">
+          <div className="col-xs-6">
             <div className={ userSearchBoxClass }>
               <input
                 type="text"
@@ -253,15 +229,9 @@ class PaymentSearch extends React.Component {
             </div>
           </div>
           <div className="col-xs-2">
-            <input
-              type="text"
-              name="ipFilterSearchBox"
-              onChange={this.searchOnTextChange}
-              className="form-control"
-              placeholder="Type IP start search"
-              ref={(ipFilterSearchBox) => this.ipFilterSearchBox = ipFilterSearchBox} />
-            <div style={{ paddingLeft: '4px', color: 'darkgrey' }}><small><em>^ marks the start</em></small></div>
-            <div style={{ paddingLeft: '4px', color: 'darkgrey' }}><small><em>$ marks the end</em></small></div>
+            <button type="button" className="btn btn-sm btn-primary" onClick={this.showAll}>
+              <span><span className="glyphicon"></span> <span>Show All</span></span>
+            </button>
           </div>
         </div>
       </div>
