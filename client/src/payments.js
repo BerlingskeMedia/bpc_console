@@ -202,9 +202,6 @@ class PaymentSearch extends React.Component {
         userSearchFeedback = <span className="glyphicon glyphicon-ok form-control-feedback" aria-hidden="true"></span>;
         userSearchBoxClass += ' has-success'
         userSearchFeedbackReadable = 'Searching in users'
-      // } else {
-        // userSearchFeedback = <span className="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>;
-        // userSearchBoxClass += ' has-error'
       } else {
         userSearchFeedbackReadable = 'Searching in email masks'
       }
@@ -222,7 +219,7 @@ class PaymentSearch extends React.Component {
                 className="form-control"
                 aria-describedby="inputSuccess2Status"
                 onChange={this.onUserSearchChange}
-                placeholder="Type user email or ID start search"
+                placeholder="Type user email/ID to start search"
                 ref={(userSearchBox) => this.userSearchBox = userSearchBox} />
                 { userSearchFeedback }
                 <div style={{ paddingLeft: '4px', color: 'darkgrey' }}><small><em>{ userSearchFeedbackReadable }</em></small></div>
