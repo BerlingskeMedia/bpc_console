@@ -1,4 +1,3 @@
-const Bpc = require('./bpp');
 
 const request = (path, options = {}) => {
 
@@ -66,7 +65,7 @@ const authorize = (credentials) => {
     };
   }
 
-  return Bpc.request('/authenticate', {
+  return request('/authenticate', {
     method: 'POST',
     body: JSON.stringify(credentials)
   })
