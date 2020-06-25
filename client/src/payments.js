@@ -19,9 +19,9 @@ module.exports = class extends React.Component {
   }
 
 
-  getPayments(query = '') {
-    return PM.request(`/api/orders${ query }`)
-     // return PM.request(`/bmxpiku/jsonAPI/master/db.json`)//temporary
+  getPayments(query = '', path = '') {
+    const requestPath = path || '/admin/order';
+    return PM.request(`${ requestPath }${ query }`)
     .then(payments => {
       const paymentsCount = payments.length;
       this.setState({ payments, paymentsCount, searchCleared: false });
@@ -42,7 +42,6 @@ module.exports = class extends React.Component {
         return this.getPayments(`/${ preloaded_id }`);
       } else {
         return this.getPayments();
-        // return Promise.resolve();
       }
     })
     .catch(err => {
@@ -85,7 +84,6 @@ module.exports = class extends React.Component {
   }
 };
 
-
 class PaymentSearch extends React.Component {
   constructor(props){
     super(props);
@@ -116,7 +114,6 @@ class PaymentSearch extends React.Component {
         return acc;
       }, {});
 
-
       if(Object.keys(preloadedSearchParams).length > 0) {
         this.userSearchBox.value = preloadedSearchParams.uid || preloadedSearchParams.emailmask || '';
 
@@ -129,12 +126,10 @@ class PaymentSearch extends React.Component {
     }
   }
 
-
   onUserSearchChange() {
     clearTimeout(this.state.searchUserTimer);
     this.setState({searchUserTimer: setTimeout(this.searchUser, 1000)});
   }
-
 
   searchUser() {
     const searchText = this.userSearchBox.value;
@@ -152,7 +147,6 @@ class PaymentSearch extends React.Component {
       return Promise.resolve();
     }
   }
-
 
   searchOnTextChange(e) {
     clearTimeout(this.state.searchTimer);
@@ -181,7 +175,7 @@ class PaymentSearch extends React.Component {
     const search = encodeURIComponent(`${ searchParams.join('&') }`);
     window.history.pushState({ search: search }, "search", `/payments?search=${search}`);
     this.setState({ searchInProgress: true }, () => {
-      this.props.getPayments(`/api/orders/${this.state.foundUser.id}`)
+      this.props.getPayments('', `/admin/user/${this.state.foundUser.id}/order`)
       .finally(() => this.setState({ searchInProgress: false }));
     })
   }

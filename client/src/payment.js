@@ -17,9 +17,8 @@ module.exports = class extends React.Component {
   }
 
   getPayment() {
-    const id = this.props.payment.userId;
-    // return PM.request(`/bmxpiku/jsonAPI/master/oneRecord.json`)//temporary
-    return PM.request(`/api/orders/${ id }`)
+    const id = this.props.payment.orderId;
+    return PM.request(`/admin/order/${ id }`)
     .then(payment => {
       this.setState({ payment })
       return Promise.resolve(payment);
@@ -59,8 +58,8 @@ module.exports = class extends React.Component {
 
     return (
       <div style={{ paddingBottom: '4px' }}>
-        <div className="row">
-          <div className="col-xs-4">
+        <div className="row" style={{ display: "flex", flexWrap: "wrap" }}>
+          <div className="col" style={{ flex: 1 }}>
             <div className="text-wrap" style={{ textDecorationLine: '' }}>
               <h4>
                 <div><small><em>Order ID</em></small></div>
@@ -80,13 +79,13 @@ module.exports = class extends React.Component {
               </div>
             </div>
           </div>
-          <div className="col-xs-4">
+          <div className="col" style={{ flex: 1 }}>
           { this.state.showDetails
             ? <PaymentOverview payment={payment} />
             : null
           }
           </div>
-          <div className="col-xs-4" style={{ textAlign: 'right' }}>
+          <div className="col" style={{ textAlign: 'right', flex: 1 }}>
             { this.state.showDetails
               ? <button type="button" className="btn btn-sm btn-info" onClick={this.showHidePaymentDetails}>
                   <span><span className="glyphicon glyphicon-resize-small" aria-hidden="true"></span> <span>Close</span></span>
@@ -135,10 +134,26 @@ class PaymentOverview extends React.Component {
           <em><small><strong>Status:</strong> {this.props.payment.status || ''}</small></em>
         </div>
         <div style={{ paddingLeft: '4px' }}>
-          <em><small><strong>Transaction:</strong> {this.props.payment.transaction || ''}</small></em>
+          <em><small><strong>Transaction:</strong>
+            <div style={{ paddingLeft: '22px',border: '1px solid',marginLeft: '10px' }}>
+              {
+                Object.keys(this.props.payment.transaction).map((key, i) => (
+                  <p key={i}>
+                    <span><strong>{key}:</strong> {this.props.payment.transaction[key]}</span>
+                  </p>
+                ))
+              }</div></small></em>
         </div>
         <div style={{ paddingLeft: '4px' }}>
-          <em><small><strong>Agreement:</strong> {this.props.payment.agreement || ''}</small></em>
+          <em><small><strong>Agreement:</strong>
+            <div style={{ paddingLeft: '22px',border: '1px solid',marginLeft: '10px' }}>
+              {
+                Object.keys(this.props.payment.agreement).map((key, i) => (
+                  <p key={i}>
+                    <span><strong>{key}:</strong> {this.props.payment.agreement[key]}</span>
+                  </p>
+                ))
+              }</div></small></em>
         </div>
         <div style={{ paddingLeft: '4px' }}>
           <em><small><strong>ariaBillingGroupID:</strong> {this.props.payment.ariaBillingGroupID || ''}</small></em>
