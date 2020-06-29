@@ -36,3 +36,6 @@ config.sh
 
 #IDEA files
 .idea
+
+#local env file
+.env
