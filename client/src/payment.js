@@ -139,7 +139,7 @@ class PaymentOverview extends React.Component {
               {
                 Object.keys(this.props.payment.transaction).map((key, i) => (
                   <p key={i}>
-                    <span><strong>{key}:</strong> {this.props.payment.transaction[key]}</span>
+                    <span><strong>{key}:</strong> {JSON.stringify(this.props.payment.transaction[key], null, 2)}</span>
                   </p>
                 ))
               }</div></small></em>
