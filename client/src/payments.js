@@ -34,7 +34,7 @@ module.exports = class extends React.Component {
   }
 
   componentDidMount() {
-    return Bpc.authorize()
+    return PM.authorize()
     .then(() => this.setState({ authorized: true }))
     .then(() => {
       const preloaded_id = getUrlParameter("id");

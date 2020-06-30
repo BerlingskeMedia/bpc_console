@@ -1,7 +1,7 @@
 
 const request = (path, options = {}) => {
 
-  let pm_url = window.location.origin.replace('console', 'pm');
+  let pm_url = window.location.origin.replace('console', 'payment');
   const local_pm_url = window.localStorage.getItem('pm_url');
 
   if(typeof local_pm_url === 'string' && local_pm_url.length > 0) {
