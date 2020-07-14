@@ -34,7 +34,7 @@ module.exports = class extends React.Component {
       return (
         <Planinstance
           key={planinstance._id}
-          id={planinstance._id} 
+          id={planinstance._id}
           accessrules={this.props.accessrules}/>
       );
     });
@@ -72,7 +72,6 @@ class Planinstance extends React.Component {
     super(props);
     this.savePlaninstance = this.savePlaninstance.bind(this);
     this.updatePlaninstanceState = this.updatePlaninstanceState.bind(this);
-    this.validateEmailmask = this.validateEmailmask.bind(this);
     this.addEmailmask = this.addEmailmask.bind(this);
     this.removeEmailmask = this.removeEmailmask.bind(this);
     this.addUser = this.addUser.bind(this);
@@ -84,24 +83,11 @@ class Planinstance extends React.Component {
   }
 
 
-  validateEmailmask(value) {
-    // var regex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    // return regex.test(String(value).toLowerCase());
-    const atIndex = value.indexOf('@');
-    const dotIndex = value.indexOf('.');
-    const valid = value.length > 0 &&     // There is a value
-      atIndex > -1 &&                     // There is an @
-      (atIndex + 1) < dotIndex &&         // There is a domain
-      value.length - dotIndex > 1;        // There is a top-level domain
-    return Promise.resolve(valid);
-  }
-
-
   addEmailmask(value) {
     let newPlaninstance = Object.assign({}, this.state.planinstance);
     newPlaninstance.emailMasks = newPlaninstance.emailMasks || [];
     newPlaninstance.emailMasks.push(value);
-    return this.updatePlaninstanceState(newPlaninstance);
+    return this.updatePlaninstanceState(newPlaninstance).then(() => (this.savePlaninstance(this.state.planinstance)));
   }
 
 
@@ -109,7 +95,7 @@ class Planinstance extends React.Component {
     let newPlaninstance = Object.assign({}, this.state.planinstance);
     const index = newPlaninstance.emailMasks.findIndex(i => i === item);
     newPlaninstance.emailMasks.splice(index, 1);
-    return this.updatePlaninstanceState(newPlaninstance);
+    return this.updatePlaninstanceState(newPlaninstance).then(() => (this.savePlaninstance(this.state.planinstance)));
   }
 
 
@@ -124,7 +110,7 @@ class Planinstance extends React.Component {
     return this.updateUser({ add: { uid: foundUser.id } });
   }
 
-  
+
   removeUser(user) {
     return this.updateUser({ remove: { uid: user.uid } });
   }
@@ -150,7 +136,7 @@ class Planinstance extends React.Component {
       alert('Error when saving!');
     });
   }
-  
+
 
   componentDidMount() {
     if(this.props.id) {
@@ -173,7 +159,7 @@ class Planinstance extends React.Component {
     if(!planinstance.titleDomain) {
       alerts.push(<span key={-1} className='glyphicon glyphicon-warning-sign' title="Missing titleDomain" aria-hidden="true"></span>);
     }
-    
+
     if(!planinstance.services instanceof Array) {
       alerts.push(<span key={-1} className='glyphicon glyphicon-warning-sign' title="No services" aria-hidden="true"></span>);
     }
@@ -210,7 +196,10 @@ class Planinstance extends React.Component {
           <div>Activation date: { planinstance.activationDate }</div>
           <div>Termination date: { planinstance.terminationDate || '' }</div>
         </td>
-        <td><Note planinstance={planinstance} savePlaninstance={this.savePlaninstance} /></td>
+        <td>
+          <Note planinstance={planinstance} savePlaninstance={this.savePlaninstance} />
+          <PlaninstancesMasks addEmailmask={this.addEmailmask} removeEmailmask={this.removeEmailmask} masks={planinstance.emailMasks} />
+        </td>
         <td>{planinstance.units}</td>
         <td>
           <PlaninstancesUsers removeUser={this.removeUser} users={planinstance.users} />
@@ -234,7 +223,7 @@ class Note extends React.Component {
       saveInProgress: false
     };
   }
-  
+
   handleChange(e) {
     clearTimeout(this.state.saveTimer);
     const note = e.target.value;
@@ -246,7 +235,7 @@ class Note extends React.Component {
     clearTimeout(this.state.saveTimer);
     this.saveNote();
   }
-  
+
   saveNote() {
     if(this.state.saveInProgress){
       return false;
@@ -319,7 +308,7 @@ class PlaninstancesUser extends React.Component {
     const user = this.props.user;
     if(user && user.uid) {
       const query = `?provider=gigya&id=${ encodeURIComponent(user.uid) }`;
-    
+
       return Bpc.request(`/users${ query }`)
       .then(users => {
         const foundUser = users.length === 1 ? users[0] : null;
@@ -390,7 +379,7 @@ class AddPlaninstancesUser extends React.Component {
     this.setState({searchUserTimer: setTimeout(this.searchUser, 1000)});
   }
 
-  
+
   addUser() {
     const foundUser = this.state.foundUser;
     if(foundUser) {
@@ -442,6 +431,108 @@ class AddPlaninstancesUser extends React.Component {
             </button>
           </div>
       </div>
+    );
+  }
+}
+
+class PlaninstancesMasks extends React.Component {
+  constructor(props){
+    super(props);
+    this.validateEmailmask = this.validateEmailmask.bind(this);
+    this.addEmailmask = this.addEmailmask.bind(this);
+    this.onChangeAddMask = this.onChangeAddMask.bind(this);
+    this.state = {
+      validMask: null,
+      userInput: false,
+      maskTimer: null
+    };
+  }
+
+  onChangeAddMask() {
+    this.setState({ userInput: true });
+
+    clearTimeout(this.state.maskTimer);
+    this.setState({maskTimer: setTimeout(this.validateEmailmask(this.addMaskInput.value), 2000)});
+  }
+
+  validateEmailmask(value) {
+    const atIndex = value.indexOf('@');
+    const dotIndex = value.indexOf('.');
+    const valid = value.length > 0 &&     // There is a value
+      atIndex > -1 &&                     // There is an @
+      (atIndex + 1) < dotIndex &&         // There is a domain
+      value.length - dotIndex > 1;        // There is a top-level domain
+    this.setState({validMask: valid});
+    return valid;
+  }
+
+  addEmailmask() {
+    const input = this.addMaskInput.value;
+    if(this.validateEmailmask(input)) {
+      this.props.addEmailmask(input).then(() => {
+        this.addMaskInput.value = '';
+        this.setState({ userInput: false });
+      });
+    }
+  }
+
+
+  render() {
+    if(!this.props.masks || !this.props.masks instanceof Array) {
+      return null;
+    }
+    let userSearchFeedback = null;
+    let userSearchBoxClass = 'form-group has-feedback';
+    if(this.state.userInput) {
+      if (this.state.validMask) {
+        userSearchFeedback = <span className="glyphicon glyphicon-ok form-control-feedback" aria-hidden="true"></span>;
+        userSearchBoxClass += ' has-success'
+      } else {
+        userSearchFeedback = <span className="glyphicon glyphicon-warning-sign form-control-feedback" aria-hidden="true"></span>;
+        userSearchBoxClass += ' has-error'
+      }
+    }
+    const _masks = this.props.masks || [];
+    const masks = _masks.map((mask) => {
+      return (
+        <tr>
+          <td>
+            {mask}
+          </td>
+          <td>
+            <div style={{textAlign: 'right'}}>
+              <button type="button" className='btn btn-xs btn-danger' onClick={this.props.removeEmailmask} style={{ minWidth: '30px' }}>
+                <span className='glyphicon glyphicon-trash' aria-hidden="true"></span> <span>Remove</span>
+              </button>
+            </div>
+          </td>
+        </tr>
+      );
+    });
+    return (
+      <table className="table table-striped" style={{marginTop: '25px'}}>
+        <div><strong>Email Masks</strong></div>
+        <tbody>
+        {masks}
+        <tr>
+          <div className={ userSearchBoxClass } style={{marginTop: '5px'}}>
+            <input
+              type="text"
+              name="addMaskInput"
+              onChange={this.onChangeAddMask}
+              className="form-control input-sm"
+              ref={(addMaskInput) => this.addMaskInput = addMaskInput}
+            />
+            { userSearchFeedback }
+            <div style={{ textAlign: 'right', marginTop: '3px' }}>
+              <button type="button" className='btn btn-xs btn-success' onClick={this.addEmailmask} style={{ minWidth: '90px' }}>
+                <span className='glyphicon glyphicon-plus' aria-hidden="true"></span> <span>Add</span>
+              </button>
+            </div>
+          </div>
+        </tr>
+        </tbody>
+      </table>
     );
   }
 }
