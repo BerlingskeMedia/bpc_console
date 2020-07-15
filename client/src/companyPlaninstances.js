@@ -478,9 +478,6 @@ class PlaninstancesMasks extends React.Component {
 
 
   render() {
-    if(!this.props.masks || !this.props.masks instanceof Array) {
-      return null;
-    }
     let userSearchFeedback = null;
     let userSearchBoxClass = 'form-group has-feedback';
     if(this.state.userInput) {

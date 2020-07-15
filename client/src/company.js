@@ -21,6 +21,8 @@ module.exports = class extends React.Component {
     this.updateUser = this.updateUser.bind(this);
     this.addIp = this.addIp.bind(this);
     this.removeIp = this.removeIp.bind(this);
+    this.addEmailmask = this.addEmailmask.bind(this);
+    this.removeEmailmask = this.removeEmailmask.bind(this);
     this.state = {
       company: null,
       showDetails: false,
@@ -44,7 +46,7 @@ module.exports = class extends React.Component {
     return this.updateUser({ add: { uid: foundUser.id } });
   }
 
-  
+
   removeUser(user) {
     return this.updateUser({ remove: { uid: user.uid || user.id } });
   }
@@ -70,6 +72,15 @@ module.exports = class extends React.Component {
     return Promise.resolve(valid);
   }
 
+  validateEmailmask(value) {
+    const atIndex = value.indexOf('@');
+    const dotIndex = value.indexOf('.');
+    const valid = value.length > 0 &&     // There is a value
+      atIndex > -1 &&                     // There is an @
+      (atIndex + 1) < dotIndex &&         // There is a domain
+      value.length - dotIndex > 1;        // There is a top-level domain
+    return Promise.resolve(valid);
+  }
 
   addIp(value) {
     let newCompany = Object.assign({}, this.state.company);
@@ -83,6 +94,21 @@ module.exports = class extends React.Component {
     let newCompany = Object.assign({}, this.state.company);
     const index = newCompany.ipFilter.findIndex(i => i === item);
     newCompany.ipFilter.splice(index, 1);
+    return this.saveCompany(newCompany);
+  }
+
+  addEmailmask(value) {
+    let newCompany = Object.assign({}, this.state.company);
+    newCompany.emailMasks = newCompany.emailMasks || [];
+    newCompany.emailMasks.push(value);
+    return this.saveCompany(newCompany);
+  }
+
+
+  removeEmailmask(item) {
+    let newCompany = Object.assign({}, this.state.company);
+    const index = newCompany.emailMasks.findIndex(i => i === item);
+    newCompany.emailMasks.splice(index, 1);
     return this.saveCompany(newCompany);
   }
 
@@ -137,8 +163,8 @@ module.exports = class extends React.Component {
       this.showCompanyDetails();
     }
   }
-  
-  
+
+
   render() {
 
     const company = this.state.company || this.props.company;
@@ -196,16 +222,16 @@ module.exports = class extends React.Component {
           ?  <div style={{ marginTop: '10px', marginBottom: '100px', minHeight: '100px' }}>
 
               <CompanyIDsAndDates company={this.state.company} />
-              
+
               <CompanyNote
                 note={this.state.company.note}
                 addCompanyNote={this.addCompanyNote}
                 saveNote={this.saveCompanyNote} />
-              
+
               <AccessRules
                 data={this.state.company.accessRules}
                 accessrules={this.props.accessrules} />
-              
+
               <ArrayItems
                 data={this.state.company.ipFilter}
                 label="IP filter"
@@ -221,11 +247,20 @@ module.exports = class extends React.Component {
                 removeUser={this.removeUser}
                 addUser={this.addUser} />
 
+              {/* Enable After API is prepared */}
+              {/*<ArrayItems*/}
+              {/*  data={this.state.company.emailMasks}*/}
+              {/*  label="Email Masks"*/}
+              {/*  note="Email Masks that receive access according to all the access rules above."*/}
+              {/*  addItem={this.addEmailmask}*/}
+              {/*  removeItem={this.removeEmailmask}*/}
+              {/*  validateItem={this.validateEmailmask} />*/}
+
               <Planinstances
                 ariaAccountNo={company.ariaAccountNo}
                 accessrules={this.props.accessrules} />
 
-            </div>  
+            </div>
           : null
         }
         <hr />
@@ -251,7 +286,7 @@ class CompanyOverview extends React.Component {
 
     const users = this.props.company.users || [];
     const userCount = this.props.company.userCount || users.length;
-    
+
     const planinstances = this.props.company.planinstances || [];
     const planinstanceCount = this.props.company.planinstanceCount || planinstances.length;
 
@@ -340,7 +375,7 @@ class CompanyIDsAndDates extends React.Component {
               <tbody>
                 <tr>
                   <td><Link to={`/companies?id=${ company._id }`}>{ company._id }</Link></td>
-                  <td>{ created }</td>                  
+                  <td>{ created }</td>
                   <td>{ status }</td>
                 </tr>
               </tbody>
