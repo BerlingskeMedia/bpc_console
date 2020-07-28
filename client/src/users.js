@@ -13,7 +13,7 @@ module.exports = class extends React.Component {
     document.title = 'BPC - Users';
   }
 
-  
+
   setUsers(users) {
     // We clear state so that it triggers a re-render in the SearchResult component
     this.setState({users: []});
@@ -265,7 +265,7 @@ class ShowFullUser extends React.Component {
   componentDidMount() {
     this.getUserData(this.props.user._id);
   }
-  
+
   componentDidUpdate(prevProps) {
     if (this.props.user._id !== prevProps.user._id) {
       this.getUserData(this.props.user._id);
@@ -332,7 +332,7 @@ class UserDetails extends React.Component {
       );
     }
 
-    const styleProviderColor = 
+    const styleProviderColor =
       user.provider === 'gigya' ? "#ff0000" : // Red
       user.provider === 'google' ? "#0000ff" : // Blue
       "#333"; // Standard dark
@@ -384,6 +384,8 @@ class Tools extends React.Component {
           <div className="col-xs-6">
             <GigyaResetPassword user={ user } />
             <RecalcPermissionsButton user={ user } />
+            <hr />
+            <GigyaFinalizeAccount user={ user } />
           </div>
         </div>
       </div>
@@ -504,6 +506,93 @@ class GigyaResetPassword extends React.Component {
   }
 }
 
+class GigyaFinalizeAccount extends React.Component {
+  constructor(props){
+    super(props);
+    this.showConfirm = this.showConfirm.bind(this);
+    this.finalizeRegistration = this.finalizeRegistration.bind(this);
+    this.state = {
+      showConfirmReset: false,
+      confirmResetTimeout: null,
+      resetSuccesfulFadeOutTimeout: null
+    }
+  }
+
+  showConfirm() {
+
+    const confirmResetTimeout = setTimeout(() => {
+      this.setState({ showConfirmReset: false });
+    }, 2000);
+
+    this.setState({
+      showConfirmReset: true,
+      confirmResetTimeout
+    });
+  }
+
+  finalizeRegistration() {
+    const payload = {
+      loginID: this.props.user.email,
+      password: this.passwordInput.value
+    }
+
+    return Bpc.request('/gigya/finalizeRegistration', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    })
+      .then(() => {
+        this.newPasswordInput.value = '';
+        $('.finalizeSuccess').fadeIn(100);
+        if(this.state.resetSuccesfulFadeOutTimeout) {
+          clearTimeout(this.state.messageSentSuccesfulFadeOutTimeout);
+        }
+
+        const newResetSuccesfulFadeOutTimeout = setTimeout(
+          function() {
+            $('.finalizeSuccess').fadeOut(600);
+          },
+          3000
+        );
+
+        this.setState({
+          resetSuccesfulFadeOutTimeout: newResetSuccesfulFadeOutTimeout
+        });
+      })
+      .catch(err => {
+        alert('Error');
+      });
+  }
+
+  render() {
+    if(this.props.user.provider !== 'gigya') {
+      return null;
+    }
+    return(
+      <div className="form-inline">
+        <div>
+          In case of user not being able to log in, even after password reset, you can try:
+        </div>
+        <div className="form-group">
+          <input
+            type="text"
+            name="passwordInput"
+            className="form-control input"
+            placeholder="Current password"
+            disabled={this.state.showConfirmReset}
+            ref={(passwordInput) => this.passwordInput = passwordInput} />
+        </div>
+        <span>&nbsp;</span>
+        <button type="button" className="btn btn btn-default" onClick={this.showConfirm} disabled={this.state.showConfirmReset}>Finalize user account</button>
+        <span>&nbsp;</span>
+        { this.state.showConfirmReset
+          ? <button type="button" className="btn btn btn-danger" onClick={this.finalizeRegistration}>Confirm</button>
+          : null
+        }
+        <span className="finalizeSuccess" style={{color: '#008000', verticalAlign: 'middle', marginLeft: '10px', display: 'none'}}>Finalize account</span>
+      </div>
+    );
+  }
+}
 
 class RecalcPermissionsButton extends React.Component {
 
@@ -668,7 +757,7 @@ class Permissions extends React.Component {
     }
 
     var navItems = this.state.scopes.map(function (name, index) {
-      
+
       const isActive = this.state.activeTab === name;
 
       return (
@@ -746,7 +835,7 @@ class PermissionScope extends React.Component {
   componentDidMount() {
     this.getPermissions(this.props)
   }
-  
+
   componentDidUpdate(prevProps) {
     if (this.props.scope !== prevProps.scope || this.props.user !== prevProps.user) {
       this.getPermissions(this.props)
@@ -797,7 +886,7 @@ class DataScopeTable extends React.Component {
 
     let rows = [
       <EmField key={name} name={name} data="(See array items below)" />
-      
+
     ];
 
 
