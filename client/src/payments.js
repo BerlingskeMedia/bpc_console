@@ -107,7 +107,7 @@ class PaymentSearch extends React.Component {
       foundUser: null,
       userSearchBoxHasInput: false,
       searchFields: {
-        agreement_id: '',
+        agreementId: '',
         orderId: '',
         ticket: '',
         ariaPlanID: '',
@@ -216,7 +216,7 @@ class PaymentSearch extends React.Component {
   }
 
   setAgreement(e) {
-    this.setState({searchFields: { ...this.state.searchFields, agreement_id: e.target.value}});
+    this.setState({searchFields: { ...this.state.searchFields, agreementId: e.target.value}});
   }
   setOrder(e) {
     this.setState({searchFields: { ...this.state.searchFields, orderId: e.target.value }});
@@ -270,7 +270,7 @@ class PaymentSearch extends React.Component {
                 <div style={{ paddingLeft: '4px', color: 'darkgrey' }}><small><em>{ userSearchFeedbackReadable }</em></small></div>
             </div>
           </div>
-          <PaymentSearchInput type="text" name="agreement_id" id="agreement_id" onChange={this.setAgreement} placeholder="MobilePay agreement ID" />
+          <PaymentSearchInput type="text" name="agreementId" id="agreementId" onChange={this.setAgreement} placeholder="MobilePay agreement ID" />
           <PaymentSearchInput type="text" name="orderId" id="orderId" onChange={this.setOrder} placeholder="Order Id" />
           <PaymentSearchInput type="text" name="ticket" id="ticket" onChange={this.setTicket} placeholder="Dibs ticket" />
           <PaymentSearchInput type="text" name="ariaPlanID" id="ariaPlanID" onChange={this.setPlanID} placeholder="Aria Plan Id" />
