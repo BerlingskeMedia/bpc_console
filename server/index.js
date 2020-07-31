@@ -25,11 +25,15 @@ const goodOptions = {
   }
 };
 
-
 const init = async () => {
 
   await server.register(Inert);
   await server.register(HapiBpc);
+
+  await server.ext('onPreResponse', function (request, reply) {
+    request.response.header('X-Frame-Options', 'DENY');
+    return reply.continue;
+  })
 
   server.route({
     method: 'GET',
