@@ -559,7 +559,7 @@ class GigyaFinalizeAccount extends React.Component {
         });
       })
       .catch(err => {
-        alert('Error');
+        console.log(err);
       });
   }
 
