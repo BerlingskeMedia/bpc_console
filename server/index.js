@@ -31,7 +31,14 @@ const init = async () => {
   await server.register(HapiBpc);
 
   await server.ext('onPreResponse', function (request, reply) {
-    request.response.header('X-Frame-Options', 'DENY');
+    const {response} = request;
+
+    if (response.isBoom) {
+      response.output.headers['X-Frame-Options'] = 'DENY';
+    } else {
+      response.header('X-Frame-Options', 'DENY');
+    }
+
     return reply.continue;
   })
 
