@@ -247,14 +247,13 @@ module.exports = class extends React.Component {
                 removeUser={this.removeUser}
                 addUser={this.addUser} />
 
-              {/* Enable After API is prepared */}
-              {/*<ArrayItems*/}
-              {/*  data={this.state.company.emailMasks}*/}
-              {/*  label="Email Masks"*/}
-              {/*  note="Email Masks that receive access according to all the access rules above."*/}
-              {/*  addItem={this.addEmailmask}*/}
-              {/*  removeItem={this.removeEmailmask}*/}
-              {/*  validateItem={this.validateEmailmask} />*/}
+              <ArrayItems
+                data={this.state.company.emailMasks}
+                label="Email Masks"
+                note="Email Masks that receive access according to all the access rules above."
+                addItem={this.addEmailmask}
+                removeItem={this.removeEmailmask}
+                validateItem={this.validateEmailmask} />
 
               <Planinstances
                 ariaAccountNo={company.ariaAccountNo}
