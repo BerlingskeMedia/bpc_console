@@ -194,13 +194,13 @@ class PaymentSearch extends React.Component {
       return;
     }
 
-    const search = encodeURIComponent(`${ searchParams.join('&') }`);
+    const search = searchParams.join('&');
     window.history.pushState({ search: search }, "search", `/payments?search=${search}`);
     if(this.state.foundUser) {
-    this.setState({ searchInProgress: true }, () => {
-      this.props.getPayments('', `/admin/user/${this.state.foundUser.id}/order`)
-      .finally(() => this.setState({ searchInProgress: false }));
-    })
+      this.setState({ searchInProgress: true }, () => {
+        this.props.getPayments('', `/admin/user/${this.state.foundUser.id}/order`)
+        .finally(() => this.setState({ searchInProgress: false }));
+      })
     } else {
       this.setState({ searchInProgress: true }, () => {
         this.props.getPayments('', `/admin/order?${search}`)
