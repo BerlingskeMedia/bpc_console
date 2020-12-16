@@ -9,7 +9,6 @@ const request = (path, options = {}) => {
   } else if (process.env.BPC_URL !== '') {
     bpc_url = process.env.BPC_URL;
   }
-  console.log('BPC URL:', bpc_url);
 
   if(!bpc_url) {
     console.error('BPC URL missing');
@@ -20,7 +19,7 @@ const request = (path, options = {}) => {
       ...options,
       headers: {
         ...options.headers,
-        'content-Type': 'application/json'
+        'Content-Type': 'application/json'
       }
   };
   const _request = new Request(`${ bpc_url }${ path }`, opt);

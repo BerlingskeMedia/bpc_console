@@ -9,7 +9,6 @@ const request = (path, options = {}) => {
   } else if (process.env.BPP_URL !== '') {
     bpp_url = process.env.BPP_URL;
   }
-  console.log('BPP URL:', bpp_url);
 
   if(!bpp_url) {
     console.error('BPP URL missing');

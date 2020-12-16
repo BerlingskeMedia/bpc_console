@@ -9,7 +9,6 @@ const request = (path, options = {}) => {
   } else if (process.env.PM_URL !== '') {
     pm_url = process.env.PM_URL;
   }
-  console.log('PM URL:', pm_url);
 
   if(!pm_url) {
     console.error('PaymentManager URL missing');
