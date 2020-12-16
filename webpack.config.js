@@ -1,4 +1,5 @@
-var path = require('path');
+const path = require('path');
+const webpack = require('webpack');
 
 module.exports = {
   target: 'web',
@@ -26,7 +27,15 @@ module.exports = {
       },
     ]
   },
-  plugins: [],
+  plugins: [
+    new webpack.DefinePlugin({
+      'process.env': {
+        'BPP_URL': JSON.stringify(process.env.BPP_URL),
+        'BPC_URL': JSON.stringify(process.env.BPC_URL),
+        'PM_URL': JSON.stringify(process.env.PM_URL),
+      }
+    }),
+  ],
   watch: false,
   watchOptions: {
     poll: (process.env.SITE_ENVIRONMENT == 'docker') ? true : false // for Dockerized local development environment files sync

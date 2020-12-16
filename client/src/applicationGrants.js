@@ -123,7 +123,7 @@ module.exports = class extends React.Component {
       return Promise.resolve(data);
     });
   }
-  
+
   componentDidUpdate(prevProps) {
     if (this.props.application && this.props.application.id &&
       this.props.application.id !== prevProps.application.id) {
@@ -132,7 +132,7 @@ module.exports = class extends React.Component {
       this.getGrants({});
     }
   }
-  
+
   render() {
 
     const scope = this.props.application.scope;
@@ -534,7 +534,7 @@ class Grant extends React.Component {
       : null;
 
     const addRoleButton = this.state.value !== 'N/A' ? <button type="button" className="btn btn-info btn-xs" onClick={this.addRoleToGrantScope} style={{ marginTop: '2px' }}>Add role</button> : null;
-    
+
     return (
       <tr>
         <td className="col-xs-4">
@@ -576,7 +576,7 @@ class ApplicationUser extends React.Component {
       user: null
     };
   }
-  
+
   getUser(grant) {
     return Bpc.request(`/users/${grant.user}`)
     .then(data => {

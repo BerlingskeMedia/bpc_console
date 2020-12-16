@@ -38,7 +38,7 @@ To build and serve the application, run:
 npm run dev
 ```
 
-The following ENV vers need to be set:
+The following ENV vars need to be set:
 
 * BPC_APP_ID=application_id
 * BPC_APP_SECRET=FDGdf8345kjhdfgkDFEk7843y5HF23Fg
@@ -53,3 +53,21 @@ webpack
 ```
 
 Note: Building the frontend application is already done in 1) when running `npm run dev`, or 2) when the Docker images is build.
+
+# Work with docker
+## prepare env
+`
+ cp ./env.dev. ./env
+`
+
+## define hosts
+add to /etc/hosts
+`
+127.0.0.1 console.local
+`
+## build + serve
+```
+docker-compose -f docker-compose.dev.yaml up --build
+```
+
+check at http://console.local:8086/

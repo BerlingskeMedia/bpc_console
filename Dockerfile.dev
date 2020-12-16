@@ -1,0 +1,23 @@
+FROM node:10.16-alpine
+
+ARG NODE=production
+ENV NODE_ENV=${NODE}
+ENV PATH=$PATH:/build/node_modules/.bin
+
+WORKDIR /build
+
+ADD package.json .
+ADD package-lock.json .
+
+# Installing packages
+RUN npm install
+
+# Building the client
+ADD ./client ./client
+ADD webpack.config.js .
+RUN webpack
+
+ADD ./server ./server
+
+# Exposing our endpoint to Docker.
+EXPOSE  8000

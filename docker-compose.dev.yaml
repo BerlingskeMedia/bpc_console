@@ -1,0 +1,17 @@
+version: "3.4"
+services:
+  bpc_console:
+    build:
+      args:
+        - NODE=development
+      context: ./
+      dockerfile: Dockerfile.dev
+    container_name: bpc_console
+    ports:
+      - 8086:8000
+    volumes:
+      - ./server:/build/server
+      - ./client:/build/client
+    env_file:
+      - .env
+    command: npm run dev
