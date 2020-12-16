@@ -6,6 +6,8 @@ const request = (path, options = {}) => {
 
   if(typeof local_bpp_url === 'string' && local_bpp_url.length > 0) {
     bpp_url = local_bpp_url;
+  } else if (process.env.BPP_URL !== '') {
+    bpp_url = process.env.BPP_URL;
   }
 
   if(!bpp_url) {
@@ -24,7 +26,7 @@ const request = (path, options = {}) => {
       _request.headers.set('Authorization', result.header);
     }
   } catch(ex) { }
-  
+
   return fetch(_request)
   .then(response => {
 

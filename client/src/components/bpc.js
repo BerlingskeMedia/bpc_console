@@ -6,6 +6,8 @@ const request = (path, options = {}) => {
 
   if(typeof local_bpc_url === 'string' && local_bpc_url.length > 0) {
     bpc_url = local_bpc_url;
+  } else if (process.env.BPC_URL !== '') {
+    bpc_url = process.env.BPC_URL;
   }
 
   if(!bpc_url) {
@@ -13,13 +15,20 @@ const request = (path, options = {}) => {
     return;
   }
 
-  const _request = new Request(`${ bpc_url }${ path }`, options);
+  const opt = {
+      ...options,
+      headers: {
+        ...options.headers,
+        'Content-Type': 'application/json'
+      }
+  };
+  const _request = new Request(`${ bpc_url }${ path }`, opt);
 
   let credentials;
 
   try {
     credentials =  JSON.parse(window.sessionStorage.getItem('bpc_console_ticket'));
-    
+
     if(credentials) {
       const result = hawk.client.header(_request.url, _request.method, { credentials, app: credentials.app });
       _request.headers.set('Authorization', result.header);
@@ -39,7 +48,7 @@ const request = (path, options = {}) => {
         }
       });
     }
-    
+
     return Promise.reject(response);
   });
 };

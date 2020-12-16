@@ -25,13 +25,14 @@
     "@babel/preset-env": "^7.11.5",
     "@babel/preset-react": "^7.10.4",
     "babel-loader": "^8.1.0",
+    "nodemon": "^2.0.6",
     "webpack": "4.43.0",
     "webpack-cli": "3.3.11"
   },
   "scripts": {
     "start": "node $npm_package_main",
     "client:build": "npx webpack",
-    "dev": "npx webpack --watch & npx nodemon --inspect --ignore 'client/' server",
+    "dev": "webpack --watch & nodemon --inspect --ignore 'client/' server",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
