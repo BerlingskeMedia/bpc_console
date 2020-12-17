@@ -3,6 +3,7 @@ FROM node:10.16-alpine as build
 MAINTAINER Daniel Kokott <dako@berlingskemedia.dk>
 
 WORKDIR /build
+ENV PATH=$PATH:/build/node_modules/.bin
 
 ADD package.json .
 ADD package-lock.json .
