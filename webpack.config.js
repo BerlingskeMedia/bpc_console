@@ -30,9 +30,9 @@ module.exports = {
   plugins: [
     new webpack.DefinePlugin({
       'process.env': {
-        'BPP_URL': JSON.stringify(process.env.BPP_URL),
-        'BPC_URL': JSON.stringify(process.env.BPC_URL),
-        'PM_URL': JSON.stringify(process.env.PM_URL),
+        'BPP_URL': JSON.stringify(process.env.BPP_URL || ''),
+        'BPC_URL': JSON.stringify(process.env.BPC_URL || ''),
+        'PM_URL': JSON.stringify(process.env.PM_URL || ''),
       }
     }),
   ],
