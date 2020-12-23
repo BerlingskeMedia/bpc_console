@@ -67,7 +67,7 @@ add to /etc/hosts
 `
 ## build + serve
 ```
-docker-compose -f docker-compose.dev.yaml up --build
+docker-compose -f docker-compose.dev.yml up --build
 ```
 
 check at http://console.local:8086/
