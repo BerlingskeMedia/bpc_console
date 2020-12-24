@@ -8,8 +8,8 @@ import CompanyIpAccessScope from './companyIpAccessScope';
 import CompanyUsers from './companyUsers';
 import CompanyPlaninstances from './companyPlaninstances';
 import { validateIpv4 } from '../validators/validateIp';
-
-import * as ArrayItems from "../components/arrayItems";
+import { validateEmailmask } from '../validators/email';
+import * as ArrayItems from '../components/arrayItems';
 import * as Bpp from "../components/bpp";
 
 export default class Company extends React.Component {
@@ -64,19 +64,12 @@ export default class Company extends React.Component {
         }).then((company) => this.setState({company}));
     }
 
-
     validateIp(value) {
         return Promise.resolve(validateIpv4(value))
     }
 
     validateEmailmask(value) {
-        const atIndex = value.indexOf('@');
-        const dotIndex = value.indexOf('.');
-        const valid = value.length > 0 &&     // There is a value
-            atIndex > -1 &&                     // There is an @
-            (atIndex + 1) < dotIndex &&         // There is a domain
-            value.length - dotIndex > 1;        // There is a top-level domain
-        return Promise.resolve(valid);
+        return Promise.resolve(validateEmailmask(value))
     }
 
     addIp(value) {

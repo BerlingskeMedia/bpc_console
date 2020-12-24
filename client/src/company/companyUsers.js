@@ -1,11 +1,11 @@
 import React from 'react';
 import CompanyUser from './companyUser';
 import * as Bpc from '../components/bpc';
+import { validateEmail } from '../validators/email';
 
 export default class CompanyUsers extends React.Component {
   constructor(props){
     super(props);
-    this.validateEmail = this.validateEmail.bind(this);
     this.createUser = this.createUser.bind(this);
     this.searchUser = this.searchUser.bind(this);
     this.addUser = this.addUser.bind(this);
@@ -43,7 +43,7 @@ export default class CompanyUsers extends React.Component {
     const value = this.findUserInput.value;
     if(value.length > 0) {
 
-      const inputCreateUserValid = this.validateEmail(value);
+      const inputCreateUserValid = validateEmail(value);
 
       // Setting the inputAddUserValid flag now, because there is one second delay
       //  before se start searching for users in BPC
@@ -67,15 +67,10 @@ export default class CompanyUsers extends React.Component {
     }
   }
 
-  validateEmail(email) {
-    const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    return re.test(String(email).toLowerCase());
-  }
-
   createUser() {
     const value = this.findUserInput.value;
 
-    if(!this.validateEmail(value)) {
+    if(!validateEmail(value)) {
       return Promise.reject();
     }
 

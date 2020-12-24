@@ -1,4 +1,5 @@
 import React from 'react';
+import { validateEmailmask } from '../validators/email';
 
 export default class CompanyPlaninstancesMasks extends React.Component {
     constructor(props) {
@@ -21,14 +22,9 @@ export default class CompanyPlaninstancesMasks extends React.Component {
     }
 
     validateEmailmask(value) {
-        const atIndex = value.indexOf('@');
-        const dotIndex = value.indexOf('.');
-        const valid = value.length > 0 &&     // There is a value
-            atIndex > -1 &&                     // There is an @
-            (atIndex + 1) < dotIndex &&         // There is a domain
-            value.length - dotIndex > 1;        // There is a top-level domain
-        this.setState({validMask: valid});
-        return valid;
+        const validMask = validateEmailmask(value);
+        this.setState({ validMask });
+        return validMask;
     }
 
     addEmailmask() {
