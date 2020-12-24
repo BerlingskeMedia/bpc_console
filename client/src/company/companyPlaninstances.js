@@ -1,6 +1,6 @@
-import React from "react";
-import CompanyPlaninstance from "./companyPlaninstance";
-import * as Bpp from "../components/bpp";
+import React from 'react';
+import CompanyPlaninstance from './companyPlaninstance';
+import * as Bpp from '../components/bpp';
 
 export default class CompanyPlaninstances extends React.Component {
     constructor(props) {

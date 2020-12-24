@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 export default class CompanyPlaninstancesMasks extends React.Component {
     constructor(props) {
@@ -41,10 +41,11 @@ export default class CompanyPlaninstancesMasks extends React.Component {
         }
     }
 
-
     render() {
         let userSearchFeedback = null;
         let userSearchBoxClass = 'form-group has-feedback';
+        const _masks = this.props.masks || [];
+
         if (this.state.userInput) {
             if (this.state.validMask) {
                 userSearchFeedback =
@@ -56,7 +57,7 @@ export default class CompanyPlaninstancesMasks extends React.Component {
                 userSearchBoxClass += ' has-error'
             }
         }
-        const _masks = this.props.masks || [];
+
         const masks = _masks.map((mask) => {
             return (
                 <tr key={mask}>
@@ -75,6 +76,7 @@ export default class CompanyPlaninstancesMasks extends React.Component {
                 </tr>
             );
         });
+
         return (
             <table className="table table-striped" style={{marginTop: '25px'}}>
                 <div><strong>Email Masks</strong></div>

@@ -1,13 +1,13 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import CompanyOverview from "./companyOverview";
-import CompanyIDsAndDates from "./companyIDsAndDates";
-import CompanyNote from "./companyNote";
-import CompanyIpAccessGlobal from "./companyIpAccessGlobal";
-import CompanyIpAccessScope from "./companyIpAccessScope";
-import CompanyUsers from "./companyUsers";
-import CompanyPlaninstances from "./companyPlaninstances";
-import {validateIpv4} from "../validators/validateIp";
+import React from 'react';
+import { Link } from 'react-router-dom';
+import CompanyOverview from './companyOverview';
+import CompanyIDsAndDates from './companyIDsAndDates';
+import CompanyNote from './companyNote';
+import CompanyIpAccessGlobal from './companyIpAccessGlobal';
+import CompanyIpAccessScope from './companyIpAccessScope';
+import CompanyUsers from './companyUsers';
+import CompanyPlaninstances from './companyPlaninstances';
+import { validateIpv4 } from '../validators/validateIp';
 
 import * as ArrayItems from "../components/arrayItems";
 import * as Bpp from "../components/bpp";
@@ -38,7 +38,6 @@ export default class Company extends React.Component {
         };
     }
 
-
     addCompanyNote(note) {
         let company = Object.assign({}, this.state.company);
         company.note = note;
@@ -49,24 +48,20 @@ export default class Company extends React.Component {
         return this.saveCompany(this.state.company);
     }
 
-
     addUser(foundUser) {
         return this.updateUser({add: {uid: foundUser.id}});
     }
 
-
     removeUser(user) {
         return this.updateUser({remove: {uid: user.uid || user.id}});
     }
-
 
     updateUser(payload) {
         const id = this.props.company._id;
         return Bpp.request(`/api/companies/${id}/users`, {
             method: 'POST',
             body: JSON.stringify(payload)
-        })
-            .then((company) => this.setState({company}));
+        }).then((company) => this.setState({company}));
     }
 
 
@@ -90,7 +85,6 @@ export default class Company extends React.Component {
         newCompany.ipFilter.push(value);
         return this.saveCompany(newCompany);
     }
-
 
     removeIp(item) {
         let newCompany = Object.assign({}, this.state.company);
@@ -195,7 +189,6 @@ export default class Company extends React.Component {
         }, [])
     }
 
-
     render() {
         const company = this.state.company || this.props.company;
         const accessRules = this.reduceAccessRules(company.accessRules || []);
@@ -228,12 +221,6 @@ export default class Company extends React.Component {
                                 }
                             </div>
                         </div>
-                        {/* { this.state.showLoader
-              ? (<div className="loadSpinner">
-                  <img src="/assets/load_spinner.gif" />
-                </div>)
-              : null
-            } */}
                     </div>
                     <div className="col-xs-4">
                         {this.state.showDetails

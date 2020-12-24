@@ -1,5 +1,5 @@
-import React from "react";
-import {Link} from "react-router-dom";
+import React from 'react';
+import { Link } from 'react-router-dom';
 import * as Bpc from "../components/bpc";
 
 export default class CompanyPlaninstancesUser extends React.Component {
@@ -10,7 +10,6 @@ export default class CompanyPlaninstancesUser extends React.Component {
             foundUser: null
         };
     }
-
 
     getUserDetails() {
         const user = this.props.user;
@@ -25,11 +24,9 @@ export default class CompanyPlaninstancesUser extends React.Component {
         }
     }
 
-
     componentDidMount() {
         this.getUserDetails();
     }
-
 
     render() {
         const user = this.state.foundUser || this.props.user;

@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import Company from "./company";
 const Bpp = require('./components/bpp');
 const Bpc = require('./components/bpc');

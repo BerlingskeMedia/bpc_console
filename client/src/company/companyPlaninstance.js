@@ -1,9 +1,9 @@
-import React from "react";
-import CompanyPlaninstancesMasks from "./companyPlaninstancesMasks";
-import CompanyPlaninstancesUsers from "./companyPlaninstancesUsers";
-import CompanyPlaninstancesAddUser from "./companyPlaninstancesAddUser";
-import CompanyPlaninstancesNote from "./companyPlaninstancesNote";
-import * as Bpp from "../components/bpp";
+import React from 'react';
+import CompanyPlaninstancesMasks from './companyPlaninstancesMasks';
+import CompanyPlaninstancesUsers from './companyPlaninstancesUsers';
+import CompanyPlaninstancesAddUser from './companyPlaninstancesAddUser';
+import CompanyPlaninstancesNote from './companyPlaninstancesNote';
+import * as Bpp from '../components/bpp';
 
 export default class CompanyPlaninstance extends React.Component {
     constructor(props) {
@@ -20,14 +20,12 @@ export default class CompanyPlaninstance extends React.Component {
         };
     }
 
-
     addEmailmask(value) {
         let newPlaninstance = Object.assign({}, this.state.planinstance);
         newPlaninstance.emailMasks = newPlaninstance.emailMasks || [];
         newPlaninstance.emailMasks.push(value);
         return this.updatePlaninstanceState(newPlaninstance).then(() => (this.savePlaninstance(this.state.planinstance)));
     }
-
 
     removeEmailmask(item) {
         let newPlaninstance = Object.assign({}, this.state.planinstance);
@@ -36,13 +34,11 @@ export default class CompanyPlaninstance extends React.Component {
         return this.updatePlaninstanceState(newPlaninstance).then(() => (this.savePlaninstance(this.state.planinstance)));
     }
 
-
     updatePlaninstanceState(planinstance) {
         return new Promise((resolve) => {
             return this.setState({planinstance}, resolve);
         });
     }
-
 
     addUser(foundUser) {
         return this.updateUser({add: {uid: foundUser.id}});
@@ -53,28 +49,23 @@ export default class CompanyPlaninstance extends React.Component {
         return this.updateUser({remove: {uid: user.uid}});
     }
 
-
     updateUser(payload) {
         const id = this.props.id;
         return Bpp.request(`/api/planinstances/${id}/users`, {
             method: 'POST',
             body: JSON.stringify(payload)
-        })
-            .then((planinstance) => this.setState({planinstance}));
+        }).then((planinstance) => this.setState({planinstance}));
     }
-
 
     savePlaninstance(planinstance) {
         const id = this.props.id;
         return Bpp.request(`/api/planinstances/${id}`, {
             method: 'PUT',
             body: JSON.stringify(planinstance)
-        })
-            .catch((err) => {
-                alert('Error when saving!');
-            });
+        }).catch((err) => {
+            alert('Error when saving!');
+        });
     }
-
 
     componentDidMount() {
         if (this.props.id) {
@@ -83,9 +74,7 @@ export default class CompanyPlaninstance extends React.Component {
         }
     }
 
-
     render() {
-
         if (!this.state.planinstance) {
             return null;
         }
@@ -126,7 +115,6 @@ export default class CompanyPlaninstance extends React.Component {
                                   aria-hidden="true"></span>);
             }
         }
-
 
         return (
             <tr>

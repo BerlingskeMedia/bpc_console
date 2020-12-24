@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 export default class CompanyIpAccessGlobal extends React.Component {
     constructor(props) {
@@ -31,11 +31,7 @@ export default class CompanyIpAccessGlobal extends React.Component {
                         <td>{accessRule.accessFeature}</td>
                         <td>{accessRule.titleDomain}</td>
                         <td>{accessRoles}</td>
-                        <td style={{textAlign: 'right'}}>
-                            {/* <button type="button" className='btn btn-xs btn-danger' onClick={this.props.removeItem} style={{ minWidth: '90px'}}>
-              <span className='glyphicon glyphicon-trash' aria-hidden="true"></span> <span>Remove</span>
-            </button> */}
-                        </td>
+                        <td style={{textAlign: 'right'}}></td>
                     </tr>
                 );
             });

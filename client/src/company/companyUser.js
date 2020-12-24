@@ -1,6 +1,6 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import * as Bpc from "../components/bpc";
+import React from 'react';
+import { Link } from 'react-router-dom';
+import * as Bpc from '../components/bpc';
 
 export default class CompanyUser extends React.Component {
     constructor(props) {
@@ -27,12 +27,10 @@ export default class CompanyUser extends React.Component {
             });
     }
 
-
     showAddedByDetails() {
         this.getAddedByDetails()
             .then(() => this.setState({showAddedByDetails: true}))
     }
-
 
     getAddedByDetails() {
         if (this.props.user.addedBy && this.props.user.addedBy.user) {
@@ -43,14 +41,11 @@ export default class CompanyUser extends React.Component {
         }
     }
 
-
     componentDidMount() {
         this.getUserDetails(this.props.user.uid);
     }
 
-
     render() {
-
         let item = <span>{this.props.user.uid}</span>
         const foundUser = this.state.foundUser;
 

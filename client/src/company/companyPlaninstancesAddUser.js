@@ -1,5 +1,5 @@
-import React from "react";
-import * as Bpc from "../components/bpc";
+import React from 'react';
+import * as Bpc from '../components/bpc';
 
 export default class CompanyPlaninstancesAddUser extends React.Component {
     constructor(props) {
@@ -13,7 +13,6 @@ export default class CompanyPlaninstancesAddUser extends React.Component {
             foundUser: null
         };
     }
-
 
     searchUser() {
         const input = this.addUserInput.value;
@@ -29,13 +28,11 @@ export default class CompanyPlaninstancesAddUser extends React.Component {
         }
     }
 
-
     onChangeAddUser() {
         this.setState({foundUser: null, userSearchCompleted: false});
         clearTimeout(this.state.searchUserTimer);
         this.setState({searchUserTimer: setTimeout(this.searchUser, 1000)});
     }
-
 
     addUser() {
         const foundUser = this.state.foundUser;
@@ -52,15 +49,11 @@ export default class CompanyPlaninstancesAddUser extends React.Component {
         }
     }
 
-
-    componentDidMount() {
-    }
-
-
     render() {
-
         let userSearchFeedback = null;
         let userSearchBoxClass = 'form-group has-feedback';
+        const addButtonDisabled = !this.state.userSearchCompleted || this.state.addingUser || !this.state.foundUser;
+
         if (this.state.userSearchCompleted) {
             if (this.state.foundUser) {
                 userSearchFeedback =
@@ -72,8 +65,6 @@ export default class CompanyPlaninstancesAddUser extends React.Component {
                 userSearchBoxClass += ' has-error'
             }
         }
-
-        const addButtonDisabled = !this.state.userSearchCompleted || this.state.addingUser || !this.state.foundUser;
 
         return (
             <div className={userSearchBoxClass} style={{marginTop: '5px'}}>

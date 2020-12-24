@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 export default class CompanyPlaninstancesNote extends React.Component {
   constructor(props){
@@ -41,7 +41,6 @@ export default class CompanyPlaninstancesNote extends React.Component {
   }
 
   render() {
-
     const planinstance = this.props.planinstance;
 
     return (
@@ -51,7 +50,8 @@ export default class CompanyPlaninstancesNote extends React.Component {
         rows="4"
         disabled={this.state.saveInProgress}
         onChange={this.handleChange}
-        onBlur={this.onBlur}></textarea>
+        onBlur={this.onBlur}>
+      </textarea>
     );
   }
 }

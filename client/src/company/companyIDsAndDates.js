@@ -1,6 +1,6 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import * as Bpc from "../components/bpc";
+import React from 'react';
+import { Link } from 'react-router-dom';
+import * as Bpc from '../components/bpc';
 
 export default class CompanyIDsAndDates extends React.Component {
     constructor(props) {
@@ -12,9 +12,7 @@ export default class CompanyIDsAndDates extends React.Component {
         };
     }
 
-
     retrieveAccountDetailsRequest() {
-
         const company = this.props.company;
         const ariaAccountNo = company.ariaAccountNo;
 
@@ -31,7 +29,6 @@ export default class CompanyIDsAndDates extends React.Component {
         }
     }
 
-
     componentDidMount() {
         if (this.props.company.createdBy && this.props.company.createdBy.user) {
             Bpc.request(`/users/${encodeURIComponent(this.props.company.createdBy.user)}`)
@@ -41,9 +38,7 @@ export default class CompanyIDsAndDates extends React.Component {
 
 
     render() {
-
         const company = this.props.company;
-
         const createdTitle = (this.state.createdByUser ? this.state.createdByUser.email : null) || (company.createdBy ? company.createdBy.user : '');
         const created = <span title={createdTitle}>{company.createdAt || '-'}</span>;
 

@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 export default class CompanyNote extends React.Component {
     constructor(props) {
@@ -11,17 +11,14 @@ export default class CompanyNote extends React.Component {
         };
     }
 
-
     handleChange(e) {
         const note = e.target.value;
         this.props.addCompanyNote(note);
     }
 
-
     onBlur(e) {
         this.saveNote();
     }
-
 
     saveNote() {
         this.setState({saveInProgress: true}, () => {
@@ -49,11 +46,6 @@ export default class CompanyNote extends React.Component {
               onChange={this.handleChange}
               onBlur={this.onBlur}></textarea>
                 </div>
-                {/* <div className="col-xs-1" style={{ textAlign: 'right' }}>
-          <button type="button" className="btn btn-sm btn-warning" onClick={this.saveNote} disabled={this.state.saveInProgress}>
-            <span className="glyphicon glyphicon-save" aria-hidden="true"></span> <span>Save</span>
-          </button>
-        </div> */}
             </div>
         );
     }

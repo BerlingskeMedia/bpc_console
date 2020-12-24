@@ -1,11 +1,10 @@
-import React from "react";
-import CompanyPlaninstancesUser from "./companyPlaninstancesUser";
+import React from 'react';
+import CompanyPlaninstancesUser from './companyPlaninstancesUser';
 
 export default class CompanyPlaninstancesUsers extends React.Component {
     constructor(props) {
         super(props);
     }
-
 
     render() {
         if (!this.props.users || !this.props.users instanceof Array) {

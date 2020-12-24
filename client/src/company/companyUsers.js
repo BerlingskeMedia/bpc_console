@@ -1,6 +1,6 @@
-import React from "react";
-import CompanyUser from "./companyUser";
-import * as Bpc from "../components/bpc";
+import React from 'react';
+import CompanyUser from './companyUser';
+import * as Bpc from '../components/bpc';
 
 export default class CompanyUsers extends React.Component {
   constructor(props){
@@ -39,7 +39,6 @@ export default class CompanyUsers extends React.Component {
     }
   }
 
-
   onChangeAddUser() {
     const value = this.findUserInput.value;
     if(value.length > 0) {
@@ -68,12 +67,10 @@ export default class CompanyUsers extends React.Component {
     }
   }
 
-
   validateEmail(email) {
     const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(String(email).toLowerCase());
   }
-
 
   createUser() {
     const value = this.findUserInput.value;
@@ -105,16 +102,13 @@ export default class CompanyUsers extends React.Component {
     });
   }
 
-
   addUser() {
     return this.addRemoveUser(this.props.addUser);
   }
 
-
   removeUser() {
     return this.addRemoveUser(this.props.removeUser);
   }
-
 
   addRemoveUser(addRemoveFunc) {
     const foundUser = this.state.foundUser;
@@ -135,9 +129,7 @@ export default class CompanyUsers extends React.Component {
     }
   }
 
-
   render() {
-
     // In case of undefined
     let users = this.props.users || [];
 
