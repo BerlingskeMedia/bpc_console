@@ -126,22 +126,18 @@ export default class Company extends React.Component {
             });
     }
 
-
     saveCompany(company) {
         const id = this.props.company._id;
         return Bpp.request(`/api/companies/${id}`, {
             method: 'PUT',
             body: JSON.stringify(company)
-        })
-            .then((response) => this.setState({
-                company: response,
-            }))
-            .catch((err) => {
-                alert('Error when saving!');
-                this.getCompany();
-            });
+        }).then((response) => this.setState({
+            company: response,
+        })).catch((err) => {
+            alert('Error when saving!');
+            this.getCompany();
+        });
     }
-
 
     showCompanyDetails() {
         this.setState({showLoader: true}, () => {
@@ -160,7 +156,6 @@ export default class Company extends React.Component {
             this.showCompanyDetails();
         }
     }
-
 
     componentDidMount() {
         if (this.props.autoLoadDetails) {
@@ -267,14 +262,16 @@ export default class Company extends React.Component {
                             note="Accepts single IPs and CIDR. All matched IPs will give access to all brands"
                             removeItem={this.removeIp}
                             addItem={this.addIp}
-                            validateItem={this.validateIp}/>
+                            validateItem={this.validateIp}
+                        />
 
                         <CompanyUsers
                             users={this.state.company.users}
                             label="Users"
                             note="Users that receive access according to all the access rules above."
                             removeUser={this.removeUser}
-                            addUser={this.addUser}/>
+                            addUser={this.addUser}
+                        />
 
                         <ArrayItems
                             data={this.state.company.emailMasks}
@@ -282,11 +279,13 @@ export default class Company extends React.Component {
                             note="Email Masks that receive access according to all the access rules above."
                             addItem={this.addEmailmask}
                             removeItem={this.removeEmailmask}
-                            validateItem={this.validateEmailmask}/>
+                            validateItem={this.validateEmailmask}
+                        />
 
                         <CompanyPlaninstances
                             ariaAccountNo={company.ariaAccountNo}
-                            accessrules={this.props.accessrules}/>
+                            accessrules={this.props.accessrules}
+                        />
 
                     </div>
                     : null
