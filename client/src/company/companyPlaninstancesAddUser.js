@@ -73,7 +73,8 @@ export default class CompanyPlaninstancesAddUser extends React.Component {
                     name="addUserInput"
                     className="form-control input-sm"
                     onChange={this.onChangeAddUser}
-                    ref={(addUserInput) => this.addUserInput = addUserInput}/>
+                    ref={(addUserInput) => this.addUserInput = addUserInput}
+                />
                 {userSearchFeedback}
                 <div style={{textAlign: 'right', marginTop: '3px'}}>
                     <button type="button" className='btn btn-xs btn-success' onClick={this.addUser}

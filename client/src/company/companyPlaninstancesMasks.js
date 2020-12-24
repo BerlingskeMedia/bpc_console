@@ -75,27 +75,29 @@ export default class CompanyPlaninstancesMasks extends React.Component {
 
         return (
             <table className="table table-striped" style={{marginTop: '25px'}}>
-                <div><strong>Email Masks</strong></div>
                 <tbody>
-                {masks}
-                <tr>
-                    <div className={userSearchBoxClass} style={{marginTop: '5px'}}>
-                        <input
-                            type="text"
-                            name="addMaskInput"
-                            onChange={this.onChangeAddMask}
-                            className="form-control input-sm"
-                            ref={(addMaskInput) => this.addMaskInput = addMaskInput}
-                        />
-                        {userSearchFeedback}
-                        <div style={{textAlign: 'right', marginTop: '3px'}}>
-                            <button type="button" className='btn btn-xs btn-success' onClick={this.addEmailmask}
-                                    style={{minWidth: '90px'}}>
-                                <span className='glyphicon glyphicon-plus' aria-hidden="true"></span> <span>Add</span>
-                            </button>
-                        </div>
-                    </div>
-                </tr>
+                    <tr><th colSpan={2}><div><strong>Email Masks</strong></div></th></tr>
+                    {masks}
+                    <tr>
+                        <td colSpan={2}>
+                            <div className={userSearchBoxClass} style={{marginTop: '5px'}}>
+                                <input
+                                    type="text"
+                                    name="addMaskInput"
+                                    onChange={this.onChangeAddMask}
+                                    className="form-control input-sm"
+                                    ref={(addMaskInput) => this.addMaskInput = addMaskInput}
+                                />
+                                {userSearchFeedback}
+                                <div style={{textAlign: 'right', marginTop: '3px'}}>
+                                    <button type="button" className='btn btn-xs btn-success' onClick={this.addEmailmask}
+                                            style={{minWidth: '90px'}}>
+                                        <span className='glyphicon glyphicon-plus' aria-hidden="true"></span> <span>Add</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         );
