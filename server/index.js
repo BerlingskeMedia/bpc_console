@@ -68,17 +68,6 @@ const init = async () => {
 
   server.route({
     method: 'get',
-    path: '/assets/hawk.js',
-    config: {
-      tags: ['good_exclude']
-    },
-    handler: {
-      file: './node_modules/@hapi/hawk/lib/browser.js'
-    }
-  });
-
-  server.route({
-    method: 'get',
     path: '/assets/{param*}',
     config: {
       tags: ['good_exclude']
