@@ -1,7 +1,7 @@
 import React from 'react';
 
 export default class CompanyPlaninstancesNote extends React.Component {
-  constructor(props){
+  constructor(props) {
     super(props);
     this.handleChange = this.handleChange.bind(this);
     this.onBlur = this.onBlur.bind(this);
@@ -16,7 +16,7 @@ export default class CompanyPlaninstancesNote extends React.Component {
   handleChange(e) {
     clearTimeout(this.state.saveTimer);
     const note = e.target.value;
-    this.setState({ note });
+    this.setState({note});
     this.setState({saveTimer: setTimeout(this.saveNote, 2500)});
   }
 
@@ -26,17 +26,17 @@ export default class CompanyPlaninstancesNote extends React.Component {
   }
 
   saveNote() {
-    if(this.state.saveInProgress){
+    if (this.state.saveInProgress) {
       return false;
     }
 
     const planinstance = this.props.planinstance;
     planinstance.note = this.state.note;
-    this.setState({ saveInProgress: true }, () => {
+    this.setState({saveInProgress: true}, () => {
       this.props.savePlaninstance(planinstance)
-      .finally(() => {
-        this.setState({ saveInProgress: false })
-      })
+          .finally(() => {
+            this.setState({saveInProgress: false})
+          })
     });
   }
 
@@ -44,13 +44,13 @@ export default class CompanyPlaninstancesNote extends React.Component {
     const planinstance = this.props.planinstance;
 
     return (
-      <textarea
-        className="form-control"
-        defaultValue={planinstance.note}
-        rows="4"
-        disabled={this.state.saveInProgress}
-        onChange={this.handleChange}
-        onBlur={this.onBlur}>
+        <textarea
+            className="form-control"
+            defaultValue={planinstance.note}
+            rows="4"
+            disabled={this.state.saveInProgress}
+            onChange={this.handleChange}
+            onBlur={this.onBlur}>
       </textarea>
     );
   }
