@@ -15,7 +15,15 @@ const request = (path, options = {}) => {
     return;
   }
 
-  const _request = new Request(`${ pm_url }${ path }`, options);
+  const opt = {
+    ...options,
+    headers: {
+      ...options.headers,
+      'Content-Type': 'application/json'
+    }
+  };
+
+  const _request = new Request(`${ pm_url }${ path }`, opt);
 
   let credentials;
   try {
