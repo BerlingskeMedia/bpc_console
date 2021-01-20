@@ -9,6 +9,7 @@ module.exports = class extends React.Component {
     this.getPayment = this.getPayment.bind(this);
     this.showPaymentDetails = this.showPaymentDetails.bind(this);
     this.showHidePaymentDetails = this.showHidePaymentDetails.bind(this);
+    this.changeStatus = this.changeStatus.bind(this);
     this.state = {
       payment: null,
       showDetails: false,
@@ -50,6 +51,18 @@ module.exports = class extends React.Component {
     }
   }
 
+  changeStatus(element) {
+    const payment = this.state.payment || this.props.payment;
+    return PM.request(`/admin/order/${payment.orderId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({
+        status: element.target.value,
+      }),
+    }).then(payment => {
+      this.setState({payment})
+      return Promise.resolve(payment);
+    });
+  }
 
   render() {
 
@@ -81,7 +94,7 @@ module.exports = class extends React.Component {
           </div>
           <div className="col" style={{ flex: 1 }}>
           { this.state.showDetails
-            ? <PaymentOverview payment={payment} />
+            ? <PaymentOverview payment={payment} changeStatus={this.changeStatus} />
             : null
           }
           </div>
@@ -131,7 +144,13 @@ class PaymentOverview extends React.Component {
           <em><small><strong>Price/Frequency Price:</strong> {this.props.payment.price || ''}/{this.props.payment.frequencyPrice || ''}</small></em>
         </div>
         <div style={{ paddingLeft: '4px' }}>
-          <em><small><strong>Status:</strong> {this.props.payment.status || ''}</small></em>
+          <em><small><strong>Status:</strong>
+            <PaymentStatusSelect
+              status={this.props.payment.status}
+              onChange={this.props.changeStatus}
+              options={[{value: 'pending'}, {value: 'success'}, {value: 'canceled'}, {value: 'failed'}]}
+            />
+          </small></em>
         </div>
         <div style={{ paddingLeft: '4px' }}>
           <em><small><strong>Transaction:</strong>
@@ -171,5 +190,17 @@ class PaymentOverview extends React.Component {
         </div>
       </div>
     );
+  }
+}
+
+class PaymentStatusSelect extends React.Component {
+  render() {
+    return(
+      <select className="form-control" defaultValue={this.props.status} onChange={this.props.onChange}>
+        {this.props.options.map(id =>
+          <option key={id.value} value={id.value}>{id.label || id.value}</option>
+        )}
+      </select>
+    )
   }
 }
