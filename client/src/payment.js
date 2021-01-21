@@ -94,7 +94,10 @@ module.exports = class extends React.Component {
           </div>
           <div className="col" style={{ flex: 1 }}>
           { this.state.showDetails
-            ? <PaymentOverview payment={payment} changeStatus={this.changeStatus} />
+            ? <PaymentOverview
+              payment={payment}
+              changeStatus={this.changeStatus}
+              authorizedToChangeStatus={this.props.authorizedToChangeStatus} />
             : null
           }
           </div>
@@ -144,12 +147,14 @@ class PaymentOverview extends React.Component {
           <em><small><strong>Price/Frequency Price:</strong> {this.props.payment.price || ''}/{this.props.payment.frequencyPrice || ''}</small></em>
         </div>
         <div style={{ paddingLeft: '4px' }}>
-          <em><small><strong>Status:</strong>
-            <PaymentStatusSelect
+          <em><small><strong>Status: </strong>
+            { this.props.authorizedToChangeStatus ?
+              <PaymentStatusSelect
               status={this.props.payment.status}
               onChange={this.props.changeStatus}
               options={[{value: 'pending'}, {value: 'success'}, {value: 'canceled'}, {value: 'failed'}]}
-            />
+              /> : this.props.payment.status || ''
+            }
           </small></em>
         </div>
         <div style={{ paddingLeft: '4px' }}>

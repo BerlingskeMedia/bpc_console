@@ -12,6 +12,7 @@ module.exports = class extends React.Component {
     this.state = {
       payments: [],
       authorized: false,
+      authorizedToChangeStatus: false,
       searchCleared: true
     };
 
@@ -35,7 +36,13 @@ module.exports = class extends React.Component {
 
   componentDidMount() {
     return PM.authorize()
-    .then(() => this.setState({ authorized: true }))
+    .then((credentials) => {
+      this.setState({
+        authorized: true,
+        authorizedToChangeStatus: credentials.scope.find(
+          element => element.includes('adminstatuschange')) !== undefined }
+        )
+    })
     .then(() => {
       const preloaded_id = getUrlParameter("id");
       if(preloaded_id) {
@@ -59,7 +66,8 @@ module.exports = class extends React.Component {
       return <Payment
               key={payment.orderId}
               payment={payment}
-              autoLoadDetails={isTheOnlyPaymentFound} />
+              autoLoadDetails={isTheOnlyPaymentFound}
+              authorizedToChangeStatus={this.state.authorizedToChangeStatus}/>
     });
 
     if(!this.state.authorized) {
