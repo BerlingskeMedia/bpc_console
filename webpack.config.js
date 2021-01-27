@@ -41,17 +41,5 @@ const bundle = {
     poll: (process.env.SITE_ENVIRONMENT == 'docker') ? true : false // for Dockerized local development environment files sync
   }
 };
-const hawk = {
-  target: 'web',
-  mode: process.env.WEBPACK_MODE || 'production', // 'development' || 'production'
-  entry: {
-    main: './node_modules/@hapi/hawk/lib/browser.js'
-  },
-  output: {
-    path: path.resolve(__dirname, 'client/build'),
-    filename: "login.js"
-  },
-  watch: false,
-};
 
-module.exports = [bundle, hawk];
+module.exports = [bundle];
