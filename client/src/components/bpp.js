@@ -1,3 +1,4 @@
+const Hawk = require('@hapi/hawk/lib/browser');
 
 const request = (path, options = {}) => {
 
@@ -30,7 +31,7 @@ const request = (path, options = {}) => {
     credentials =  JSON.parse(window.sessionStorage.getItem('bpp_ticket'));
 
     if(credentials) {
-      const result = hawk.client.header(_request.url, _request.method, { credentials, app: credentials.app });
+      const result = Hawk.client.header(_request.url, _request.method, { credentials, app: credentials.app });
       _request.headers.set('Authorization', result.header);
     }
   } catch(ex) { }
