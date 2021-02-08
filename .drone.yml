@@ -48,7 +48,7 @@ steps:
         - awslogs-stream-prefix=cust-production-bpc-bpc_console
       memory: 512
       port_mappings:
-        - 8100 8000
+        - 8000 8000
       region: eu-west-1
       service: cust-production-bpc-bpc_console
       service_network_security_groups:
@@ -82,11 +82,11 @@ steps:
     image: plugins/ecr
     settings:
       access_key:
-        from_secret: aws_access_key_production
+        from_secret: aws_access_key_staging
       secret_key:
-        from_secret: aws_access_key_secret_production
+        from_secret: aws_access_key_secret_staging
       region: eu-west-1
-      repo:   cust-production-bpc-ecr/bpc_console
+      repo:   cust-staging-bpc-ecr/console
       registry: 815296035528.dkr.ecr.eu-west-1.amazonaws.com
       dockerfile: Dockerfile
       tags:
@@ -100,38 +100,43 @@ steps:
         from_secret: bpc_app_secret_staging
       BPC_APP_ID:
         from_secret: bpc_app_id_staging
-      settings:
-        secret_environment_variables:
-          - BPC_APP_SECRET
-          - BPC_APP_ID
+    settings:
+      secret_environment_variables:
+        - BPC_APP_SECRET
+        - BPC_APP_ID
+      environment_variables:
+        - BPC_URL=https://api.bpc.cust.berlingskemedia-staging.net
       aws_access_key_id:
-        from_secret: aws_access_key_production
+        from_secret: aws_access_key_staging
       aws_secret_access_key:
-        from_secret: aws_access_key_secret_production
-      cluster: cust-production-bpc
+        from_secret: aws_access_key_secret_staging
+      cluster: cust-staging-bpc
       compatibilities: FARGATE
       deployment_configuration: 100 200
       desired_count: 1
-      docker_image: 815296035528.dkr.ecr.eu-west-1.amazonaws.com/cust-production-bpc-ecr/bpc_console
-      container_name: cust-production-bpc-bpc_console-container
-      family: cust-production-bpc-bpc_console
+      docker_image: 815296035528.dkr.ecr.eu-west-1.amazonaws.com/cust-staging-bpc-ecr/console
+      container_name: cust-staging-bpc-console-container
+      family: cust-staging-bpc-console
       log_driver: awslogs
       log_options:
-        - awslogs-group=cust-production-bpc
+        - awslogs-group=cust-staging-bpc
         - awslogs-region=eu-west-1
-        - awslogs-stream-prefix=cust-production-bpc-bpc_console
+        - awslogs-stream-prefix=bpc-console
       memory: 512
       port_mappings:
-        - 8100 8000
+        - 8000 8000
       region: eu-west-1
-      service: cust-production-bpc-bpc_console
+      service: cust-staging-bpc-console
       service_network_security_groups:
-      [security_groups]
+        - sg-016331f75685ea21a
+        - sg-0e65421f068578cef
       service_network_subnets:
-      [subnets]
+        - subnet-061a8876f7f68ea21
+        - subnet-0ace4f6a68677187c
+        - subnet-01633ca14c693e302
       tag: ${CI_COMMIT_SHA}
       task_cpu: 256
-      task_execution_role_arn: arn:aws:iam::815296035528:role/cust-production-bpc-bpc_console-exec
+      task_execution_role_arn: arn:aws:iam::815296035528:role/cust-staging-bpc-console-exec
       task_memory: 512
       task_network_mode: awsvpc
 
@@ -198,7 +203,7 @@ steps:
         - awslogs-stream-prefix=bpc-console
       memory: 512
       port_mappings:
-        - 8100 8000
+        - 8000 8000
       region: eu-west-1
       service: cust-testing-bpc-console
       service_network_security_groups:
