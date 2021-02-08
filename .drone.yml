@@ -335,7 +335,7 @@ trigger:
 ---
 kind: pipeline
 type: docker
-name: qa1 pipeline
+name: qa2 pipeline
 
 steps:
   - name: publish image to qa2
