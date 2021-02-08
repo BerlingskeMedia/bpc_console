@@ -33,6 +33,8 @@ steps:
         - BPC_APP_ID
       environment_variables:
         - BPC_URL=https://api.bpc.cust.berlingskemedia.net
+        - BPP_URL=https://bpp.berlingskemedia.net
+        - PM_URL=https://payment.berlingskemedia.net
       aws_access_key_id:
         from_secret: aws_access_key_production
       aws_secret_access_key:
@@ -113,6 +115,8 @@ steps:
         - BPC_APP_ID
       environment_variables:
         - BPC_URL=https://api.bpc.cust.berlingskemedia-staging.net
+        - BPP_URL=https://bpp.berlingskemedia-staging.net
+        - PM_URL=https://payment.berlingskemedia-staging.net
       aws_access_key_id:
         from_secret: aws_access_key_staging
       aws_secret_access_key:
@@ -193,6 +197,8 @@ steps:
         - BPC_APP_ID
       environment_variables:
         - BPC_URL=https://api.bpc.cust.berlingskemedia-testing.net
+        - BPP_URL=https://bpp.berlingskemedia-testing.net
+        - PM_URL=https://payment.berlingskemedia-testing.net
       aws_access_key_id:
         from_secret: aws_access_key_testing
       aws_secret_access_key:
