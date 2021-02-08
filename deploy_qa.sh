@@ -20,7 +20,7 @@ Help()
    echo "tag syntax:"
    echo "qa[n]-[version]-[branch_name]"
    echo "n              QA's index"
-   echo "version        Incrementally new version of tag on this specific QA (if any yet createt - will be set to version 1)"
+   echo "version        Incrementally new version of tag on this specific QA (if any yet created - will be set to version 1)"
    echo "branch_name    Current branch's name"
    echo
 }
@@ -32,7 +32,7 @@ Help()
 ########
 
 
-allowed_quas=( "qa1" )
+allowed_quas=( "testing" "qa1" )
 
 if [[ $1 = "-h" || $1 = "--help" ]]; then
 	Help
@@ -53,7 +53,7 @@ if [ -z "$COMMENT" ]; then
 	COMMENT="$QA from branch: $BRANCH_NAME"
 fi
 
-LAST_TAG=$(git tag | grep -P "^$QA-\d+-" |sort | tail -n 1)
+LAST_TAG=$(git tag | grep -P "^$QA-\d+-" |sort -k2 -t- -n | tail -n 1)
 BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
 
 # Check if tag exists, if not create first tag
