@@ -179,7 +179,7 @@ steps:
         - BPC_APP_SECRET
         - BPC_APP_ID
       environment_variables:
-        - BPC_URL=api.bpc.cust.berlingskemedia-testing.net
+        - BPC_URL=https://api.bpc.cust.berlingskemedia-testing.net
       aws_access_key_id:
         from_secret: aws_access_key_testing
       aws_secret_access_key:
