@@ -14,13 +14,13 @@ Help()
    echo
    echo "required argument:"
    echo "-h|--help       Displays this help page, will ignore all other arguments"
-   echo "qa[n]           The >n< index of QA for which this branch should be tagged."
+   echo "testing|qa[n]   Environment name, the >n< index of QA for which this branch should be tagged."
    echo "commentary      If not provided, will be generated automatically."
    echo
    echo "tag syntax:"
-   echo "qa[n]-[version]-[branch_name]"
-   echo "n              QA's index"
-   echo "version        Incrementally new version of tag on this specific QA (if any yet created - will be set to version 1)"
+   echo "[environment_name]-[version]-[branch_name]"
+   echo "environment_name Name of the environment eg: testing, qa1"
+   echo "version        Incrementally new version of tag on this specific environment (if any yet created - will be set to version 1)"
    echo "branch_name    Current branch's name"
    echo
 }
