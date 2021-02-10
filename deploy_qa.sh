@@ -10,7 +10,7 @@ Help()
    echo
    echo "Purpose of this script is to make tag & deploy more convenient. It is designed to work with Berlingske's drone.io CI/CD."
    echo
-   echo "Syntax: $0 [-h|--help] | [testing|qa1|qa2|...] [[commentary to this tag]]"
+   echo "Syntax: $0 [-h|--help] | [qa1|qa2|...] [[commentary to this tag]]"
    echo
    echo "required argument:"
    echo "-h|--help       Displays this help page, will ignore all other arguments"
@@ -32,7 +32,7 @@ Help()
 ########
 
 
-allowed_envs=( "testing" "qa1" "qa2")
+allowed_envs=( "qa1" "qa2")
 
 if [[ $1 = "-h" || $1 = "--help" ]]; then
 	Help
