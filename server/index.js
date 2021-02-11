@@ -44,6 +44,17 @@ const init = async () => {
 
   server.route({
     method: 'GET',
+    path: '/healthcheck',
+    config: {
+      tags: ['good_exclude']
+    },
+    handler: function(request, h){
+      return '';
+    }
+  });
+
+  server.route({
+    method: 'GET',
     path: '/favicon.ico',
     config: {
       tags: ['good_exclude']
