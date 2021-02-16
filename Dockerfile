@@ -2,6 +2,13 @@ FROM node:10.16-alpine as build
 
 MAINTAINER Daniel Kokott <dako@berlingskemedia.dk>
 
+ARG BPC_URL=''
+ARG BPP_URL=''
+ARG PM_URL=''
+ENV BPC_URL=${BPC_URL}
+ENV BPP_URL=${BPP_URL}
+ENV PM_URL=${PM_URL}
+
 WORKDIR /build
 ENV PATH=$PATH:/build/node_modules/.bin
 
