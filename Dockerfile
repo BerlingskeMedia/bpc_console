@@ -5,9 +5,11 @@ MAINTAINER Daniel Kokott <dako@berlingskemedia.dk>
 ARG BPC_URL=''
 ARG BPP_URL=''
 ARG PM_URL=''
+ARG NODE=production
 ENV BPC_URL=${BPC_URL}
 ENV BPP_URL=${BPP_URL}
 ENV PM_URL=${PM_URL}
+ENV NODE_ENV=${NODE}
 
 WORKDIR /build
 ENV PATH=$PATH:/build/node_modules/.bin
