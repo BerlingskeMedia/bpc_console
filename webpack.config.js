@@ -30,6 +30,7 @@ const bundle = {
   plugins: [
     new webpack.DefinePlugin({
       'process.env': {
+        'NODE_ENV': JSON.stringify(process.env.NODE_ENV || ''),
         'BPP_URL': JSON.stringify(process.env.BPP_URL || ''),
         'BPC_URL': JSON.stringify(process.env.BPC_URL || ''),
         'PM_URL': JSON.stringify(process.env.PM_URL || ''),

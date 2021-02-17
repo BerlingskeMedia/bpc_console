@@ -101,6 +101,8 @@ steps:
       tags:
         - latest
         - ${CI_COMMIT_SHA}
+      build_args:
+        - NODE=staging
 
   - name: Deploy to staging
     image: pelotech/drone-ecs:1.0.7
@@ -184,6 +186,7 @@ steps:
         - ${DRONE_TAG}-${CI_COMMIT_SHA}
         - ${CI_COMMIT_SHA}
       build_args:
+        - NODE=testing
         - BPC_URL=https://api.bpc.cust.berlingskemedia-testing.net
         - BPP_URL=https://bpp.berlingskemedia-testing.net
         - PM_URL=https://payment.berlingskemedia-testing.net
@@ -273,6 +276,7 @@ steps:
         - ${DRONE_TAG}-${CI_COMMIT_SHA}
         - ${CI_COMMIT_SHA}
       build_args:
+        - NODE=testing
         - BPC_URL=https://api-qa1.bpc.cust.berlingskemedia-testing.net
         - BPP_URL=https://bpp.berlingskemedia-testing.net
         - PM_URL=https://payment.berlingskemedia-testing.net
@@ -362,6 +366,7 @@ steps:
         - ${DRONE_TAG}-${CI_COMMIT_SHA}
         - ${CI_COMMIT_SHA}
       build_args:
+        - NODE=testing
         - BPC_URL=https://api-qa2.bpc.cust.berlingskemedia-testing.net
         - BPP_URL=https://bpp.berlingskemedia-testing.net
         - PM_URL=https://payment.berlingskemedia-testing.net
