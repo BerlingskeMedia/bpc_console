@@ -103,6 +103,9 @@ steps:
         - ${CI_COMMIT_SHA}
       build_args:
         - NODE=staging
+        - BPC_URL=https://api.bpc.cust.berlingskemedia-staging.net
+        - BPP_URL=https://bpp.berlingskemedia-staging.net
+        - PM_URL=https://payment.berlingskemedia-staging.net
 
   - name: Deploy to staging
     image: pelotech/drone-ecs:1.0.7
