@@ -157,6 +157,7 @@ trigger:
   repo:
     - BerlingskeMedia/bpc_console
   branch:
+    - BMD-4608
     - master
   event:
     include:
