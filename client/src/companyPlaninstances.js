@@ -200,7 +200,7 @@ class Planinstance extends React.Component {
           <Note planinstance={planinstance} savePlaninstance={this.savePlaninstance} />
           <PlaninstancesMasks addEmailmask={this.addEmailmask} removeEmailmask={this.removeEmailmask} masks={planinstance.emailMasks} />
         </td>
-        <td>{planinstance.users?.length || 0}/{planinstance.units}</td>
+        <td>{planinstance.users?.length || '0'}/{planinstance.units}</td>
         <td>
           <PlaninstancesUsers removeUser={this.removeUser} users={planinstance.users} />
           <AddPlaninstancesUser addUser={this.addUser} />
