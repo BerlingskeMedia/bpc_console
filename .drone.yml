@@ -7,9 +7,9 @@ steps:
   - name: build
     image: node:14.15-alpine
     environment:
-      - BPC_URL=https://api.bpc.cust.berlingskemedia.net
-      - BPP_URL=https://bpp.berlingskemedia.net
-      - PM_URL=https://payment.berlingskemedia.net
+      BPC_URL=https://api.bpc.cust.berlingskemedia.net
+      BPP_URL=https://bpp.berlingskemedia.net
+      PM_URL=https://payment.berlingskemedia.net
     commands:
       - npm ci
       - npm run client:build
