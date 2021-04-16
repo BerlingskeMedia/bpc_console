@@ -5,18 +5,22 @@ name: PR checks
 
 steps:
   - name: build
-    image: node:10.16-alpine
+    image: node:14.15-alpine
     commands:
       - npm ci
   - name: test
-    image: node:10.16-alpine
+    image: node:14.15-alpine
     commands:
       - npm test
     environment:
-      - NODE=testing
-      - BPC_URL=https://bpc.berlingskemedia-testing.net
-      - BPP_URL=https://bpp.berlingskemedia-testing.net
-      - PM_URL=https://payment.berlingskemedia-testing.net
+      MONGODB_HOST: bpc_mongo
+      MONGODB_NAME: bpc_testing
+      ENCRYPTIONPASSWORD: a_password_that_is_not_too_short_and_also_not_very_random_but_is_good_enough
+
+services:
+  - name: bpc_mongo
+    image: mongo:3.6-xenial
+    command: [ --smallfiles ]
 
 trigger:
   event:
