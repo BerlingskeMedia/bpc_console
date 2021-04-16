@@ -17,9 +17,11 @@ steps:
       - BPC_URL=https://bpc.berlingskemedia-testing.net
       - BPP_URL=https://bpp.berlingskemedia-testing.net
       - PM_URL=https://payment.berlingskemedia-testing.net
+
 trigger:
   event:
     - pull_request
+
 ---
 kind: pipeline
 type: docker
