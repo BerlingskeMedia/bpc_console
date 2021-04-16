@@ -1,6 +1,28 @@
 ---
 kind: pipeline
 type: docker
+name: PR checks
+
+steps:
+  - name: build
+    image: node:10.16-alpine
+    commands:
+      - npm ci
+  - name: test
+    image: node:10.16-alpine
+    commands:
+      - npm test
+    environment:
+      - NODE=testing
+      - BPC_URL=https://bpc.berlingskemedia-testing.net
+      - BPP_URL=https://bpp.berlingskemedia-testing.net
+      - PM_URL=https://payment.berlingskemedia-testing.net
+trigger:
+  event:
+    - pull_request
+---
+kind: pipeline
+type: docker
 name: Production pipeline
 
 steps:
