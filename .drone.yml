@@ -7,7 +7,7 @@ steps:
   - name: build
     image: node:14.15-alpine
     environment:
-      BPC_URL: https://api.bpc.cust.aws.berlingskemedia.net
+      BPC_URL: https://bpc.berlingskemedia.net
       BPP_URL: https://bpp.berlingskemedia.net
       PM_URL: https://payment.berlingskemedia.net
     commands:
@@ -40,7 +40,7 @@ steps:
         - latest
         - ${CI_COMMIT_SHA}
       build_args:
-        - BPC_URL=https://api.bpc.cust.aws.berlingskemedia.net
+        - BPC_URL=https://bpc.berlingskemedia.net
         - BPP_URL=https://bpp.berlingskemedia.net
         - PM_URL=https://payment.berlingskemedia.net
 
@@ -56,7 +56,7 @@ steps:
         - BPC_APP_SECRET
         - BPC_APP_ID
       environment_variables:
-        - BPC_URL=https://api.bpc.cust.aws.berlingskemedia.net
+        - BPC_URL=https://bpc.berlingskemedia.net
         - BPP_URL=https://bpp.berlingskemedia.net
         - PM_URL=https://payment.berlingskemedia.net
       aws_access_key_id:
