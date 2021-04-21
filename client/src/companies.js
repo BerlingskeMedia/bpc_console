@@ -1,9 +1,9 @@
-const React = require('react');
-const Company = require('./company');
-const Bpc = require('./components/bpc');
+import React from 'react';
+import Company from "./company";
 const Bpp = require('./components/bpp');
+const Bpc = require('./components/bpc');
 
-module.exports = class extends React.Component {
+export default class Companies extends React.Component {
 
   constructor(props) {
     super(props);
@@ -16,11 +16,11 @@ module.exports = class extends React.Component {
       authorized: false,
       searchCleared: true
     };
-    
+
     document.title = 'BPC - Companies';
   }
-  
-  
+
+
   getCompanies(query) {
     return Bpp.request(`/api/companies?customerType=B&&${ query || '' }`)
     // return Bpp.request(`/api/companies?customerType=B&title=DJ&${ query || '' }`)
@@ -145,7 +145,7 @@ class CompanySearch extends React.Component {
 
         if(preloadedSearhParams.uid) {
           this.searchUser();
-        }        
+        }
 
         this.searchOnTextChange();
       }
@@ -157,7 +157,7 @@ class CompanySearch extends React.Component {
     clearTimeout(this.state.searchUserTimer);
     this.setState({searchUserTimer: setTimeout(this.searchUser, 1000)});
   }
-  
+
 
   searchUser() {
     const searchText = this.userSearchBox.value;
@@ -169,7 +169,7 @@ class CompanySearch extends React.Component {
       .then(users => {
         const foundUser = users.length === 1 ? users[0] : null;
         this.setState({ foundUser, userSearchBoxHasInput: true }, this.search);
-      });      
+      });
     } else {
       this.setState({ foundUser: null, userSearchBoxHasInput: false }, this.search);
       return Promise.resolve();
@@ -224,7 +224,7 @@ class CompanySearch extends React.Component {
       this.props.clearSearchResults();
       return;
     }
-    
+
     const query = `${ searchParams.join('&') }`;
 
     const search = encodeURIComponent(query);

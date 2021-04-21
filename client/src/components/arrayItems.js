@@ -137,7 +137,7 @@ class ArrayItem extends React.Component {
 
   render() {
 
-    const data = this.props.data || [];
+    const data = this.props.data || '';
 
     return (
       <tr key={ data }>
