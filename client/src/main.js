@@ -141,7 +141,6 @@ class Main extends React.Component {
 
     const environment_style =
       process.env.NODE_ENV === 'production' ? null :
-      process.env.NODE_ENV === 'staging' ? { backgroundColor: 'coral', borderRadius: '10px', padding: '10px' } :
       process.env.NODE_ENV === 'testing' ? { backgroundColor: 'palegreen', borderRadius: '10px', padding: '10px' } :
       null;
 
