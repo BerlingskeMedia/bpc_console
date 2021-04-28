@@ -140,9 +140,9 @@ class Main extends React.Component {
   render() {
 
     const environment_style =
-      window.location.hostname === 'console.berlingskemedia.net' ? null :
-      window.location.hostname === 'console.berlingskemedia-staging.net' ? { backgroundColor: 'coral', borderRadius: '10px', padding: '10px' } :
-      window.location.hostname === 'console.berlingskemedia-testing.net' ? { backgroundColor: 'palegreen', borderRadius: '10px', padding: '10px' } :
+      process.env.NODE_ENV === 'production' ? null :
+      process.env.NODE_ENV === 'staging' ? { backgroundColor: 'coral', borderRadius: '10px', padding: '10px' } :
+      process.env.NODE_ENV === 'testing' ? { backgroundColor: 'palegreen', borderRadius: '10px', padding: '10px' } :
       null;
 
     return (
