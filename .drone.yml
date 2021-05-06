@@ -1,0 +1,500 @@
+---
+kind: pipeline
+type: docker
+name: PR checks
+
+steps:
+  - name: build
+    image: node:14.15-alpine
+    environment:
+      BPC_URL: https://bpc.berlingskemedia.net
+      BPP_URL: https://bpp.berlingskemedia.net
+      PM_URL: https://payment.berlingskemedia.net
+    commands:
+      - npm ci
+      - npm run client:build
+
+trigger:
+  event:
+    - pull_request
+
+---
+kind: pipeline
+type: docker
+name: Production pipeline
+
+steps:
+  - name: publish image to production
+    image: plugins/ecr
+    settings:
+      mirror: https://proxy.docker.all.berlingskemedia.net
+      access_key:
+        from_secret: aws_access_key_production
+      secret_key:
+        from_secret: aws_access_key_secret_production
+      region: eu-west-1
+      repo:   cust-production-bpc-ecr/console
+      registry: 815296035528.dkr.ecr.eu-west-1.amazonaws.com
+      dockerfile: Dockerfile
+      tags:
+        - latest
+        - ${CI_COMMIT_SHA}
+      build_args:
+        - BPC_URL=https://bpc.berlingskemedia.net
+        - BPP_URL=https://bpp.berlingskemedia.net
+        - PM_URL=https://payment.berlingskemedia.net
+
+  - name: Deploy to production
+    image: pelotech/drone-ecs:1.0.7
+    environment:
+      BPC_APP_SECRET:
+        from_secret: bpc_app_secret_production
+      BPC_APP_ID:
+        from_secret: bpc_app_id_production
+    settings:
+      secret_environment_variables:
+        - BPC_APP_SECRET
+        - BPC_APP_ID
+      environment_variables:
+        - BPC_URL=https://bpc.berlingskemedia.net
+        - BPP_URL=https://bpp.berlingskemedia.net
+        - PM_URL=https://payment.berlingskemedia.net
+      aws_access_key_id:
+        from_secret: aws_access_key_production
+      aws_secret_access_key:
+        from_secret: aws_access_key_secret_production
+      cluster: cust-production-bpc
+      compatibilities: FARGATE
+      deployment_configuration: 100 200
+      desired_count: 1
+      docker_image: 815296035528.dkr.ecr.eu-west-1.amazonaws.com/cust-production-bpc-ecr/console
+      container_name: cust-production-bpc-console-container
+      family: cust-production-bpc-console
+      log_driver: awslogs
+      log_options:
+        - awslogs-group=cust-production-bpc
+        - awslogs-region=eu-west-1
+        - awslogs-stream-prefix=bpc-console
+      memory: 512
+      port_mappings:
+        - 8000 8000
+      region: eu-west-1
+      service: cust-production-bpc-console
+      service_network_security_groups:
+        - sg-039a7f876836f4796
+        - sg-007426a1e865b79d5
+      service_network_subnets:
+        - subnet-061a8876f7f68ea21
+        - subnet-0ace4f6a68677187c
+        - subnet-01633ca14c693e302
+      tag: ${CI_COMMIT_SHA}
+      task_cpu: 256
+      task_execution_role_arn: arn:aws:iam::815296035528:role/cust-production-bpc-console-exec
+      task_memory: 512
+      task_network_mode: awsvpc
+
+trigger:
+  repo:
+    - BerlingskeMedia/bpc_console
+  branch:
+    - master
+  event:
+    include:
+      - push
+    exclude:
+      - pull_request
+
+---
+kind: pipeline
+type: docker
+name: Staging pipeline
+
+steps:
+  - name: publish image to staging
+    image: plugins/ecr
+    settings:
+      mirror: https://proxy.docker.all.berlingskemedia.net
+      access_key:
+        from_secret: aws_access_key_staging
+      secret_key:
+        from_secret: aws_access_key_secret_staging
+      region: eu-west-1
+      repo:   cust-staging-bpc-ecr/console
+      registry: 815296035528.dkr.ecr.eu-west-1.amazonaws.com
+      dockerfile: Dockerfile
+      tags:
+        - latest
+        - ${CI_COMMIT_SHA}
+      build_args:
+        - NODE=staging
+        - BPC_URL=https://api.bpc.cust.berlingskemedia-staging.net
+        - BPP_URL=https://bpp.berlingskemedia-staging.net
+        - PM_URL=https://payment.berlingskemedia-staging.net
+
+  - name: Deploy to staging
+    image: pelotech/drone-ecs:1.0.7
+    environment:
+      BPC_APP_SECRET:
+        from_secret: bpc_app_secret_staging
+      BPC_APP_ID:
+        from_secret: bpc_app_id_staging
+    settings:
+      secret_environment_variables:
+        - BPC_APP_SECRET
+        - BPC_APP_ID
+      environment_variables:
+        - BPC_URL=https://api.bpc.cust.berlingskemedia-staging.net
+        - BPP_URL=https://bpp.berlingskemedia-staging.net
+        - PM_URL=https://payment.berlingskemedia-staging.net
+      aws_access_key_id:
+        from_secret: aws_access_key_staging
+      aws_secret_access_key:
+        from_secret: aws_access_key_secret_staging
+      cluster: cust-staging-bpc
+      compatibilities: FARGATE
+      deployment_configuration: 100 200
+      desired_count: 1
+      docker_image: 815296035528.dkr.ecr.eu-west-1.amazonaws.com/cust-staging-bpc-ecr/console
+      container_name: cust-staging-bpc-console-container
+      family: cust-staging-bpc-console
+      log_driver: awslogs
+      log_options:
+        - awslogs-group=cust-staging-bpc
+        - awslogs-region=eu-west-1
+        - awslogs-stream-prefix=bpc-console
+      memory: 512
+      port_mappings:
+        - 8000 8000
+      region: eu-west-1
+      service: cust-staging-bpc-console
+      service_network_security_groups:
+        - sg-016331f75685ea21a
+        - sg-0e65421f068578cef
+      service_network_subnets:
+        - subnet-061a8876f7f68ea21
+        - subnet-0ace4f6a68677187c
+        - subnet-01633ca14c693e302
+      tag: ${CI_COMMIT_SHA}
+      task_cpu: 256
+      task_execution_role_arn: arn:aws:iam::815296035528:role/cust-staging-bpc-console-exec
+      task_memory: 512
+      task_network_mode: awsvpc
+
+trigger:
+  repo:
+    - BerlingskeMedia/bpc_console
+  branch:
+    - master
+  event:
+    include:
+      - push
+    exclude:
+      - pull_request
+
+---
+kind: pipeline
+type: docker
+name: testing pipeline
+
+steps:
+  - name: publish image to testing
+    image: plugins/ecr
+    settings:
+      mirror: https://proxy.docker.all.berlingskemedia.net
+      access_key:
+        from_secret: aws_access_key_testing
+      secret_key:
+        from_secret: aws_access_key_secret_testing
+      region: eu-west-1
+      repo:   cust-testing-bpc-ecr/console
+      registry: 815296035528.dkr.ecr.eu-west-1.amazonaws.com
+      dockerfile: Dockerfile
+      tags:
+        - ${DRONE_TAG}-${CI_COMMIT_SHA}
+        - ${CI_COMMIT_SHA}
+      build_args:
+        - NODE=testing
+        - BPC_URL=https://bpc.berlingskemedia-testing.net
+        - BPP_URL=https://bpp.berlingskemedia-testing.net
+        - PM_URL=https://payment.berlingskemedia-testing.net
+
+  - name: Deploy to testing
+    image: pelotech/drone-ecs:1.0.7
+    environment:
+      BPC_APP_SECRET:
+        from_secret: bpc_app_secret_testing
+      BPC_APP_ID:
+        from_secret: bpc_app_id_testing
+    settings:
+      secret_environment_variables:
+        - BPC_APP_SECRET
+        - BPC_APP_ID
+      environment_variables:
+        - BPC_URL=https://bpc.berlingskemedia-testing.net
+        - BPP_URL=https://bpp.berlingskemedia-testing.net
+        - PM_URL=https://payment.berlingskemedia-testing.net
+      aws_access_key_id:
+        from_secret: aws_access_key_testing
+      aws_secret_access_key:
+        from_secret: aws_access_key_secret_testing
+      cluster: cust-testing-bpc
+      compatibilities: FARGATE
+      deployment_configuration: 100 200
+      desired_count: 1
+      docker_image: 815296035528.dkr.ecr.eu-west-1.amazonaws.com/cust-testing-bpc-ecr/console
+      container_name: cust-testing-bpc-console-container
+      family: cust-testing-bpc-console
+      log_driver: awslogs
+      log_options:
+        - awslogs-group=cust-testing-bpc
+        - awslogs-region=eu-west-1
+        - awslogs-stream-prefix=bpc-console
+      memory: 512
+      port_mappings:
+        - 8000 8000
+      region: eu-west-1
+      service: cust-testing-bpc-console
+      service_network_security_groups:
+        - sg-0df64e3261ba5b0b4
+        - sg-0213c0cd9fb0fd55f
+      service_network_subnets:
+        - subnet-061a8876f7f68ea21
+        - subnet-0ace4f6a68677187c
+        - subnet-01633ca14c693e302
+      tag: ${CI_COMMIT_SHA}
+      task_cpu: 256
+      task_execution_role_arn: arn:aws:iam::815296035528:role/cust-testing-bpc-console-exec
+      task_memory: 512
+      task_network_mode: awsvpc
+    when:
+      ref:
+        include:
+          - refs/tags/testing*
+        exclude:
+          - refs/heads/master
+
+trigger:
+  repo:
+    - BerlingskeMedia/bpc_console
+  event:
+    - tag
+  ref:
+    include:
+      - refs/tags/testing*
+
+---
+kind: pipeline
+type: docker
+name: qa1 pipeline
+
+steps:
+  - name: publish image to qa1
+    image: plugins/ecr
+    settings:
+      mirror: https://proxy.docker.all.berlingskemedia.net
+      access_key:
+        from_secret: aws_access_key_testing
+      secret_key:
+        from_secret: aws_access_key_secret_testing
+      region: eu-west-1
+      repo:   cust-testing-bpc-ecr/console
+      registry: 815296035528.dkr.ecr.eu-west-1.amazonaws.com
+      dockerfile: Dockerfile
+      tags:
+        - ${DRONE_TAG}-${CI_COMMIT_SHA}
+        - ${CI_COMMIT_SHA}
+      build_args:
+        - NODE=testing
+        - BPC_URL=https://api-qa1--bpc--cust.berlingskemedia-testing.net
+        - BPP_URL=https://bpp.berlingskemedia-testing.net
+        - PM_URL=https://payment.berlingskemedia-testing.net
+
+  - name: Deploy to qa1
+    image: pelotech/drone-ecs:1.0.7
+    environment:
+      BPC_APP_SECRET:
+        from_secret: bpc_app_secret_testing
+      BPC_APP_ID:
+        from_secret: bpc_app_id_testing
+    settings:
+      secret_environment_variables:
+        - BPC_APP_SECRET
+        - BPC_APP_ID
+      environment_variables:
+        - BPC_URL=https://api-qa1--bpc--cust.berlingskemedia-testing.net
+        - BPP_URL=https://bpp.berlingskemedia-testing.net
+        - PM_URL=https://payment.berlingskemedia-testing.net
+      aws_access_key_id:
+        from_secret: aws_access_key_testing
+      aws_secret_access_key:
+        from_secret: aws_access_key_secret_testing
+      cluster: cust-testing-bpc
+      compatibilities: FARGATE
+      deployment_configuration: 100 200
+      desired_count: 1
+      docker_image: 815296035528.dkr.ecr.eu-west-1.amazonaws.com/cust-testing-bpc-ecr/console
+      container_name: cust-testing-bpc-console-qa1-container
+      family: cust-testing-bpc-console-qa1
+      log_driver: awslogs
+      log_options:
+        - awslogs-group=cust-testing-bpc
+        - awslogs-region=eu-west-1
+        - awslogs-stream-prefix=bpc-console-qa1
+      memory: 512
+      port_mappings:
+        - 8000 8000
+      region: eu-west-1
+      service: cust-testing-bpc-console-qa1
+      service_network_security_groups:
+        - sg-0df64e3261ba5b0b4
+        - sg-0248c96f5ef1eb306
+      service_network_subnets:
+        - subnet-061a8876f7f68ea21
+        - subnet-0ace4f6a68677187c
+        - subnet-01633ca14c693e302
+      tag: ${CI_COMMIT_SHA}
+      task_cpu: 256
+      task_execution_role_arn: arn:aws:iam::815296035528:role/cust-testing-bpc-console-qa1-exec
+      task_memory: 512
+      task_network_mode: awsvpc
+    when:
+      ref:
+        include:
+          - refs/tags/qa1*
+        exclude:
+          - refs/heads/master
+
+trigger:
+  repo:
+    - BerlingskeMedia/bpc_console
+  event:
+    - tag
+  ref:
+    include:
+      - refs/tags/qa1*
+---
+kind: pipeline
+type: docker
+name: qa2 pipeline
+
+steps:
+  - name: publish image to qa2
+    image: plugins/ecr
+    settings:
+      mirror: https://proxy.docker.all.berlingskemedia.net
+      access_key:
+        from_secret: aws_access_key_testing
+      secret_key:
+        from_secret: aws_access_key_secret_testing
+      region: eu-west-1
+      repo:   cust-testing-bpc-ecr/console
+      registry: 815296035528.dkr.ecr.eu-west-1.amazonaws.com
+      dockerfile: Dockerfile
+      tags:
+        - ${DRONE_TAG}-${CI_COMMIT_SHA}
+        - ${CI_COMMIT_SHA}
+      build_args:
+        - NODE=testing
+        - BPC_URL=https://api-qa2--bpc--cust.berlingskemedia-testing.net
+        - BPP_URL=https://bpp.berlingskemedia-testing.net
+        - PM_URL=https://payment.berlingskemedia-testing.net
+
+  - name: Deploy to qa2
+    image: pelotech/drone-ecs:1.0.7
+    environment:
+      BPC_APP_SECRET:
+        from_secret: bpc_app_secret_testing
+      BPC_APP_ID:
+        from_secret: bpc_app_id_testing
+    settings:
+      secret_environment_variables:
+        - BPC_APP_SECRET
+        - BPC_APP_ID
+      environment_variables:
+        - BPC_URL=https://api-qa2--bpc--cust.berlingskemedia-testing.net
+        - BPP_URL=https://bpp.berlingskemedia-testing.net
+        - PM_URL=https://payment.berlingskemedia-testing.net
+      aws_access_key_id:
+        from_secret: aws_access_key_testing
+      aws_secret_access_key:
+        from_secret: aws_access_key_secret_testing
+      cluster: cust-testing-bpc
+      compatibilities: FARGATE
+      deployment_configuration: 100 200
+      desired_count: 1
+      docker_image: 815296035528.dkr.ecr.eu-west-1.amazonaws.com/cust-testing-bpc-ecr/console
+      container_name: cust-testing-bpc-console-qa2-container
+      family: cust-testing-bpc-console-qa2
+      log_driver: awslogs
+      log_options:
+        - awslogs-group=cust-testing-bpc
+        - awslogs-region=eu-west-1
+        - awslogs-stream-prefix=bpc-console-qa2
+      memory: 512
+      port_mappings:
+        - 8000 8000
+      region: eu-west-1
+      service: cust-testing-bpc-console-qa2
+      service_network_security_groups:
+        - sg-0df64e3261ba5b0b4
+        - sg-0974c750cd03a0567
+      service_network_subnets:
+        - subnet-061a8876f7f68ea21
+        - subnet-0ace4f6a68677187c
+        - subnet-01633ca14c693e302
+      tag: ${CI_COMMIT_SHA}
+      task_cpu: 256
+      task_execution_role_arn: arn:aws:iam::815296035528:role/cust-testing-bpc-console-qa2-exec
+      task_memory: 512
+      task_network_mode: awsvpc
+    when:
+      ref:
+        include:
+          - refs/tags/qa2*
+        exclude:
+          - refs/heads/master
+
+trigger:
+  repo:
+    - BerlingskeMedia/bpc_console
+  event:
+    - tag
+  ref:
+    include:
+      - refs/tags/qa2*
+---
+kind: "secret"
+name: "aws_access_key_testing"
+get:
+  path: "drone/cust-testing-bpc"
+  name: "aws_access_key"
+---
+kind: "secret"
+name: "aws_access_key_secret_testing"
+get:
+  path: "drone/cust-testing-bpc"
+  name: "aws_access_key_secret"
+---
+kind: "secret"
+name: "aws_access_key_production"
+get:
+  path: "drone/cust-production-bpc"
+  name: "aws_access_key"
+---
+kind: "secret"
+name: "aws_access_key_secret_production"
+get:
+  path: "drone/cust-production-bpc"
+  name: "aws_access_key_secret"
+---
+kind: "secret"
+name: "aws_access_key_staging"
+get:
+  path: "drone/cust-staging-bpc"
+  name: "aws_access_key"
+---
+kind: "secret"
+name: "aws_access_key_secret_staging"
+get:
+  path: "drone/cust-staging-bpc"
+  name: "aws_access_key_secret"
