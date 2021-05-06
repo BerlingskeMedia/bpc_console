@@ -1,3 +1,4 @@
+const Hawk = require('@hapi/hawk/lib/browser');
 const React = require('react');
 const Link = require('react-router-dom').Link;
 const Bpc = require('./components/bpc');
@@ -232,7 +233,7 @@ class GenerateHawkAuthHeader extends React.Component {
       const options = { credentials: { id, key, algorithm: 'sha256' }, app };
 
       try {
-        const result = hawk.client.header(uri, method, options);
+        const result = Hawk.client.header(uri, method, options);
         this.setState({ result: result, error: null });
       } catch (ex) {
         this.setState({ result: null, error: ex });

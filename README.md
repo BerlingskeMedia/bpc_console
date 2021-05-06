@@ -6,7 +6,7 @@ See [https://github.com/BerlingskeMedia/bpc](https://github.com/BerlingskeMedia/
 
 BPC Console uses plugin [hapi-bpc](https://github.com/BerlingskeMedia/hapi-bpc) to manage BPC tickets and enable user authentication.
 
-BPC Console uses Google Sign from the browser and exhanges the Google Auth response (`id_token` and `access_token`) for a user ticket. The user ticket is stored in _sessionStorage_ and used directly from the client to the CORS enabled endpoints on BPC.
+BPC Console uses Google Sign from the browser and exchanges the Google Auth response (`id_token` and `access_token`) for a user ticket. The user ticket is stored in _sessionStorage_ and used directly from the client to the CORS enabled endpoints on BPC.
 
 
 # Prerequisites

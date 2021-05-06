@@ -68,7 +68,6 @@ module.exports = class extends React.Component {
 
     const payment = this.state.payment || this.props.payment;
     const userLink = payment.userId ? <Link to={`/users?search=${ payment.userId }`}>{ payment.userId }</Link> : null;
-
     return (
       <div style={{ paddingBottom: '4px' }}>
         <div className="row" style={{ display: "flex", flexWrap: "wrap" }}>
@@ -78,18 +77,10 @@ module.exports = class extends React.Component {
                 <div><small><em>Order ID</em></small></div>
                 { payment.orderId || ''}
               </h4>
-              <div>
-                { payment.email
-                  ? <small><span className="label label-info">{ payment.email }</span> { userLink }</small>
-                  : null
-                }
-              </div>
-              <div>
-                { payment.plan
-                  ? <small><span className="label label-info">Plan</span> { payment.plan }</small>
-                  : null
-                }
-              </div>
+              <PaymentInfo label={payment.email} data={userLink} />
+              <PaymentInfo label="Plan" data={payment.plan} />
+              <PaymentInfo label="Status" data={payment.status} />
+              <PaymentInfo label="Payment type" data={payment.paymentType} />
             </div>
           </div>
           <div className="col" style={{ flex: 1 }}>
@@ -114,6 +105,25 @@ module.exports = class extends React.Component {
         </div>
         <hr />
       </div>
+    );
+  }
+}
+
+class PaymentInfo extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+
+  render() {
+    const { label, data } = this.props;
+    if (!label || !data) {
+      return null;
+    }
+
+    return (
+        <div>
+          <small><span className="label label-info">{ label }</span> { data } </small>
+        </div>
     );
   }
 }

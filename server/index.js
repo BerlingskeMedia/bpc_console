@@ -44,6 +44,17 @@ const init = async () => {
 
   server.route({
     method: 'GET',
+    path: '/healthcheck',
+    config: {
+      tags: ['good_exclude']
+    },
+    handler: function(request, h){
+      return '';
+    }
+  });
+
+  server.route({
+    method: 'GET',
     path: '/favicon.ico',
     config: {
       tags: ['good_exclude']
@@ -63,17 +74,6 @@ const init = async () => {
       directory: {
         path: './client/build'
       }
-    }
-  });
-
-  server.route({
-    method: 'get',
-    path: '/assets/hawk.js',
-    config: {
-      tags: ['good_exclude']
-    },
-    handler: {
-      file: './node_modules/@hapi/hawk/lib/browser.js'
     }
   });
 
