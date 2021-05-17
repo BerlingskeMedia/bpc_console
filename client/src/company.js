@@ -26,7 +26,8 @@ module.exports = class extends React.Component {
     this.state = {
       company: null,
       showDetails: false,
-      showLoader: false
+      showLoader: false,
+      users: [],
     };
   }
 
@@ -115,11 +116,31 @@ module.exports = class extends React.Component {
 
   getCompany() {
     const id = this.props.company._id;
+    let fetchedCompany = null;
     return Bpp.request(`/api/companies/${ id }`)
-    .then(company => {
-      this.setState({ company })
-      return Promise.resolve(company);
-    });
+      .then(company => {
+        fetchedCompany = company;
+        const ids = company.users.map(user => user.uid).join(',');
+        if(ids.length) {
+          return Bpc.request(`/users?provider=gigya&id=${encodeURIComponent(ids)}`);
+        } else {
+          return [];
+        }
+      })
+      .then(fetchedUsers => {
+        let users = [];
+        if (fetchedUsers.length) {
+          users = fetchedCompany.users.map(user => {
+            const fetchedUser = fetchedUsers.find(fUser => fUser.id === user.uid);
+            if (fetchedUser) {
+              return {...user, ...fetchedUser};
+            }
+            return user;
+          });
+        }
+        this.setState({company: fetchedCompany, users});
+        return Promise.resolve(fetchedCompany);
+      });
   }
 
 
@@ -241,7 +262,7 @@ module.exports = class extends React.Component {
                 validateItem={this.validateIp} />
 
               <Users
-                users={this.state.company.users}
+                users={this.state.users}
                 label="Users"
                 note="Users that receive access according to all the access rules above."
                 removeUser={this.removeUser}
