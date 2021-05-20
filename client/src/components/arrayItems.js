@@ -71,7 +71,20 @@ module.exports = class extends React.Component {
       data = data.slice(0, 5);
     }
 
-    let items = data.map((item) => <ArrayItem key={item} data={item} removeItem={this.props.removeItem} translateItem={this.props.translateItem} />)
+    let items = data.map((item) => <ArrayItem key={item} data={item} removeItem={this.props.removeItem} translateItem={this.props.translateItem} isCheckbox={this.props.confirmRemoval !== undefined} />)
+
+    if (this.props.confirmRemoval) {
+      items.push(
+        <tr key={-2}>
+          <td></td>
+          <td style={{textAlign: 'right'}}>
+            <button type="button" className='btn btn-xs btn-danger' onClick={this.props.confirmRemoval} style={{ minWidth: '90px' }}>
+              <span>Remove</span>
+            </button>
+          </td>
+        </tr>
+      )
+    }
 
     const inputClassName = this.state.hasInput && !this.state.inputValid ? 'form-group has-error' : 'form-group';
 
@@ -138,14 +151,20 @@ class ArrayItem extends React.Component {
   render() {
 
     const data = this.props.data || [];
+    let item;
+    if (this.props.isCheckbox) {
+      item = <input type="checkbox" onClick={this.props.removeItem.bind(this, data)} style={{ minWidth: '90px' }}/>
+    } else {
+      item = <button type="button" className='btn btn-xs btn-danger' onClick={this.props.removeItem.bind(this, data)} style={{ minWidth: '90px' }}>
+        <span className='glyphicon glyphicon-trash' aria-hidden="true"></span> <span>Remove</span>
+      </button>;
+    }
 
     return (
       <tr key={ data }>
         <td>{ data }</td>
         <td style={{ textAlign: 'right'}}>
-          <button type="button" className='btn btn-xs btn-danger' onClick={this.props.removeItem.bind(this, data)} style={{ minWidth: '90px' }}>
-            <span className='glyphicon glyphicon-trash' aria-hidden="true"></span> <span>Remove</span>
-          </button>
+          { item }
         </td>
       </tr>
     );
