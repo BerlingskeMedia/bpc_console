@@ -21,6 +21,7 @@ module.exports = class extends React.Component {
     this.updateUser = this.updateUser.bind(this);
     this.addIp = this.addIp.bind(this);
     this.removeIp = this.removeIp.bind(this);
+    this.confirmRemoveIps = this.confirmRemoveIps.bind(this);
     this.addEmailmask = this.addEmailmask.bind(this);
     this.removeEmailmask = this.removeEmailmask.bind(this);
     this.state = {
@@ -28,6 +29,7 @@ module.exports = class extends React.Component {
       showDetails: false,
       showLoader: false,
       users: [],
+      ipsToRemove: [],
     };
   }
 
@@ -92,10 +94,21 @@ module.exports = class extends React.Component {
 
 
   removeIp(item) {
-    let newCompany = Object.assign({}, this.state.company);
-    const index = newCompany.ipFilter.findIndex(i => i === item);
-    newCompany.ipFilter.splice(index, 1);
-    return this.saveCompany(newCompany);
+    if (this.state.ipsToRemove.includes(item)) {
+      this.setState({ipsToRemove: [...this.state.ipsToRemove.filter(ip => ip !== item)]});
+    } else {
+      this.setState({ipsToRemove: [...this.state.ipsToRemove, item]});
+    }
+  }
+
+  confirmRemoveIps() {
+    if (this.state.ipsToRemove.length) {
+      const company = {
+        ...this.state.company,
+        ipFilter: this.state.company.ipFilter.filter(ip => !this.state.ipsToRemove.includes(ip))
+      };
+      return this.saveCompany(company);
+    }
   }
 
   addEmailmask(value) {
@@ -258,6 +271,7 @@ module.exports = class extends React.Component {
                 label="IP filter"
                 note="Accepts single IPs and CIDR."
                 removeItem={this.removeIp}
+                confirmRemoval={this.confirmRemoveIps}
                 addItem={this.addIp}
                 validateItem={this.validateIp} />
 
