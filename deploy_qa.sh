@@ -75,7 +75,6 @@ if [[ ! $REPLY =~ ^[Yy](es)?$ ]]; then
 fi
 
 echo "Committing..."
-git add .
 git commit -m "Commit for tag $TAG"
 git push origin ${BRANCH_NAME}
 git tag -a "$TAG" -m "$COMMENT"
