@@ -220,7 +220,7 @@ steps:
         - NODE=testing
         - BPC_URL=https://api-qa1--bpc--cust.berlingskemedia-testing.net
         - BPP_URL=https://bpp.berlingskemedia-testing.net
-        - PM_URL=https://paymentmanager.userhandling.userhandling.aws.berlingskemedia-testing.net
+        - PM_URL=https://paymentmanager-qa1.userhandling.userhandling.aws.berlingskemedia-testing.net
 
   - name: Deploy to qa1
     image: pelotech/drone-ecs:1.0.7
@@ -236,7 +236,7 @@ steps:
       environment_variables:
         - BPC_URL=https://api-qa1--bpc--cust.berlingskemedia-testing.net
         - BPP_URL=https://bpp.berlingskemedia-testing.net
-        - PM_URL=https://paymentmanager.userhandling.userhandling.aws.berlingskemedia-testing.net
+        - PM_URL=https://paymentmanager-qa1.userhandling.userhandling.aws.berlingskemedia-testing.net
       access_key:
         from_secret: aws_access_key_testing
       secret_key:
@@ -310,7 +310,7 @@ steps:
         - NODE=testing
         - BPC_URL=https://api-qa2--bpc--cust.berlingskemedia-testing.net
         - BPP_URL=https://bpp.berlingskemedia-testing.net
-        - PM_URL=https://paymentmanager.userhandling.userhandling.aws.berlingskemedia-testing.net
+        - PM_URL=https://paymentmanager-qa2.userhandling.userhandling.aws.berlingskemedia-testing.net
 
   - name: Deploy to qa2
     image: pelotech/drone-ecs:1.0.7
@@ -326,7 +326,7 @@ steps:
       environment_variables:
         - BPC_URL=https://api-qa2--bpc--cust.berlingskemedia-testing.net
         - BPP_URL=https://bpp.berlingskemedia-testing.net
-        - PM_URL=https://paymentmanager.userhandling.userhandling.aws.berlingskemedia-testing.net
+        - PM_URL=https://paymentmanager-qa2.userhandling.userhandling.aws.berlingskemedia-testing.net
       access_key:
         from_secret: aws_access_key_testing
       secret_key:
