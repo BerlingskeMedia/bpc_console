@@ -153,7 +153,7 @@ module.exports = class extends React.Component {
     const showTruncatedUserList = originalUserCount > maxUsersToShow;
 
     // Using "slice" to get a copy so the original array is not changed, as it will cause issues when re-rendering.
-    users = showTruncatedUserList ? users.slice(0, maxUsersToShow) : users;console.log(users);
+    users = showTruncatedUserList ? users.slice(0, maxUsersToShow) : users;
 
     // Using the props.removeUser instead of this.removeUser, since this component does not need to clear the input field
     let items = users.map((user) => <User key={user.uid} user={user} removeUser={this.props.removeUser} searchUser={this.searchUser} />)
