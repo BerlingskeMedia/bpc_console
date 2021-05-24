@@ -133,12 +133,15 @@ module.exports = class extends React.Component {
     return Bpp.request(`/api/companies/${ id }`)
       .then(company => {
         fetchedCompany = company;
-        const ids = company.users.map(user => user.uid).join(',');
+        let ids = [];
+        if (company.users) {
+          ids = company.users.map(user => user.uid).join(',');
+        }
         if(ids.length) {
           return Bpc.request(`/users?provider=gigya&id=${encodeURIComponent(ids)}`);
-        } else {
-          return [];
         }
+
+        return [];
       })
       .then(fetchedUsers => {
         let users = [];
