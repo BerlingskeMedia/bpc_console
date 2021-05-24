@@ -156,7 +156,7 @@ module.exports = class extends React.Component {
     users = showTruncatedUserList ? users.slice(0, maxUsersToShow) : users;
 
     // Using the props.removeUser instead of this.removeUser, since this component does not need to clear the input field
-    let items = users.map((user) => <User key={user.id} user={user} removeUser={this.props.removeUser} searchUser={this.searchUser} />)
+    let items = users.map((user) => <User key={user.uid} user={user} removeUser={this.props.removeUser} searchUser={this.searchUser} />)
 
     if(showTruncatedUserList) {
       items.push(

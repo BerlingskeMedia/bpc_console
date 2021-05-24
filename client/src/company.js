@@ -135,15 +135,23 @@ module.exports = class extends React.Component {
         fetchedCompany = company;
         let ids = [];
         if (company.users) {
-          ids = company.users.map(user => user.uid).join(',');
+          ids = company.users.map(user => user.uid);
         }
         if(ids.length) {
-          return Bpc.request(`/users?provider=gigya&id=${encodeURIComponent(ids)}`);
+          const chunker = function* (arr, n) {
+            for (let i = 0; i < arr.length; i += n) {
+              yield arr.slice(i, i + n);
+            }
+          }
+          const chunks = [...chunker(ids, 200)];
+          const promises = chunks.map(chunk => Bpc.request(`/users?provider=gigya&id=${encodeURIComponent(chunk.join())}`));
+          return Promise.all(promises);
         }
 
         return [];
       })
       .then(fetchedUsers => {
+        fetchedUsers = fetchedUsers.flat();
         let users = [];
         if (fetchedUsers.length) {
           users = fetchedCompany.users.map(user => {

@@ -7,7 +7,7 @@
     "@babel/core": "^7.11.6",
     "@babel/preset-env": "^7.11.5",
     "@babel/preset-react": "^7.10.4",
-    "babel-loader": "^8.1.0",
+    "@babel/runtime": "^7.14.0",
     "@hapi/boom": "^8.0.1",
     "@hapi/good": "^8.2.4",
     "@hapi/good-console": "^8.1.2",
@@ -17,6 +17,7 @@
     "@hapi/inert": "^5.2.2",
     "@hapi/iron": "^5.1.4",
     "@hapi/joi": "^16.1.8",
+    "babel-loader": "^8.1.0",
     "hapi-bpc": "^3.5.2",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
@@ -27,6 +28,7 @@
     "webpack-cli": "3.3.11"
   },
   "devDependencies": {
+    "@babel/plugin-transform-runtime": "^7.14.3",
     "nodemon": "^2.0.6"
   },
   "scripts": {
