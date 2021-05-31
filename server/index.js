@@ -8,6 +8,7 @@ const log = require('util').log;
 const Hapi = require('@hapi/hapi');
 const Inert = require('@hapi/inert');
 const HapiBpc = require('hapi-bpc');
+const GeoLookup = require('./geo_lookup');
 
 const server = Hapi.server({
   port: process.env.PORT || 8000
@@ -29,6 +30,7 @@ const init = async () => {
 
   await server.register(Inert);
   await server.register(HapiBpc);
+  await server.register(GeoLookup, { routes: { prefix: '/geoLookup' } });
 
   await server.ext('onPreResponse', function (request, reply) {
     const {response} = request;
@@ -103,6 +105,7 @@ const init = async () => {
 
 
   await server.register({ plugin: Good, options: goodOptions });
+  await GeoLookup.init(process.env.GEO_DBS_DIRECTORY);
   await server.bpc.connect();
   await server.start();
   log(`Server running at: ${server.info.uri}`);
