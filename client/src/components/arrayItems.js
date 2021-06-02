@@ -6,6 +6,7 @@ module.exports = class extends React.Component {
     this.addItem = this.addItem.bind(this);
     this.onChangeAddItem = this.onChangeAddItem.bind(this);
     this.showFullList = this.showFullList.bind(this);
+    this.getDataLabel = this.getDataLabel.bind(this);
     this.state = {
       hasInput: false,
       inputValid: false,
@@ -75,6 +76,14 @@ module.exports = class extends React.Component {
     }
   }
 
+  getDataLabel(item) {
+    let dataLabel = '';
+    if (this.props.dataLabels) {
+      dataLabel = this.props.dataLabels.get(item) || '';
+    }
+    return dataLabel;
+  }
+
 
   render() {
 
@@ -85,7 +94,7 @@ module.exports = class extends React.Component {
       data = data.slice(0, 5);
     }
 
-    let items = data.map((item) => <ArrayItem key={item} data={item} removeItem={this.props.removeItem} translateItem={this.props.translateItem} isCheckbox={this.props.confirmRemoval !== undefined} />)
+    let items = data.map((item) => <ArrayItem key={item} data={item} label={this.getDataLabel(item)} removeItem={this.props.removeItem} translateItem={this.props.translateItem} isCheckbox={this.props.confirmRemoval !== undefined} />)
 
     if (this.props.confirmRemoval) {
       items.push(
@@ -177,7 +186,7 @@ class ArrayItem extends React.Component {
 
     return (
       <tr key={ data }>
-        <td>{ data }</td>
+        <td>{ data } { this.props.label ? <span>({ this.props.label })</span> : '' }</td>
         <td style={{ textAlign: 'right'}}>
           { item }
         </td>
