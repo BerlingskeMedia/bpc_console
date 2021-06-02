@@ -9,7 +9,8 @@ module.exports = class extends React.Component {
     this.state = {
       hasInput: false,
       inputValid: false,
-      showTruncatedList: false
+      showTruncatedList: false,
+      validationInfo: '',
     };
   }
 
@@ -20,9 +21,22 @@ module.exports = class extends React.Component {
       // Setting the invalid flag now, because there is one second delay
       //  before se start searching for users in BPC
       this.props.validateItem(value)
-      .then(inputValid => this.setState({ hasInput: true, inputValid }));
+      .then(inputValid => {
+        this.setState({ hasInput: true, inputValid });
+        if (this.props.validationInfo) {
+          return this.props.validationInfo(value, inputValid);
+        }
+        return [];
+      })
+      .then(validationInfo => {
+        if (validationInfo.length) {
+          this.setState({validationInfo: `${validationInfo[0].city}, ${validationInfo[0].country}`});
+        } else {
+          this.setState({validationInfo: ''});
+        }
+      });
     } else {
-      this.setState({ hasInput: false, inputValid: false });
+      this.setState({ hasInput: false, inputValid: false, validationInfo: '' });
     }
   }
 
@@ -113,6 +127,7 @@ module.exports = class extends React.Component {
                 ref={(addItemInput) => this.addItemInput = addItemInput} />
             </div>
           </td>
+          <td>{this.state.validationInfo}</td>
           <td style={{ textAlign: 'right'}}>
             <button type="button" className='btn btn-xs btn-success' onClick={this.addItem} disabled={!this.state.inputValid || this.state.addingItem} style={{ minWidth: '90px' }}>
               <span className='glyphicon glyphicon-plus' aria-hidden="true"></span> <span>Add</span>

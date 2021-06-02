@@ -1,11 +1,13 @@
 const Hawk = require('@hapi/hawk/lib/browser');
 
-const request = (path, options = {}) => {
+const request = (path, options = {}, bpcUrl = '') => {
 
   let bpc_url = window.location.origin.replace('console', 'bpc');
   const local_bpc_url = window.localStorage.getItem('bpc_url');
 
-  if(typeof local_bpc_url === 'string' && local_bpc_url.length > 0) {
+  if (bpcUrl.length) {
+    bpc_url = bpcUrl
+  } else if(typeof local_bpc_url === 'string' && local_bpc_url.length > 0) {
     bpc_url = local_bpc_url;
   } else if (process.env.BPC_URL !== '') {
     bpc_url = process.env.BPC_URL;

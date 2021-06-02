@@ -6,6 +6,7 @@ const Bpp = require('./components/bpp');
 const Planinstances = require('./companyPlaninstances');
 const Users = require('./companyUsers');
 const ArrayItems = require('./components/arrayItems');
+const backend = require('./components/backend');
 
 module.exports = class extends React.Component {
   constructor(props){
@@ -67,12 +68,16 @@ module.exports = class extends React.Component {
 
   validateIp(value) {
     // Regex for IP incl. CIDR validation
-    // var regex = /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))?$/g;
-    // var found = value.match(regex);
-    // return found != null;
-    var regex = RegExp('^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))?$');
+    const regex = RegExp('^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-9]|3[0-2]))$');
     const valid = regex.test(value);
     return Promise.resolve(valid);
+  }
+
+  getGeo(value, isValid) {
+    if (!isValid) {
+      return '';
+    }
+    return backend.request(`/geoLookup/ip/${value.substr(0, value.lastIndexOf('/'))}`);
   }
 
   validateEmailmask(value) {
@@ -284,7 +289,8 @@ module.exports = class extends React.Component {
                 removeItem={this.removeIp}
                 confirmRemoval={this.confirmRemoveIps}
                 addItem={this.addIp}
-                validateItem={this.validateIp} />
+                validateItem={this.validateIp}
+                validationInfo={this.getGeo}/>
 
               <Users
                 users={this.state.users}
