@@ -241,21 +241,6 @@ class User extends React.Component {
     };
   }
 
-
-  getUserDetails() {
-    return Bpc.request(`/users?provider=gigya&id=${ encodeURIComponent(this.props.user.uid) }`)
-    .then((users) => {
-      const foundUser = users.length === 1 ? users[0] : null;
-      if(foundUser) {
-        this.setState({ foundUser });
-      } else {
-        // Waiting on the Gigya webhook
-        setTimeout(() => this.getUserDetails(), 3000);
-      }
-    });
-  }
-
-
   showAddedByDetails() {
     this.getAddedByDetails()
     .then(() => this.setState({ showAddedByDetails: true }))
@@ -272,18 +257,13 @@ class User extends React.Component {
   }
 
 
-  componentDidMount() {
-    this.getUserDetails(this.props.user.uid);
-  }
-
-
   render() {
 
-    let item = <span>{ this.props.user.uid }</span>
-    const foundUser = this.state.foundUser;
-
-    if(foundUser) {
-      item = <Link to={`/users?search=${ foundUser.id }`}>{ foundUser.email }</Link>
+    let item;
+    if (this.props.user.id) {
+      item = <Link to={`/users?search=${ this.props.user.id }`}>{ this.props.user.email }</Link>
+    } else {
+      item = <span>{ this.props.user.uid }</span>
     }
 
     let addedByDetails = '';
@@ -294,7 +274,7 @@ class User extends React.Component {
     } 
 
     return (
-      <tr key={this.props.user.uid}>
+      <tr key={this.props.user.id || this.props.user.uid}>
         <td>
           <div style={{ marginTop: '3px', marginBottom: '3px' }}>
             { item }

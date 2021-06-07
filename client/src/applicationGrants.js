@@ -40,13 +40,29 @@ module.exports = class extends React.Component {
     if(!app) {
       return;
     }
+    let grants;
 
     return Bpc.request(`/grants?app=${ app }&limit=${ limit }&skip=${ skip }`)
-    .then(data => {
-      this.setState({
-        grants: data
+      .then(data => {
+        grants = data;
+        const userIds = grants.map(grant => grant.user).join();
+        if (userIds.length) {
+          return Bpc.request(`/users?id=${userIds}`);
+        }
+        return [];
+      })
+      .then(users => {
+        grants = grants.map(grant => {
+          const foundUser = users.find(user => user._id === grant.user);
+          if (foundUser) {
+            grant = {...{foundUser}, ...grant};
+          }
+          return grant;
+        })
+        this.setState({
+          grants
+        });
       });
-    });
   }
 
 
@@ -237,7 +253,7 @@ class UserSearch extends React.Component {
         .then(data => {
           this.setState({
             userHasGrant: data.length === 1,
-            grant: data.length === 1 ? data[0] : null
+            grant: data.length === 1 ? {...{foundUser: this.state.user}, ...data[0]} : null
           });
         });
 
@@ -572,32 +588,11 @@ class Grant extends React.Component {
 class ApplicationUser extends React.Component {
   constructor(props){
     super(props);
-    this.state = {
-      user: null
-    };
-  }
-
-  getUser(grant) {
-    return Bpc.request(`/users/${grant.user}`)
-    .then(data => {
-      this.setState({
-        user: data
-      });
-    })
-    .catch(err => {
-      this.setState({
-        user: null
-      });
-    });
-  }
-
-  componentDidMount() {
-    this.getUser(this.props.grant);
   }
 
   render(){
     const grant = this.props.grant;
-    const user = this.state.user;
+    const user = this.props.grant.foundUser;
 
     return (
       <div>

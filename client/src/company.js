@@ -21,12 +21,15 @@ module.exports = class extends React.Component {
     this.updateUser = this.updateUser.bind(this);
     this.addIp = this.addIp.bind(this);
     this.removeIp = this.removeIp.bind(this);
+    this.confirmRemoveIps = this.confirmRemoveIps.bind(this);
     this.addEmailmask = this.addEmailmask.bind(this);
     this.removeEmailmask = this.removeEmailmask.bind(this);
     this.state = {
       company: null,
       showDetails: false,
-      showLoader: false
+      showLoader: false,
+      users: [],
+      ipsToRemove: [],
     };
   }
 
@@ -91,10 +94,21 @@ module.exports = class extends React.Component {
 
 
   removeIp(item) {
-    let newCompany = Object.assign({}, this.state.company);
-    const index = newCompany.ipFilter.findIndex(i => i === item);
-    newCompany.ipFilter.splice(index, 1);
-    return this.saveCompany(newCompany);
+    if (this.state.ipsToRemove.includes(item)) {
+      this.setState({ipsToRemove: [...this.state.ipsToRemove.filter(ip => ip !== item)]});
+    } else {
+      this.setState({ipsToRemove: [...this.state.ipsToRemove, item]});
+    }
+  }
+
+  confirmRemoveIps() {
+    if (this.state.ipsToRemove.length) {
+      const company = {
+        ...this.state.company,
+        ipFilter: this.state.company.ipFilter.filter(ip => !this.state.ipsToRemove.includes(ip))
+      };
+      return this.saveCompany(company);
+    }
   }
 
   addEmailmask(value) {
@@ -115,11 +129,42 @@ module.exports = class extends React.Component {
 
   getCompany() {
     const id = this.props.company._id;
+    let fetchedCompany = null;
     return Bpp.request(`/api/companies/${ id }`)
-    .then(company => {
-      this.setState({ company })
-      return Promise.resolve(company);
-    });
+      .then(company => {
+        fetchedCompany = company;
+        let ids = [];
+        if (company.users) {
+          ids = company.users.map(user => user.uid);
+        }
+        if(ids.length) {
+          const chunker = function* (arr, n) {
+            for (let i = 0; i < arr.length; i += n) {
+              yield arr.slice(i, i + n);
+            }
+          }
+          const chunks = [...chunker(ids, 200)];
+          const promises = chunks.map(chunk => Bpc.request(`/users?provider=gigya&id=${encodeURIComponent(chunk.join())}`));
+          return Promise.all(promises);
+        }
+
+        return [];
+      })
+      .then(fetchedUsers => {
+        fetchedUsers = fetchedUsers.flat();
+        let users = [];
+        if (fetchedUsers.length) {
+          users = fetchedCompany.users.map(user => {
+            const fetchedUser = fetchedUsers.find(fUser => fUser.id === user.uid);
+            if (fetchedUser) {
+              return {...user, ...fetchedUser};
+            }
+            return user;
+          });
+        }
+        this.setState({company: fetchedCompany, users});
+        return Promise.resolve(fetchedCompany);
+      });
   }
 
 
@@ -237,11 +282,12 @@ module.exports = class extends React.Component {
                 label="IP filter"
                 note="Accepts single IPs and CIDR."
                 removeItem={this.removeIp}
+                confirmRemoval={this.confirmRemoveIps}
                 addItem={this.addIp}
                 validateItem={this.validateIp} />
 
               <Users
-                users={this.state.company.users}
+                users={this.state.users}
                 label="Users"
                 note="Users that receive access according to all the access rules above."
                 removeUser={this.removeUser}
