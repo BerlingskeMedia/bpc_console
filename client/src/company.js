@@ -69,7 +69,7 @@ module.exports = class extends React.Component {
 
   validateIp(value) {
     // Regex for IP incl. CIDR validation
-    const regex = RegExp('^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-9]|3[0-2]))$');
+    const regex = RegExp('^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-9]|3[0-2]))?$');
     const valid = regex.test(value);
     return Promise.resolve(valid);
   }
