@@ -433,7 +433,7 @@ class GigyaResetPassword extends React.Component {
       return;
     }
 
-    confirmResetTimeout = setTimeout(() => {
+    const confirmResetTimeout = setTimeout(() => {
       this.setState({ showConfirmReset: false });
     }, 2000);
 
