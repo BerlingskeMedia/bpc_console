@@ -43,6 +43,7 @@ steps:
         - BPC_URL=https://bpc.berlingskemedia.net
         - BPP_URL=https://bpp.berlingskemedia.net
         - PM_URL=https://payment.berlingskemedia.net
+        - GEO_DBS_DIRECTORY=../dbs
 
   - name: Deploy to production
     image: pelotech/drone-ecs:1.0.7
@@ -59,6 +60,7 @@ steps:
         - BPC_URL=https://bpc.berlingskemedia.net
         - BPP_URL=https://bpp.berlingskemedia.net
         - PM_URL=https://payment.berlingskemedia.net
+        - GEO_DBS_DIRECTORY=../dbs
       access_key:
         from_secret: aws_access_key_production
       secret_key:
@@ -130,6 +132,7 @@ steps:
         - BPC_URL=https://bpc.berlingskemedia-testing.net
         - BPP_URL=https://bpp.berlingskemedia-testing.net
         - PM_URL=https://payment.berlingskemedia-testing.net
+        - GEO_DBS_DIRECTORY=../dbs
 
   - name: Deploy to testing
     image: pelotech/drone-ecs:1.0.7
@@ -146,6 +149,7 @@ steps:
         - BPC_URL=https://bpc.berlingskemedia-testing.net
         - BPP_URL=https://bpp.berlingskemedia-testing.net
         - PM_URL=https://payment.berlingskemedia-testing.net
+        - GEO_DBS_DIRECTORY=../dbs
       access_key:
         from_secret: aws_access_key_testing
       secret_key:
@@ -221,6 +225,7 @@ steps:
         - BPC_URL=https://api-qa1--bpc--cust.berlingskemedia-testing.net
         - BPP_URL=https://bpp.berlingskemedia-testing.net
         - PM_URL=https://payment.berlingskemedia-testing.net
+        - GEO_DBS_DIRECTORY=../dbs
 
   - name: Deploy to qa1
     image: pelotech/drone-ecs:1.0.7
@@ -237,6 +242,7 @@ steps:
         - BPC_URL=https://api-qa1--bpc--cust.berlingskemedia-testing.net
         - BPP_URL=https://bpp.berlingskemedia-testing.net
         - PM_URL=https://payment.berlingskemedia-testing.net
+        - GEO_DBS_DIRECTORY=../dbs
       access_key:
         from_secret: aws_access_key_testing
       secret_key:
@@ -311,6 +317,7 @@ steps:
         - BPC_URL=https://api-qa2--bpc--cust.berlingskemedia-testing.net
         - BPP_URL=https://bpp.berlingskemedia-testing.net
         - PM_URL=https://payment.berlingskemedia-testing.net
+        - GEO_DBS_DIRECTORY=../dbs
 
   - name: Deploy to qa2
     image: pelotech/drone-ecs:1.0.7
@@ -327,6 +334,7 @@ steps:
         - BPC_URL=https://api-qa2--bpc--cust.berlingskemedia-testing.net
         - BPP_URL=https://bpp.berlingskemedia-testing.net
         - PM_URL=https://payment.berlingskemedia-testing.net
+        - GEO_DBS_DIRECTORY=../dbs
       access_key:
         from_secret: aws_access_key_testing
       secret_key:
