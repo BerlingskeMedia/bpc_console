@@ -1,6 +1,7 @@
 
 const React = require('react');
 const Link = require('react-router-dom').Link;
+const Netmask = require('netmask').Netmask
 const Bpc = require('./components/bpc');
 const Bpp = require('./components/bpp');
 const Planinstances = require('./companyPlaninstances');
@@ -25,13 +26,14 @@ module.exports = class extends React.Component {
     this.confirmRemoveIps = this.confirmRemoveIps.bind(this);
     this.addEmailmask = this.addEmailmask.bind(this);
     this.removeEmailmask = this.removeEmailmask.bind(this);
+    this.getIpFilterLabels = this.getIpFilterLabels.bind(this);
     this.state = {
       company: null,
       showDetails: false,
       showLoader: false,
       users: [],
       ipsToRemove: [],
-      ipFilterGeoMap: new Map(),
+      ipFilterGeo: [],
     };
   }
 
@@ -170,20 +172,17 @@ module.exports = class extends React.Component {
         }
         return Promise.resolve(users);
       })
-      .then(() => this.getIpFilterGeoMap(company))
-      .then(ipFilterGeoMap => {
-        this.setState({company, ipFilterGeoMap, users});
+      .then(() => this.getIpFilterGeo(company))
+      .then(ipFilterGeo => {
+        this.setState({company, ipFilterGeo, users});
       });
   }
 
-  getIpFilterGeoMap(company) {
+  getIpFilterGeo(company) {
     if (company.ipFilter && company.ipFilter.length) {
       return backend.geoLookup(company.ipFilter)
-        .then(geoLookup => {
-          return new Map(geoLookup.map(geo => [company.ipFilter.find(ip => ip.includes(geo.ip)), `${geo.city}, ${geo.country}`]));
-        });
     }
-    return new Map();
+    return [];
   }
 
 
@@ -195,9 +194,9 @@ module.exports = class extends React.Component {
     })
     .then((response) => {
       company = response;
-      return this.getIpFilterGeoMap(company);
+      return this.getIpFilterGeo(company);
     })
-    .then(ipFilterGeoMap => this.setState({company, ipFilterGeoMap}))
+    .then(ipFilterGeo => this.setState({company, ipFilterGeo}))
     .catch((err) => {
       alert('Error when saving!');
       this.getCompany();
@@ -230,6 +229,19 @@ module.exports = class extends React.Component {
     }
   }
 
+  getIpFilterLabels() {
+    if (this.state.company.ipFilter && this.state.company.ipFilter.length > 0) {
+      return new Map(this.state.company.ipFilter.map(ip => {
+        const geo = this.state.ipFilterGeo.find(geoEntry => ip.includes(geoEntry.ip));
+        const block = new Netmask(ip);
+        if (block.bitmask === 32) {
+          return [ip, `1 host, ${geo.city}, ${geo.country}`];
+        }
+        return [ip, `${block.first} - ${block.last} ${block.size} hosts, ${geo.city}, ${geo.country}`];
+      }));
+    }
+    return new Map();
+  }
 
   render() {
 
@@ -300,7 +312,7 @@ module.exports = class extends React.Component {
 
               <ArrayItems
                 data={this.state.company.ipFilter}
-                dataLabels={this.state.ipFilterGeoMap}
+                dataLabels={this.getIpFilterLabels()}
                 label="IP filter"
                 note="Accepts single IPs and CIDR."
                 removeItem={this.removeIp}
