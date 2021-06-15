@@ -52,15 +52,9 @@ module.exports = class extends React.Component {
         return [];
       })
       .then(users => {
-        grants = grants.map(grant => {
-          const foundUser = users.find(user => user._id === grant.user);
-          if (foundUser) {
-            grant = {...{foundUser}, ...grant};
-          }
-          return grant;
-        })
         this.setState({
-          grants
+          grants,
+          users,
         });
       });
   }
@@ -167,6 +161,7 @@ module.exports = class extends React.Component {
         <GrantsList
           scope={scope}
           grants={this.state.grants}
+          users={this.state.users}
           deleteGrant={this.deleteGrant}
           updateGrant={this.updateGrant}
           expireGrant={this.expireGrant}
@@ -253,7 +248,7 @@ class UserSearch extends React.Component {
         .then(data => {
           this.setState({
             userHasGrant: data.length === 1,
-            grant: data.length === 1 ? {...{foundUser: this.state.user}, ...data[0]} : null
+            grant: data.length === 1 ? data[0] : null
           });
         });
 
@@ -402,6 +397,7 @@ class GrantsList extends React.Component {
         <GrantsTable
           scope={this.props.scope}
           grants={this.props.grants}
+          users={this.props.users}
           deleteGrant={this.props.deleteGrant}
           updateGrant={this.props.updateGrant}
           expireGrant={this.props.expireGrant}
@@ -469,6 +465,7 @@ class GrantsTable extends React.Component {
         <Grant
           key={grant.id}
           grant={grant}
+          user={this.props.users.find(user => user._id === grant.user)}
           scope={this.props.scope}
           deleteGrant={this.props.deleteGrant}
           updateGrant={this.props.updateGrant}
@@ -516,9 +513,11 @@ class Grant extends React.Component {
     const grant = this.props.grant;
     grant.scope.push(this.state.value);
     this.props.updateGrant(grant)
-    .done((data, textStatus, jqXHR) => {
+    .then(() => {
       this.setState({ value: 'N/A' });
-    }).fail((jqXHR, textStatus, errorThrown) => {
+    })
+    .catch((err) => {
+      console.log(err);
     });
   }
 
@@ -554,7 +553,7 @@ class Grant extends React.Component {
     return (
       <tr>
         <td className="col-xs-4">
-          <ApplicationUser grant={grant} />
+          <ApplicationUser grant={grant} user={this.props.user} />
         </td>
         <td className="col-xs-2">
           <div>{ roleList }</div>
@@ -592,7 +591,7 @@ class ApplicationUser extends React.Component {
 
   render(){
     const grant = this.props.grant;
-    const user = this.props.grant.foundUser;
+    const user = this.props.user;
 
     return (
       <div>
