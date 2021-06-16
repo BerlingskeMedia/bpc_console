@@ -40,6 +40,7 @@ ADD package-lock.json .
 
 # Installing packages
 RUN npm i --production
+RUN node -e "(async () => {require('geolite2-redist').downloadDbs('./server/$GEO_DBS_DIRECTORY')})()"
 
 ADD ./server ./server
 

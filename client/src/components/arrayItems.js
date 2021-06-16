@@ -6,10 +6,12 @@ module.exports = class extends React.Component {
     this.addItem = this.addItem.bind(this);
     this.onChangeAddItem = this.onChangeAddItem.bind(this);
     this.showFullList = this.showFullList.bind(this);
+    this.getDataLabel = this.getDataLabel.bind(this);
     this.state = {
       hasInput: false,
       inputValid: false,
-      showTruncatedList: false
+      showTruncatedList: false,
+      validationInfo: '',
     };
   }
 
@@ -20,9 +22,22 @@ module.exports = class extends React.Component {
       // Setting the invalid flag now, because there is one second delay
       //  before se start searching for users in BPC
       this.props.validateItem(value)
-      .then(inputValid => this.setState({ hasInput: true, inputValid }));
+      .then(inputValid => {
+        this.setState({ hasInput: true, inputValid });
+        if (this.props.validationInfo) {
+          return this.props.validationInfo(value, inputValid);
+        }
+        return [];
+      })
+      .then(validationInfo => {
+        if (validationInfo.length) {
+          this.setState({validationInfo: `${validationInfo[0].city}, ${validationInfo[0].country}`});
+        } else {
+          this.setState({validationInfo: ''});
+        }
+      });
     } else {
-      this.setState({ hasInput: false, inputValid: false });
+      this.setState({ hasInput: false, inputValid: false, validationInfo: '' });
     }
   }
 
@@ -61,6 +76,14 @@ module.exports = class extends React.Component {
     }
   }
 
+  getDataLabel(item) {
+    let dataLabel = '';
+    if (this.props.dataLabels) {
+      dataLabel = this.props.dataLabels.get(item) || '';
+    }
+    return dataLabel;
+  }
+
 
   render() {
 
@@ -71,7 +94,7 @@ module.exports = class extends React.Component {
       data = data.slice(0, 5);
     }
 
-    let items = data.map((item) => <ArrayItem key={item} data={item} removeItem={this.props.removeItem} translateItem={this.props.translateItem} isCheckbox={this.props.confirmRemoval !== undefined} />)
+    let items = data.map((item) => <ArrayItem key={item} data={item} label={this.getDataLabel(item)} removeItem={this.props.removeItem} translateItem={this.props.translateItem} isCheckbox={this.props.confirmRemoval !== undefined} />)
 
     if (this.props.confirmRemoval) {
       items.push(
@@ -113,6 +136,7 @@ module.exports = class extends React.Component {
                 ref={(addItemInput) => this.addItemInput = addItemInput} />
             </div>
           </td>
+          <td>{this.state.validationInfo}</td>
           <td style={{ textAlign: 'right'}}>
             <button type="button" className='btn btn-xs btn-success' onClick={this.addItem} disabled={!this.state.inputValid || this.state.addingItem} style={{ minWidth: '90px' }}>
               <span className='glyphicon glyphicon-plus' aria-hidden="true"></span> <span>Add</span>
@@ -162,7 +186,7 @@ class ArrayItem extends React.Component {
 
     return (
       <tr key={ data }>
-        <td>{ data }</td>
+        <td>{ data } { this.props.label ? <span>({ this.props.label })</span> : '' }</td>
         <td style={{ textAlign: 'right'}}>
           { item }
         </td>

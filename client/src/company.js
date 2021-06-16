@@ -1,11 +1,13 @@
 
 const React = require('react');
 const Link = require('react-router-dom').Link;
+const Netmask = require('netmask').Netmask
 const Bpc = require('./components/bpc');
 const Bpp = require('./components/bpp');
 const Planinstances = require('./companyPlaninstances');
 const Users = require('./companyUsers');
 const ArrayItems = require('./components/arrayItems');
+const backend = require('./components/backend');
 
 module.exports = class extends React.Component {
   constructor(props){
@@ -24,12 +26,14 @@ module.exports = class extends React.Component {
     this.confirmRemoveIps = this.confirmRemoveIps.bind(this);
     this.addEmailmask = this.addEmailmask.bind(this);
     this.removeEmailmask = this.removeEmailmask.bind(this);
+    this.getIpFilterLabels = this.getIpFilterLabels.bind(this);
     this.state = {
       company: null,
       showDetails: false,
       showLoader: false,
       users: [],
       ipsToRemove: [],
+      ipFilterGeo: [],
     };
   }
 
@@ -67,12 +71,16 @@ module.exports = class extends React.Component {
 
   validateIp(value) {
     // Regex for IP incl. CIDR validation
-    // var regex = /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))?$/g;
-    // var found = value.match(regex);
-    // return found != null;
-    var regex = RegExp('^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))?$');
+    const regex = RegExp('^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-9]|3[0-2]))?$');
     const valid = regex.test(value);
     return Promise.resolve(valid);
+  }
+
+  getGeoForInput(value, isValid) {
+    if (!isValid) {
+      return '';
+    }
+    return backend.geoLookup([value]);
   }
 
   validateEmailmask(value) {
@@ -129,10 +137,11 @@ module.exports = class extends React.Component {
 
   getCompany() {
     const id = this.props.company._id;
-    let fetchedCompany = null;
+    let company = null;
+    let users = [];
     return Bpp.request(`/api/companies/${ id }`)
-      .then(company => {
-        fetchedCompany = company;
+      .then(fetchedCompany => {
+        company = fetchedCompany;
         let ids = [];
         if (company.users) {
           ids = company.users.map(user => user.uid);
@@ -152,9 +161,8 @@ module.exports = class extends React.Component {
       })
       .then(fetchedUsers => {
         fetchedUsers = fetchedUsers.flat();
-        let users = [];
         if (fetchedUsers.length) {
-          users = fetchedCompany.users.map(user => {
+          users = company.users.map(user => {
             const fetchedUser = fetchedUsers.find(fUser => fUser.id === user.uid);
             if (fetchedUser) {
               return {...user, ...fetchedUser};
@@ -162,9 +170,19 @@ module.exports = class extends React.Component {
             return user;
           });
         }
-        this.setState({company: fetchedCompany, users});
-        return Promise.resolve(fetchedCompany);
+        return Promise.resolve(users);
+      })
+      .then(() => this.getIpFilterGeo(company))
+      .then(ipFilterGeo => {
+        this.setState({company, ipFilterGeo, users});
       });
+  }
+
+  getIpFilterGeo(company) {
+    if (company.ipFilter && company.ipFilter.length) {
+      return backend.geoLookup(company.ipFilter)
+    }
+    return [];
   }
 
 
@@ -174,9 +192,11 @@ module.exports = class extends React.Component {
       method: 'PUT',
       body: JSON.stringify(company)
     })
-    .then((response) => this.setState({
-      company: response,
-    }))
+    .then((response) => {
+      company = response;
+      return this.getIpFilterGeo(company);
+    })
+    .then(ipFilterGeo => this.setState({company, ipFilterGeo}))
     .catch((err) => {
       alert('Error when saving!');
       this.getCompany();
@@ -209,6 +229,19 @@ module.exports = class extends React.Component {
     }
   }
 
+  getIpFilterLabels() {
+    if (this.state.company.ipFilter && this.state.company.ipFilter.length > 0) {
+      return new Map(this.state.company.ipFilter.map(ip => {
+        const geo = this.state.ipFilterGeo.find(geoEntry => ip.includes(geoEntry.ip));
+        const block = new Netmask(ip);
+        if (block.bitmask === 32) {
+          return [ip, `1 host, ${geo.city}, ${geo.country}`];
+        }
+        return [ip, `${block.first} - ${block.last} ${block.size} hosts, ${geo.city}, ${geo.country}`];
+      }));
+    }
+    return new Map();
+  }
 
   render() {
 
@@ -279,12 +312,14 @@ module.exports = class extends React.Component {
 
               <ArrayItems
                 data={this.state.company.ipFilter}
+                dataLabels={this.getIpFilterLabels()}
                 label="IP filter"
                 note="Accepts single IPs and CIDR."
                 removeItem={this.removeIp}
                 confirmRemoval={this.confirmRemoveIps}
                 addItem={this.addIp}
-                validateItem={this.validateIp} />
+                validateItem={this.validateIp}
+                validationInfo={this.getGeoForInput}/>
 
               <Users
                 users={this.state.users}
