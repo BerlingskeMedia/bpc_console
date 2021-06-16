@@ -234,9 +234,14 @@ module.exports = class extends React.Component {
       return new Map(this.state.company.ipFilter.map(ip => {
         const geo = this.state.ipFilterGeo.find(geoEntry => ip.includes(geoEntry.ip));
         if (geo === undefined) {
-          return [ip, undefined];
+          return [ip, ''];
         }
-        const block = new Netmask(ip);
+        let block
+        try {
+          block = new Netmask(ip);
+        } catch (e) {
+          return [ip, '']
+        }
         if (block.bitmask === 32) {
           return [ip, `1 host, ${geo.city}, ${geo.country}`];
         }
