@@ -42,8 +42,8 @@ async function getGeo(ips) {
 function geoDataToDto(data) {
   return {
     ip: data.ip,
-    city: data.city.names.en,
-    country: data.country.names.en,
+    city: data.city ? data.city.names.en : '',
+    country: data.country ? data.country.names.en : '',
   }
 }
 
