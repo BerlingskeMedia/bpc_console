@@ -358,6 +358,7 @@ class UserSearch extends React.Component {
           { this.state.userFound && this.state.userHasGrant
             ? <GrantsTable
               grants={[this.state.grant]}
+              users={[this.state.user]}
               scope={application.scope}
               updateGrant={this.props.updateGrant}
               expireGrant={this.props.expireGrant}
