@@ -3,8 +3,6 @@ const Payment = require('./payment');
 const Bpc = require('./components/bpc');
 const PM = require('./components/pm');
 
-
-
 module.exports = class extends React.Component {
 
   constructor(props) {
