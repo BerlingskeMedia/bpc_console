@@ -138,6 +138,9 @@ class PaymentOverview extends React.Component {
           <em><small><strong>User ID:</strong> {this.props.payment.userId || ''}</small></em>
         </div>
         <div style={{ paddingLeft: '4px' }}>
+          <em><small><strong>Phone:</strong> {this.props.payment.phone || ''}</small></em>
+        </div>
+        <div style={{ paddingLeft: '4px' }}>
           <em><small><strong>Price/Frequency Price:</strong> {this.props.payment.price || ''}/{this.props.payment.frequencyPrice || ''}</small></em>
         </div>
         <div style={{ paddingLeft: '4px' }}>
