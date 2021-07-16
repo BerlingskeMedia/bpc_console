@@ -38,6 +38,7 @@ const bundle = {
         'PM_URL': JSON.stringify(process.env.PM_URL || ''),
       }
     }),
+    new webpack.SourceMapDevToolPlugin({}),
   ],
   watch: false,
   watchOptions: {
