@@ -315,7 +315,7 @@ class PaymentSearchInput extends React.Component {
             className="form-control"
             onChange={this.props.onChange}
             placeholder={this.props.placeholder}
-            ref={(value) => this.props.name = value} />
+            ref={(value) => this.name = value} />
           { this.props.feedback }
           <div style={{ paddingLeft: '4px', color: 'darkgrey' }}><small><em>{ this.props.feedbackReadable }</em></small></div>
         </div>
