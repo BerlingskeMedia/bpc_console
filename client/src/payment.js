@@ -117,6 +117,17 @@ class PaymentOverview extends React.Component {
     super(props);
   }
 
+  getTransaction() {
+    if (this.props.payment.hasOwnProperty('transaction')) {
+      return Object.keys(this.props.payment.transaction).map((key, i) => (
+        <p key={i}>
+          <span><strong>{key}:</strong> {JSON.stringify(this.props.payment.transaction[key], null, 2)}</span>
+        </p>
+      ));
+    }
+    return 'No data'
+  }
+
   render() {
 
     if(!this.props.payment) {
@@ -149,13 +160,8 @@ class PaymentOverview extends React.Component {
         <div style={{ paddingLeft: '4px' }}>
           <em><small><strong>Transaction:</strong>
             <div style={{ paddingLeft: '22px',border: '1px solid',marginLeft: '10px' }}>
-              {
-                Object.keys(this.props.payment.transaction).map((key, i) => (
-                  <p key={i}>
-                    <span><strong>{key}:</strong> {JSON.stringify(this.props.payment.transaction[key], null, 2)}</span>
-                  </p>
-                ))
-              }</div></small></em>
+              { this.getTransaction() }
+            </div></small></em>
         </div>
         <div style={{ paddingLeft: '4px' }}>
           <em><small><strong>Agreement:</strong>
