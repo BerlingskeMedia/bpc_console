@@ -39,3 +39,6 @@ config.sh
 
 #local env file
 .env
+
+# geo dbs
+dbs

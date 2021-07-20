@@ -74,10 +74,7 @@ if [[ ! $REPLY =~ ^[Yy](es)?$ ]]; then
 	exit 0
 fi
 
-echo "Committing..."
-git add .
-git commit -m "Commit for tag $TAG"
-git push origin ${BRANCH_NAME}
+echo "Tagging..."
 git tag -a "$TAG" -m "$COMMENT"
 git push origin "$TAG"
 

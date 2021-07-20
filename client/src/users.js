@@ -433,7 +433,7 @@ class GigyaResetPassword extends React.Component {
       return;
     }
 
-    confirmResetTimeout = setTimeout(() => {
+    const confirmResetTimeout = setTimeout(() => {
       this.setState({ showConfirmReset: false });
     }, 2000);
 
@@ -711,7 +711,7 @@ class Access extends React.Component {
             </tr>
             <tr>
               <th>BT</th>
-              <td></td>
+              <td>{dataScopes.bt.access['Plus member'] ? yes : no}</td>
               <td>{dataScopes.bt.access.bta_epaper ? yes : no}</td>
             </tr>
             <tr>

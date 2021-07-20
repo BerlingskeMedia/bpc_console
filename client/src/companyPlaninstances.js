@@ -51,6 +51,7 @@ module.exports = class extends React.Component {
               <tr>
                 <th>Subscription No</th>
                 <th>Plan</th>
+                <th>Status</th>
                 <th>Note</th>
                 <th>Units</th>
                 <th>Users</th>
@@ -80,6 +81,11 @@ class Planinstance extends React.Component {
     this.state = {
       planinstance: null
     };
+    this.statuses = new Map([
+      [-1, 'Off'],
+      [0, 'Inactive'],
+      [1, 'Active'],
+    ]);
   }
 
 
@@ -197,10 +203,13 @@ class Planinstance extends React.Component {
           <div>Termination date: { planinstance.terminationDate || '' }</div>
         </td>
         <td>
+          {this.statuses.has(planinstance.status) ? this.statuses.get(planinstance.status) : planinstance.status}
+        </td>
+        <td>
           <Note planinstance={planinstance} savePlaninstance={this.savePlaninstance} />
           <PlaninstancesMasks addEmailmask={this.addEmailmask} removeEmailmask={this.removeEmailmask} masks={planinstance.emailMasks} />
         </td>
-        <td>{planinstance.units}</td>
+        <td>{planinstance.users && planinstance.users.length || '0'}/{planinstance.units}</td>
         <td>
           <PlaninstancesUsers removeUser={this.removeUser} users={planinstance.users} />
           <AddPlaninstancesUser addUser={this.addUser} />

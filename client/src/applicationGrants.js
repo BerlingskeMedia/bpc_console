@@ -40,13 +40,23 @@ module.exports = class extends React.Component {
     if(!app) {
       return;
     }
+    let grants;
 
     return Bpc.request(`/grants?app=${ app }&limit=${ limit }&skip=${ skip }`)
-    .then(data => {
-      this.setState({
-        grants: data
+      .then(data => {
+        grants = data;
+        const userIds = grants.map(grant => grant.user).join();
+        if (userIds.length) {
+          return Bpc.request(`/users?id=${userIds}`);
+        }
+        return [];
+      })
+      .then(users => {
+        this.setState({
+          grants,
+          users,
+        });
       });
-    });
   }
 
 
@@ -151,6 +161,7 @@ module.exports = class extends React.Component {
         <GrantsList
           scope={scope}
           grants={this.state.grants}
+          users={this.state.users}
           deleteGrant={this.deleteGrant}
           updateGrant={this.updateGrant}
           expireGrant={this.expireGrant}
@@ -347,6 +358,7 @@ class UserSearch extends React.Component {
           { this.state.userFound && this.state.userHasGrant
             ? <GrantsTable
               grants={[this.state.grant]}
+              users={[this.state.user]}
               scope={application.scope}
               updateGrant={this.props.updateGrant}
               expireGrant={this.props.expireGrant}
@@ -386,6 +398,7 @@ class GrantsList extends React.Component {
         <GrantsTable
           scope={this.props.scope}
           grants={this.props.grants}
+          users={this.props.users}
           deleteGrant={this.props.deleteGrant}
           updateGrant={this.props.updateGrant}
           expireGrant={this.props.expireGrant}
@@ -453,6 +466,7 @@ class GrantsTable extends React.Component {
         <Grant
           key={grant.id}
           grant={grant}
+          user={this.props.users.find(user => user._id === grant.user)}
           scope={this.props.scope}
           deleteGrant={this.props.deleteGrant}
           updateGrant={this.props.updateGrant}
@@ -500,9 +514,11 @@ class Grant extends React.Component {
     const grant = this.props.grant;
     grant.scope.push(this.state.value);
     this.props.updateGrant(grant)
-    .done((data, textStatus, jqXHR) => {
+    .then(() => {
       this.setState({ value: 'N/A' });
-    }).fail((jqXHR, textStatus, errorThrown) => {
+    })
+    .catch((err) => {
+      console.log(err);
     });
   }
 
@@ -538,7 +554,7 @@ class Grant extends React.Component {
     return (
       <tr>
         <td className="col-xs-4">
-          <ApplicationUser grant={grant} />
+          <ApplicationUser grant={grant} user={this.props.user} />
         </td>
         <td className="col-xs-2">
           <div>{ roleList }</div>
@@ -572,32 +588,11 @@ class Grant extends React.Component {
 class ApplicationUser extends React.Component {
   constructor(props){
     super(props);
-    this.state = {
-      user: null
-    };
-  }
-
-  getUser(grant) {
-    return Bpc.request(`/users/${grant.user}`)
-    .then(data => {
-      this.setState({
-        user: data
-      });
-    })
-    .catch(err => {
-      this.setState({
-        user: null
-      });
-    });
-  }
-
-  componentDidMount() {
-    this.getUser(this.props.grant);
   }
 
   render(){
     const grant = this.props.grant;
-    const user = this.state.user;
+    const user = this.props.user;
 
     return (
       <div>

@@ -43,6 +43,7 @@ steps:
         - BPC_URL=https://bpc.berlingskemedia.net
         - BPP_URL=https://bpp.berlingskemedia.net
         - PM_URL=https://payment.berlingskemedia.net
+        - GEO_DBS_DIRECTORY=../dbs
 
   - name: Deploy to production
     image: pelotech/drone-ecs:1.0.7
@@ -59,9 +60,10 @@ steps:
         - BPC_URL=https://bpc.berlingskemedia.net
         - BPP_URL=https://bpp.berlingskemedia.net
         - PM_URL=https://payment.berlingskemedia.net
-      aws_access_key_id:
+        - GEO_DBS_DIRECTORY=../dbs
+      access_key:
         from_secret: aws_access_key_production
-      aws_secret_access_key:
+      secret_key:
         from_secret: aws_access_key_secret_production
       cluster: cust-production-bpc
       compatibilities: FARGATE
@@ -107,93 +109,6 @@ trigger:
 ---
 kind: pipeline
 type: docker
-name: Staging pipeline
-
-steps:
-  - name: publish image to staging
-    image: plugins/ecr
-    settings:
-      mirror: https://proxy.docker.all.berlingskemedia.net
-      access_key:
-        from_secret: aws_access_key_staging
-      secret_key:
-        from_secret: aws_access_key_secret_staging
-      region: eu-west-1
-      repo:   cust-staging-bpc-ecr/console
-      registry: 815296035528.dkr.ecr.eu-west-1.amazonaws.com
-      dockerfile: Dockerfile
-      tags:
-        - latest
-        - ${CI_COMMIT_SHA}
-      build_args:
-        - NODE=staging
-        - BPC_URL=https://api.bpc.cust.berlingskemedia-staging.net
-        - BPP_URL=https://bpp.berlingskemedia-staging.net
-        - PM_URL=https://payment.berlingskemedia-staging.net
-
-  - name: Deploy to staging
-    image: pelotech/drone-ecs:1.0.7
-    environment:
-      BPC_APP_SECRET:
-        from_secret: bpc_app_secret_staging
-      BPC_APP_ID:
-        from_secret: bpc_app_id_staging
-    settings:
-      secret_environment_variables:
-        - BPC_APP_SECRET
-        - BPC_APP_ID
-      environment_variables:
-        - BPC_URL=https://api.bpc.cust.berlingskemedia-staging.net
-        - BPP_URL=https://bpp.berlingskemedia-staging.net
-        - PM_URL=https://payment.berlingskemedia-staging.net
-      aws_access_key_id:
-        from_secret: aws_access_key_staging
-      aws_secret_access_key:
-        from_secret: aws_access_key_secret_staging
-      cluster: cust-staging-bpc
-      compatibilities: FARGATE
-      deployment_configuration: 100 200
-      desired_count: 1
-      docker_image: 815296035528.dkr.ecr.eu-west-1.amazonaws.com/cust-staging-bpc-ecr/console
-      container_name: cust-staging-bpc-console-container
-      family: cust-staging-bpc-console
-      log_driver: awslogs
-      log_options:
-        - awslogs-group=cust-staging-bpc
-        - awslogs-region=eu-west-1
-        - awslogs-stream-prefix=bpc-console
-      memory: 512
-      port_mappings:
-        - 8000 8000
-      region: eu-west-1
-      service: cust-staging-bpc-console
-      service_network_security_groups:
-        - sg-016331f75685ea21a
-        - sg-0e65421f068578cef
-      service_network_subnets:
-        - subnet-061a8876f7f68ea21
-        - subnet-0ace4f6a68677187c
-        - subnet-01633ca14c693e302
-      tag: ${CI_COMMIT_SHA}
-      task_cpu: 256
-      task_execution_role_arn: arn:aws:iam::815296035528:role/cust-staging-bpc-console-exec
-      task_memory: 512
-      task_network_mode: awsvpc
-
-trigger:
-  repo:
-    - BerlingskeMedia/bpc_console
-  branch:
-    - master
-  event:
-    include:
-      - push
-    exclude:
-      - pull_request
-
----
-kind: pipeline
-type: docker
 name: testing pipeline
 
 steps:
@@ -217,6 +132,7 @@ steps:
         - BPC_URL=https://bpc.berlingskemedia-testing.net
         - BPP_URL=https://bpp.berlingskemedia-testing.net
         - PM_URL=https://payment.berlingskemedia-testing.net
+        - GEO_DBS_DIRECTORY=../dbs
 
   - name: Deploy to testing
     image: pelotech/drone-ecs:1.0.7
@@ -233,9 +149,10 @@ steps:
         - BPC_URL=https://bpc.berlingskemedia-testing.net
         - BPP_URL=https://bpp.berlingskemedia-testing.net
         - PM_URL=https://payment.berlingskemedia-testing.net
-      aws_access_key_id:
+        - GEO_DBS_DIRECTORY=../dbs
+      access_key:
         from_secret: aws_access_key_testing
-      aws_secret_access_key:
+      secret_key:
         from_secret: aws_access_key_secret_testing
       cluster: cust-testing-bpc
       compatibilities: FARGATE
@@ -261,7 +178,7 @@ steps:
         - subnet-061a8876f7f68ea21
         - subnet-0ace4f6a68677187c
         - subnet-01633ca14c693e302
-      tag: ${CI_COMMIT_SHA}
+      tag: ${DRONE_TAG}-${CI_COMMIT_SHA}
       task_cpu: 256
       task_execution_role_arn: arn:aws:iam::815296035528:role/cust-testing-bpc-console-exec
       task_memory: 512
@@ -308,6 +225,7 @@ steps:
         - BPC_URL=https://api-qa1--bpc--cust.berlingskemedia-testing.net
         - BPP_URL=https://bpp.berlingskemedia-testing.net
         - PM_URL=https://payment.berlingskemedia-testing.net
+        - GEO_DBS_DIRECTORY=../dbs
 
   - name: Deploy to qa1
     image: pelotech/drone-ecs:1.0.7
@@ -324,9 +242,10 @@ steps:
         - BPC_URL=https://api-qa1--bpc--cust.berlingskemedia-testing.net
         - BPP_URL=https://bpp.berlingskemedia-testing.net
         - PM_URL=https://payment.berlingskemedia-testing.net
-      aws_access_key_id:
+        - GEO_DBS_DIRECTORY=../dbs
+      access_key:
         from_secret: aws_access_key_testing
-      aws_secret_access_key:
+      secret_key:
         from_secret: aws_access_key_secret_testing
       cluster: cust-testing-bpc
       compatibilities: FARGATE
@@ -352,7 +271,7 @@ steps:
         - subnet-061a8876f7f68ea21
         - subnet-0ace4f6a68677187c
         - subnet-01633ca14c693e302
-      tag: ${CI_COMMIT_SHA}
+      tag: ${DRONE_TAG}-${CI_COMMIT_SHA}
       task_cpu: 256
       task_execution_role_arn: arn:aws:iam::815296035528:role/cust-testing-bpc-console-qa1-exec
       task_memory: 512
@@ -398,6 +317,7 @@ steps:
         - BPC_URL=https://api-qa2--bpc--cust.berlingskemedia-testing.net
         - BPP_URL=https://bpp.berlingskemedia-testing.net
         - PM_URL=https://payment.berlingskemedia-testing.net
+        - GEO_DBS_DIRECTORY=../dbs
 
   - name: Deploy to qa2
     image: pelotech/drone-ecs:1.0.7
@@ -414,9 +334,10 @@ steps:
         - BPC_URL=https://api-qa2--bpc--cust.berlingskemedia-testing.net
         - BPP_URL=https://bpp.berlingskemedia-testing.net
         - PM_URL=https://payment.berlingskemedia-testing.net
-      aws_access_key_id:
+        - GEO_DBS_DIRECTORY=../dbs
+      access_key:
         from_secret: aws_access_key_testing
-      aws_secret_access_key:
+      secret_key:
         from_secret: aws_access_key_secret_testing
       cluster: cust-testing-bpc
       compatibilities: FARGATE
@@ -442,7 +363,7 @@ steps:
         - subnet-061a8876f7f68ea21
         - subnet-0ace4f6a68677187c
         - subnet-01633ca14c693e302
-      tag: ${CI_COMMIT_SHA}
+      tag: ${DRONE_TAG}-${CI_COMMIT_SHA}
       task_cpu: 256
       task_execution_role_arn: arn:aws:iam::815296035528:role/cust-testing-bpc-console-qa2-exec
       task_memory: 512
@@ -485,16 +406,4 @@ kind: "secret"
 name: "aws_access_key_secret_production"
 get:
   path: "drone/cust-production-bpc"
-  name: "aws_access_key_secret"
----
-kind: "secret"
-name: "aws_access_key_staging"
-get:
-  path: "drone/cust-staging-bpc"
-  name: "aws_access_key"
----
-kind: "secret"
-name: "aws_access_key_secret_staging"
-get:
-  path: "drone/cust-staging-bpc"
   name: "aws_access_key_secret"
